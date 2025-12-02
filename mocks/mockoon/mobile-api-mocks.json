@@ -1,0 +1,276 @@
+{
+  "uuid": "mobile-test-farm-api",
+  "lastMigration": 27,
+  "name": "Mobile Test Farm API Mocks",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3000,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "login-route",
+      "documentation": "User login with realistic fake data",
+      "method": "post",
+      "endpoint": "api/v1/auth/login",
+      "responses": [
+        {
+          "uuid": "login-success",
+          "body": "{\n  \"success\": true,\n  \"token\": \"{{faker 'random.uuid'}}\",\n  \"refreshToken\": \"{{faker 'random.uuid'}}\",\n  \"expiresAt\": \"{{faker 'date.future'}}\",\n  \"user\": {\n    \"id\": {{faker 'random.number'}},\n    \"firstName\": \"{{faker 'name.firstName'}}\",\n    \"lastName\": \"{{faker 'name.lastName'}}\",\n    \"email\": \"{{faker 'internet.email'}}\",\n    \"phone\": \"{{faker 'phone.phoneNumber'}}\",\n    \"avatar\": \"{{faker 'image.avatar'}}\",\n    \"verified\": true,\n    \"createdAt\": \"{{faker 'date.past'}}\"\n  }\n}",
+          "latency": 200,
+          "statusCode": 200,
+          "label": "Successful login",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "register-route",
+      "documentation": "User registration",
+      "method": "post",
+      "endpoint": "api/v1/auth/register",
+      "responses": [
+        {
+          "uuid": "register-success",
+          "body": "{\n  \"success\": true,\n  \"message\": \"Account created successfully\",\n  \"userId\": {{faker 'random.number'}},\n  \"email\": \"{{faker 'internet.email'}}\"\n}",
+          "latency": 300,
+          "statusCode": 201,
+          "label": "Successful registration",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "profile-route",
+      "documentation": "Get user profile",
+      "method": "get",
+      "endpoint": "api/v1/user/profile",
+      "responses": [
+        {
+          "uuid": "profile-success",
+          "body": "{\n  \"id\": {{faker 'random.number'}},\n  \"firstName\": \"{{faker 'name.firstName'}}\",\n  \"lastName\": \"{{faker 'name.lastName'}}\",\n  \"email\": \"{{faker 'internet.email'}}\",\n  \"phone\": \"{{faker 'phone.phoneNumber'}}\",\n  \"dateOfBirth\": \"{{faker 'date.past'}}\",\n  \"address\": {\n    \"street\": \"{{faker 'address.streetAddress'}}\",\n    \"city\": \"{{faker 'address.city'}}\",\n    \"state\": \"{{faker 'address.state'}}\",\n    \"zipCode\": \"{{faker 'address.zipCode'}}\",\n    \"country\": \"{{faker 'address.country'}}\"\n  },\n  \"preferences\": {\n    \"notifications\": {{faker 'random.boolean'}},\n    \"newsletter\": {{faker 'random.boolean'}},\n    \"theme\": \"{{faker 'helpers.randomize' '['light', 'dark', 'auto']'}}\"\n  }\n}",
+          "latency": 100,
+          "statusCode": 200,
+          "label": "User profile",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "products-route",
+      "documentation": "Get product list",
+      "method": "get",
+      "endpoint": "api/v1/products",
+      "responses": [
+        {
+          "uuid": "products-success",
+          "body": "{\n  \"products\": [\n    {{#repeat 10}}\n    {\n      \"id\": \"{{faker 'random.uuid'}}\",\n      \"name\": \"{{faker 'commerce.productName'}}\",\n      \"description\": \"{{faker 'commerce.productDescription'}}\",\n      \"price\": {{faker 'commerce.price'}},\n      \"category\": \"{{faker 'commerce.department'}}\",\n      \"inStock\": {{faker 'random.boolean'}},\n      \"rating\": {{faker 'random.number' min=1 max=5}},\n      \"imageUrl\": \"{{faker 'image.image'}}\",\n      \"sku\": \"{{faker 'random.alphaNumeric' count=10}}\"\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ],\n  \"total\": 10,\n  \"page\": 1,\n  \"pageSize\": 10\n}",
+          "latency": 150,
+          "statusCode": 200,
+          "label": "Product list",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "orders-route",
+      "documentation": "Get user orders",
+      "method": "get",
+      "endpoint": "api/v1/orders",
+      "responses": [
+        {
+          "uuid": "orders-success",
+          "body": "{\n  \"orders\": [\n    {{#repeat 5}}\n    {\n      \"orderId\": \"{{faker 'random.uuid'}}\",\n      \"orderNumber\": \"ORD-{{faker 'random.number' min=10000 max=99999}}\",\n      \"status\": \"{{faker 'helpers.randomize' '['pending', 'processing', 'shipped', 'delivered']'}}\",\n      \"total\": {{faker 'commerce.price' min=50 max=500}},\n      \"currency\": \"USD\",\n      \"createdAt\": \"{{faker 'date.recent'}}\",\n      \"estimatedDelivery\": \"{{faker 'date.future'}}\",\n      \"items\": [\n        {{#repeat 3}}\n        {\n          \"productId\": \"{{faker 'random.uuid'}}\",\n          \"name\": \"{{faker 'commerce.productName'}}\",\n          \"quantity\": {{faker 'random.number' min=1 max=5}},\n          \"price\": {{faker 'commerce.price'}}\n        }{{#unless @last}},{{/unless}}\n        {{/repeat}}\n      ]\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ],\n  \"total\": 5\n}",
+          "latency": 200,
+          "statusCode": 200,
+          "label": "Order list",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "error-401",
+      "documentation": "Unauthorized error for testing",
+      "method": "get",
+      "endpoint": "api/v1/test/unauthorized",
+      "responses": [
+        {
+          "uuid": "unauthorized-response",
+          "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"Invalid or expired authentication token\",\n  \"code\": \"AUTH_001\"\n}",
+          "latency": 50,
+          "statusCode": 401,
+          "label": "Unauthorized",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "error-500",
+      "documentation": "Server error for testing",
+      "method": "get",
+      "endpoint": "api/v1/test/servererror",
+      "responses": [
+        {
+          "uuid": "server-error-response",
+          "body": "{\n  \"error\": \"Internal Server Error\",\n  \"message\": \"An unexpected error occurred\",\n  \"code\": \"SRV_001\"\n}",
+          "latency": 1000,
+          "statusCode": 500,
+          "label": "Server error",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "*"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": []
+}

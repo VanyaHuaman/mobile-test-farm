@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  # Selenium Grid Hub - Central coordinator
+  selenium-hub:
+    image: selenium/hub:latest
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+      - "4442:4442"
+      - "4443:4443"
+    environment:
+      - SE_SESSION_REQUEST_TIMEOUT=300
+      - SE_SESSION_RETRY_INTERVAL=5
+      - SE_NODE_MAX_INSTANCES=5
+      - SE_NODE_MAX_SESSIONS=5
+    networks:
+      - test-network
+    restart: unless-stopped
+
+  # Appium server for Android devices
+  appium-android:
+    build:
+      context: ./docker/appium-android
+      dockerfile: Dockerfile
+    container_name: appium-android
+    privileged: true
+    ports:
+      - "4723:4723"
+    environment:
+      - APPIUM_HOST=0.0.0.0
+      - APPIUM_PORT=4723
+      - SELENIUM_HOST=selenium-hub
+      - SELENIUM_PORT=4444
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+      - ./tests:/tests
+      - ./results:/results
+      - android-adb-keys:/root/.android
+    networks:
+      - test-network
+    depends_on:
+      - selenium-hub
+    restart: unless-stopped
+    devices:
+      - /dev/bus/usb
+
+  # Appium server for iOS devices
+  appium-ios:
+    build:
+      context: ./docker/appium-ios
+      dockerfile: Dockerfile
+    container_name: appium-ios
+    privileged: true
+    network_mode: host
+    environment:
+      - APPIUM_HOST=0.0.0.0
+      - APPIUM_PORT=4724
+      - SELENIUM_HOST=localhost
+      - SELENIUM_PORT=4444
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+      - ./tests:/tests
+      - ./results:/results
+      - ios-device-keys:/root/.ssh
+    depends_on:
+      - selenium-hub
+    restart: unless-stopped
+
+  # Test Runner with Web UI
+  test-runner:
+    build:
+      context: ./docker/test-runner
+      dockerfile: Dockerfile
+    container_name: test-runner
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=development
+      - SELENIUM_HUB_URL=http://selenium-hub:4444
+      - APPIUM_ANDROID_URL=http://appium-android:4723
+      - APPIUM_IOS_URL=http://localhost:4724
+    volumes:
+      - ./tests:/app/tests
+      - ./results:/app/results
+      - ./config:/app/config
+      - ./web-ui:/app
+    networks:
+      - test-network
+    depends_on:
+      - selenium-hub
+      - appium-android
+    restart: unless-stopped
+
+  # mitmproxy - Traffic interception and routing
+  mitmproxy:
+    image: mitmproxy/mitmproxy:latest
+    container_name: mitmproxy
+    ports:
+      - "8080:8080"   # Proxy port for mobile devices
+      - "8081:8081"   # Web UI
+    volumes:
+      - ./mocks/mitmproxy:/home/mitmproxy/.mitmproxy
+      - ./mocks/scripts:/scripts
+    command: >
+      mitmweb
+      --web-host 0.0.0.0
+      --set block_global=false
+      --set connection_strategy=lazy
+      --scripts /scripts/route_to_mockoon.py
+    networks:
+      - test-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Mockoon - Easy mock API with realistic fake data
+  mockoon:
+    image: mockoon/cli:latest
+    container_name: mockoon
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./mocks/mockoon:/data
+    command: ["--data", "/data/mobile-api-mocks.json", "--port", "3000"]
+    networks:
+      - test-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  android-adb-keys:
+  ios-device-keys:

@@ -1,0 +1,47 @@
+# Device Configuration
+# Update this file with your actual device details after connecting them
+
+devices:
+  - id: android-tablet
+    name: Android Tablet
+    platform: android
+    model: Unknown Tablet
+    platformVersion: "11"
+    udid: ""  # Will be populated by ADB
+    status: offline
+    appium_url: http://appium-android:4723
+    capabilities:
+      platformName: Android
+      automationName: UiAutomator2
+      newCommandTimeout: 300
+      autoGrantPermissions: true
+
+  - id: pixel-4xl
+    name: Google Pixel 4 XL
+    platform: android
+    model: Pixel 4 XL
+    platformVersion: "13"
+    udid: ""  # Will be populated by ADB
+    status: offline
+    appium_url: http://appium-android:4723
+    capabilities:
+      platformName: Android
+      automationName: UiAutomator2
+      newCommandTimeout: 300
+      autoGrantPermissions: true
+
+  - id: iphone-se
+    name: iPhone SE
+    platform: ios
+    model: iPhone SE
+    platformVersion: "16.0"
+    udid: ""  # Will be populated by idevice_id
+    status: offline
+    appium_url: http://localhost:4724
+    capabilities:
+      platformName: iOS
+      automationName: XCUITest
+      newCommandTimeout: 300
+      useNewWDA: false
+      wdaLaunchTimeout: 60000
+      showXcodeLog: true

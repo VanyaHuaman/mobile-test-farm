@@ -1,0 +1,32 @@
+# Common Appium Capabilities
+
+common:
+  noReset: true
+  fullReset: false
+  newCommandTimeout: 300
+
+android:
+  automationName: UiAutomator2
+  autoGrantPermissions: true
+  skipDeviceInitialization: false
+  skipServerInstallation: false
+  ignoreHiddenApiPolicyError: true
+  disableWindowAnimation: true
+
+ios:
+  automationName: XCUITest
+  useNewWDA: false
+  wdaLaunchTimeout: 60000
+  wdaConnectionTimeout: 60000
+  shouldUseSingletonTestManager: false
+  showXcodeLog: true
+  clearSystemFiles: false
+
+# App-specific capabilities (examples)
+apps:
+  example_app:
+    android:
+      appPackage: com.example.app
+      appActivity: .MainActivity
+    ios:
+      bundleId: com.example.app
