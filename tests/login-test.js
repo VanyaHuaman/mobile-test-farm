@@ -1,10 +1,11 @@
 const { remote } = require('webdriverio');
+const DeviceManager = require('../lib/device-manager');
 
-// Test configuration
-const capabilities = {
-  platformName: 'Android',
-  'appium:automationName': 'UiAutomator2',
-  'appium:deviceName': 'emulator-5554',
+// Get device from command line argument or use default
+const deviceNameOrId = process.argv[2] || 'android-emulator-1';
+
+// App configuration
+const APP_CONFIG = {
   'appium:app': '/Users/vanyahuaman/expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk',
   'appium:appPackage': 'com.vanyahuaman.expoarchexampleapp',
   'appium:appActivity': '.MainActivity',
@@ -13,6 +14,28 @@ const capabilities = {
 
 async function runTest() {
   console.log('🚀 Starting Appium test...');
+  console.log(`📱 Target device: ${deviceNameOrId}\n`);
+
+  // Load device manager
+  const manager = new DeviceManager();
+  const device = manager.getDevice(deviceNameOrId);
+
+  if (!device) {
+    console.error(`❌ Device '${deviceNameOrId}' not found in registry`);
+    console.log('\n💡 Available devices:');
+    manager.printDevices();
+    process.exit(1);
+  }
+
+  console.log(`✅ Device found: ${device.friendlyName}`);
+  console.log(`   Platform: ${device.platform}`);
+  console.log(`   Type: ${device.type}`);
+  console.log(`   Device ID: ${device.deviceId}\n`);
+
+  // Get capabilities with app config
+  const capabilities = manager.getCapabilities(deviceNameOrId, APP_CONFIG);
+
+  console.log('🔧 Capabilities:', JSON.stringify(capabilities, null, 2), '\n');
 
   const driver = await remote({
     hostname: 'localhost',

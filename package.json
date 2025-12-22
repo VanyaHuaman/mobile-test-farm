@@ -10,7 +10,14 @@
   "scripts": {
     "test": "node tests/login-test.js",
     "appium": "appium",
-    "test:login": "node tests/login-test.js"
+    "test:login": "node tests/login-test.js",
+    "devices": "node bin/devices.js",
+    "devices:list": "node bin/devices.js list",
+    "devices:sync": "node bin/devices.js sync",
+    "devices:register": "node bin/devices.js register"
+  },
+  "bin": {
+    "devices": "./bin/devices.js"
   },
   "repository": {
     "type": "git",

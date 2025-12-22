@@ -1,0 +1,22 @@
+{
+  "devices": {
+    "android-emulator-1": {
+      "friendlyName": "Android Emulator (Pixel 64)",
+      "deviceId": "emulator-5554",
+      "platform": "android",
+      "type": "emulator",
+      "model": "sdk_gphone64_arm64",
+      "osVersion": "Android 14",
+      "active": true,
+      "capabilities": {
+        "platformName": "Android",
+        "appium:automationName": "UiAutomator2",
+        "appium:deviceName": "emulator-5554"
+      }
+    }
+  },
+  "metadata": {
+    "lastUpdated": "2024-12-21T23:45:00Z",
+    "version": "1.0.0"
+  }
+}
