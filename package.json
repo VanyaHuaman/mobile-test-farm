@@ -1,0 +1,33 @@
+{
+  "name": "mobile-test-farm",
+  "version": "1.0.0",
+  "description": "Automated mobile device testing infrastructure for running screen tests and end-to-end flows across multiple physical devices.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/login-test.js",
+    "appium": "appium",
+    "test:login": "node tests/login-test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VanyaHuaman/mobile-test-farm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VanyaHuaman/mobile-test-farm/issues"
+  },
+  "homepage": "https://github.com/VanyaHuaman/mobile-test-farm#readme",
+  "devDependencies": {
+    "@appium/doctor": "^2.1.15",
+    "appium": "^2.0.1",
+    "appium-uiautomator2-driver": "^4.2.9",
+    "webdriverio": "^9.21.0"
+  }
+}
