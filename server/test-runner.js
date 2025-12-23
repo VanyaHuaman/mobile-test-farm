@@ -116,10 +116,10 @@ class TestRunner {
     let command = 'npm';
     let args = ['run', suite.script];
 
-    // Add device argument if specified
+    // Add device argument if specified (only use first device, tests run one device at a time)
     if (devices.length > 0 && devices[0] !== 'default') {
       args.push('--');
-      args.push(devices.join(','));
+      args.push(devices[0]); // Pass only the first device
     }
 
     console.log(`Executing: ${command} ${args.join(' ')}`);
