@@ -110,19 +110,35 @@ class TestRunner {
    */
   _executeTest(runId, suite, devices, config) {
     const testRun = this.testRuns.get(runId);
+
+    // If multiple devices, run tests sequentially on each device
+    if (devices.length > 1 && devices[0] !== 'default') {
+      this._executeMultiDeviceTest(runId, suite, devices, config, 0);
+    } else {
+      // Single device execution
+      this._executeSingleDeviceTest(runId, suite, devices, config);
+    }
+  }
+
+  /**
+   * Execute test on a single device
+   */
+  _executeSingleDeviceTest(runId, suite, devices, config, deviceIndex = 0) {
+    const testRun = this.testRuns.get(runId);
     const projectRoot = path.join(__dirname, '..');
 
     // Build command
     let command = 'npm';
     let args = ['run', suite.script];
 
-    // Add device argument if specified (only use first device, tests run one device at a time)
+    // Add device argument if specified
     if (devices.length > 0 && devices[0] !== 'default') {
       args.push('--');
-      args.push(devices[0]); // Pass only the first device
+      args.push(devices[0]);
     }
 
-    console.log(`Executing: ${command} ${args.join(' ')}`);
+    const deviceLabel = devices[0] !== 'default' ? ` on device: ${devices[0]}` : '';
+    console.log(`Executing: ${command} ${args.join(' ')}${deviceLabel}`);
 
     // Spawn process
     const childProcess = spawn(command, args, {
@@ -178,7 +194,8 @@ class TestRunner {
       // Broadcast test completion
       this.io.emit('test:completed', testRun);
 
-      console.log(`Test run ${runId} completed with code ${code}`);
+      const deviceLabel = devices[0] !== 'default' ? ` on device: ${devices[0]}` : '';
+      console.log(`Test run ${runId} completed with code ${code}${deviceLabel}`);
     });
 
     // Handle process errors
@@ -197,6 +214,116 @@ class TestRunner {
       });
 
       console.error(`Test run ${runId} error:`, error);
+    });
+  }
+
+  /**
+   * Execute tests sequentially on multiple devices
+   */
+  _executeMultiDeviceTest(runId, suite, devices, config, deviceIndex) {
+    const testRun = this.testRuns.get(runId);
+    const projectRoot = path.join(__dirname, '..');
+
+    // Check if we've completed all devices
+    if (deviceIndex >= devices.length) {
+      testRun.status = 'passed';
+      testRun.endTime = new Date();
+      testRun.duration = testRun.endTime - testRun.startTime;
+      this.io.emit('test:completed', testRun);
+      console.log(`Multi-device test run ${runId} completed all ${devices.length} devices`);
+      return;
+    }
+
+    const currentDevice = devices[deviceIndex];
+    const command = 'npm';
+    const args = ['run', suite.script, '--', currentDevice];
+
+    console.log(`[${deviceIndex + 1}/${devices.length}] Executing: ${command} ${args.join(' ')}`);
+
+    // Add separator in output
+    const separator = `\n${'='.repeat(70)}\n[${deviceIndex + 1}/${devices.length}] Testing on device: ${currentDevice}\n${'='.repeat(70)}\n`;
+    testRun.output.push({
+      type: 'stdout',
+      timestamp: new Date(),
+      text: separator,
+    });
+    this.io.emit('test:output', {
+      runId,
+      type: 'stdout',
+      text: separator,
+    });
+
+    // Spawn process for current device
+    const childProcess = spawn(command, args, {
+      cwd: projectRoot,
+      env: { ...process.env, ...config.env },
+    });
+
+    this.activeProcesses.set(runId, childProcess);
+
+    // Capture stdout
+    childProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      testRun.output.push({
+        type: 'stdout',
+        timestamp: new Date(),
+        text: output,
+      });
+      this.io.emit('test:output', {
+        runId,
+        type: 'stdout',
+        text: output,
+      });
+    });
+
+    // Capture stderr
+    childProcess.stderr.on('data', (data) => {
+      const output = data.toString();
+      testRun.output.push({
+        type: 'stderr',
+        timestamp: new Date(),
+        text: output,
+      });
+      this.io.emit('test:output', {
+        runId,
+        type: 'stderr',
+        text: output,
+      });
+    });
+
+    // Handle process completion - move to next device
+    childProcess.on('close', (code) => {
+      this.activeProcesses.delete(runId);
+
+      if (code !== 0) {
+        // Test failed on this device
+        testRun.status = 'failed';
+        testRun.endTime = new Date();
+        testRun.duration = testRun.endTime - testRun.startTime;
+        testRun.exitCode = code;
+        this.io.emit('test:completed', testRun);
+        console.log(`Multi-device test run ${runId} failed on device ${currentDevice} (${deviceIndex + 1}/${devices.length})`);
+        return;
+      }
+
+      console.log(`Device ${currentDevice} (${deviceIndex + 1}/${devices.length}) completed successfully`);
+
+      // Move to next device
+      this._executeMultiDeviceTest(runId, suite, devices, config, deviceIndex + 1);
+    });
+
+    // Handle process errors
+    childProcess.on('error', (error) => {
+      testRun.status = 'error';
+      testRun.endTime = new Date();
+      testRun.duration = testRun.endTime - testRun.startTime;
+      testRun.error = error.message;
+      this.activeProcesses.delete(runId);
+      this.io.emit('test:error', {
+        runId,
+        error: error.message,
+      });
+      console.error(`Multi-device test run ${runId} error on device ${currentDevice}:`, error);
     });
   }
 
