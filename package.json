@@ -11,6 +11,7 @@
     "test": "node tests/login-test.js",
     "appium": "appium",
     "test:login": "node tests/login-test.js",
+    "test:login:release": "node tests/login-test-release.js",
     "devices": "node bin/devices.js",
     "devices:list": "node bin/devices.js list",
     "devices:sync": "node bin/devices.js sync",
