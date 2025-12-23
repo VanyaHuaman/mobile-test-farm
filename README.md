@@ -234,13 +234,23 @@ npm run devices remove <id>    # Remove device
 
 ### Testing
 ```bash
-npm test                         # Run default test suite
-npm run test:login               # Run login test (legacy)
+# Individual Test Suites
+npm test                         # Run default test suite (login)
 npm run test:login:pom           # Run login test with Page Object Model
-npm run test:login:release       # Run with release build
+npm run test:form                # Run form interaction tests
+npm run test:list                # Run list filtering and interaction tests
+npm run test:profile             # Run profile and settings tests
+npm run test:navigation          # Run complete navigation flow tests
+
+# Run All Suites Sequentially
+npm run test:suite:all           # Run all test suites on default device
+
+# Parallel Test Execution
 npm run test:parallel:all        # Run tests on all devices in parallel
 npm run test:parallel:ios        # Run tests on iOS devices in parallel
 npm run test:parallel:android    # Run tests on Android devices in parallel
+
+# Appium Server
 npm run appium                   # Start Appium server
 ```
 
@@ -298,9 +308,11 @@ npx expo run:ios
 
 **Test Architecture:**
 - ✅ Page Object Model implementation
-- ✅ Automatic screenshot on test failure
+- ✅ Comprehensive test suites (Login, Form, List, Profile, Navigation)
+- ✅ Automatic screenshot and video on test failure
 - ✅ Cross-platform element location
 - ✅ Configuration-driven tests (.env support)
+- ✅ Centralized test data management
 
 **Parallel Execution:**
 - ✅ Parallel test runner across multiple devices
@@ -347,13 +359,15 @@ npx expo run:ios
 
 ### Phase 6: Video Recording ✅ COMPLETE
 
-### Phase 7: Next Steps (Optional)
-- [ ] Advanced test cases (forms, lists, navigation)
+### Phase 7: Advanced Test Cases ✅ COMPLETE
+
+### Phase 8: Next Steps (Optional)
 - [ ] Performance metrics collection
 - [ ] Web UI for test management
 - [ ] Firebase Test Lab integration
 - [ ] Visual regression testing
 - [ ] Cloud device farm integration
+- [ ] AI-powered self-healing locators
 
 ## Troubleshooting
 
