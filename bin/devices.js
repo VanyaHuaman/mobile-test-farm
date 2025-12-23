@@ -19,8 +19,8 @@ function question(prompt) {
 async function registerDeviceInteractive() {
   console.log('\n📝 Register New Device\n');
 
-  // First, sync to show available devices
-  const { newDevices } = manager.syncAndroidDevices();
+  // First, sync to show available devices (both Android and iOS)
+  const { newDevices } = manager.syncAllDevices();
 
   if (newDevices.length === 0) {
     console.log('\n✅ All connected devices are already registered!\n');
@@ -29,7 +29,9 @@ async function registerDeviceInteractive() {
 
   console.log('\n📋 Available unregistered devices:\n');
   newDevices.forEach((device, index) => {
-    console.log(`[${index + 1}] ${device.deviceId} (${device.model})`);
+    const platformIcon = device.platform === 'android' ? '🤖' : '🍎';
+    const typeIcon = device.type === 'simulator' ? '📲' : device.type === 'emulator' ? '🖥️ ' : '📱';
+    console.log(`[${index + 1}] ${platformIcon} ${typeIcon} ${device.deviceId} (${device.model}) - ${device.platform}`);
   });
 
   const choice = await question('\nSelect device number (or "q" to quit): ');
@@ -47,15 +49,15 @@ async function registerDeviceInteractive() {
 
   const device = newDevices[index];
 
-  console.log(`\n✅ Selected: ${device.deviceId}\n`);
+  console.log(`\n✅ Selected: ${device.deviceId} (${device.platform})\n`);
 
-  const friendlyName = await question('Enter friendly name (e.g., "Lenovo 11-inch Tablet"): ');
+  const friendlyName = await question('Enter friendly name (e.g., "iPhone 15 Pro Simulator"): ');
   const id = friendlyName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 
-  const osVersion = await question(`Enter OS version (default: "unknown"): `) || 'unknown';
+  const osVersion = await question(`Enter OS version (default: "${device.osVersion || 'unknown'}"): `) || device.osVersion || 'unknown';
   const notes = await question('Enter notes (optional): ');
 
   try {
@@ -72,7 +74,8 @@ async function registerDeviceInteractive() {
     console.log(`\n✅ Device registered successfully!`);
     console.log(`   ID: ${id}`);
     console.log(`   Name: ${friendlyName}`);
-    console.log(`   Device ID: ${device.deviceId}\n`);
+    console.log(`   Device ID: ${device.deviceId}`);
+    console.log(`   Platform: ${device.platform}\n`);
   } catch (error) {
     console.error(`\n❌ Error: ${error.message}\n`);
   }
@@ -90,7 +93,7 @@ async function main() {
       break;
 
     case 'sync':
-      manager.syncAndroidDevices();
+      manager.syncAllDevices();
       console.log('');
       rl.close();
       break;

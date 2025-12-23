@@ -1,182 +1,448 @@
 # Mobile Test Farm - Quick Start Guide
 
-Get your mobile test farm up and running in 5 steps.
+Get up and running with the Mobile Test Farm in under 10 minutes.
 
-## Prerequisites
+## Overview
 
-- Linux server with Podman installed
-- 3 USB ports (or powered USB hub)
-- Your mobile devices: Android Tablet, Pixel 4 XL, iPhone SE
+This guide will help you:
+1. Set up your development environment
+2. Install and configure the Mobile Test Farm
+3. Register your first device
+4. Run your first automated test
 
-## Step 1: Setup Devices
+**Time Required:** ~10 minutes
 
-### Android Devices (Tablet & Pixel 4 XL)
+---
 
-1. Enable Developer Options: Settings → About → Tap "Build number" 7 times
-2. Enable USB Debugging: Settings → Developer Options → USB Debugging (ON)
-3. Connect via USB and authorize the computer
+## Step 1: Prerequisites (2 minutes)
 
-See [docs/setup-android.md](docs/setup-android.md) for detailed instructions.
+### Check Your System
 
-### iOS Device (iPhone SE)
+**macOS** (recommended):
+```bash
+# Check Node.js (18+ required)
+node --version
 
-1. Enable Developer Mode: Settings → Privacy & Security → Developer Mode (ON)
-2. Connect via USB and tap "Trust This Computer"
-3. Install WebDriverAgent (see iOS setup guide)
+# Check Java (11+ required)
+java -version
 
-See [docs/setup-ios.md](docs/setup-ios.md) for detailed instructions.
+# Check Android SDK
+echo $ANDROID_HOME
+```
 
-## Step 2: Install and Setup
+### Install Missing Prerequisites
+
+**Node.js:**
+```bash
+# Install via Homebrew
+brew install node
+```
+
+**Java JDK:**
+```bash
+# Install via Homebrew
+brew install openjdk@11
+
+# Set JAVA_HOME
+export JAVA_HOME=/usr/local/opt/openjdk@11
+```
+
+**Android SDK:**
+1. Download [Android Studio](https://developer.android.com/studio)
+2. Install Android SDK via Android Studio
+3. Set environment variable:
+   ```bash
+   export ANDROID_HOME=~/Library/Android/sdk
+   export PATH=$PATH:$ANDROID_HOME/platform-tools
+   ```
+
+---
+
+## Step 2: Install Mobile Test Farm (1 minute)
+
+```bash
+# Navigate to project directory
+cd ~/mobile-test-farm
+
+# Install dependencies
+npm install
+```
+
+**What gets installed:**
+- Appium 2.19.0 (automation server)
+- UiAutomator2 driver 4.2.9 (Android automation)
+- WebDriverIO 9.21.0 (test framework)
+- Device management tools
+
+---
+
+## Step 3: Verify Installation (1 minute)
+
+```bash
+# Check Appium installation
+npx appium --version
+# Expected: 2.19.0 or higher
+
+# Check UiAutomator2 driver
+npx appium driver list --installed
+# Expected: ✔ uiautomator2@4.2.9 installed
+
+# Verify device tools
+npm run devices list
+# Expected: Shows device registry (may be empty)
+```
+
+---
+
+## Step 4: Start Appium Server (30 seconds)
+
+**In a new terminal window:**
+
+```bash
+cd ~/mobile-test-farm
+npx appium
+```
+
+**Expected output:**
+```
+[Appium] Welcome to Appium v2.19.0
+[Appium] Appium REST http interface listener started on http://0.0.0.0:4723
+[Appium] Available drivers:
+[Appium]   - uiautomator2@4.2.9 (automationName 'UiAutomator2')
+```
+
+**Keep this terminal running!** Appium needs to run in the background for tests to work.
+
+---
+
+## Step 5: Connect Your First Device (2 minutes)
+
+### Option A: Android Emulator (Fastest)
+
+1. **Start Android Emulator:**
+   ```bash
+   # List available emulators
+   emulator -list-avds
+
+   # Start an emulator (replace with your AVD name)
+   emulator -avd Pixel_4_API_30 &
+   ```
+
+2. **Verify connection:**
+   ```bash
+   adb devices
+   # Expected: emulator-5554   device
+   ```
+
+### Option B: Physical Android Device
+
+1. **Enable USB Debugging:**
+   - Settings → About Phone → Tap "Build Number" 7 times
+   - Settings → Developer Options → Enable "USB Debugging"
+
+2. **Connect via USB**
+
+3. **Verify connection:**
+   ```bash
+   adb devices
+   # Expected: ZY223K7LXM   device
+   ```
+
+4. **Accept authorization prompt** on device if it appears
+
+---
+
+## Step 6: Register Your Device (1 minute)
+
+### Discover Connected Devices
+
+```bash
+npm run devices sync
+```
+
+**Example output:**
+```
+🔍 Discovered 1 Android device(s):
+
+🆕 emulator-5554 - NEW (not registered)
+```
+
+### Register the Device
+
+```bash
+npm run devices register
+```
+
+**Interactive prompts:**
+```
+📝 Register New Device
+
+📋 Available unregistered devices:
+
+[1] emulator-5554 (sdk_gphone64_arm64)
+
+Select device number (or "q" to quit): 1
+
+Enter friendly name (e.g., "Lenovo 11-inch Tablet"): Android Emulator
+
+Enter OS version (default: "unknown"): Android 14
+
+Enter notes (optional): Test device for automation
+
+✅ Device registered successfully!
+   ID: android-emulator
+   Name: Android Emulator
+   Device ID: emulator-5554
+```
+
+### Verify Registration
+
+```bash
+npm run devices list
+```
+
+**Expected output:**
+```
+📱 Registered Devices:
+
+────────────────────────────────────────────────────────────────────
+✅ 🖥️  Android Emulator
+   ID: android-emulator
+   Device ID: emulator-5554
+   Platform: android | Type: emulator
+   Model: sdk_gphone64_arm64 | OS: Android 14
+   Notes: Test device for automation
+────────────────────────────────────────────────────────────────────
+
+Total: 1 device(s) | Active: 1
+```
+
+---
+
+## Step 7: Build the Test App (2 minutes)
+
+The test app is already created in `~/expo-arch-example-app`. Now we build it:
+
+```bash
+cd ~/expo-arch-example-app
+
+# Build for Android
+npx expo run:android
+```
+
+**What happens:**
+1. Gradle downloads dependencies (first time only)
+2. App is compiled
+3. APK is built and installed on device
+4. App launches automatically
+
+**Expected result:**
+- APK location: `android/app/build/outputs/apk/debug/app-debug.apk` (43MB)
+- App should launch on your device/emulator
+- You should see a login screen
+
+**Test manually:**
+- Username: `demo`
+- Password: `password`
+- Tap "Login" → Should navigate to Home screen ✅
+
+---
+
+## Step 8: Run Your First Automated Test (1 minute)
+
+**In the mobile-test-farm directory:**
 
 ```bash
 cd ~/mobile-test-farm
 
-# Run setup script
-chmod +x scripts/*.sh
-./scripts/setup.sh
+# Run the login test
+npm run test:login
 ```
 
-This will:
-- Check prerequisites
-- Build all containers
-- Prepare the environment
+**Expected output:**
+```
+🚀 Mobile Test Farm - Login Test
 
-## Step 3: Configure Devices
+Using device: android-emulator (Android Emulator)
+Capabilities: {
+  platformName: 'Android',
+  'appium:automationName': 'UiAutomator2',
+  'appium:deviceName': 'emulator-5554',
+  'appium:app': '/Users/.../app-debug.apk',
+  'appium:appPackage': 'com.vanyahuaman.expoarchexampleapp',
+  'appium:appActivity': '.MainActivity',
+  'appium:noReset': false
+}
+
+Connecting to Appium server...
+✅ Session created successfully
+
+Starting test: Login Flow
+  ✓ App launched
+  ✓ Login screen displayed
+  ✓ Username field found
+  ✓ Password field found
+  ✓ Entering credentials...
+  ✓ Tapping login button...
+  ✓ Navigated to Home screen
+  ✓ Home title verified: "Welcome to Home"
+
+✅ Login test passed!
+
+Session ended
+```
+
+**What the test does:**
+1. Launches the app
+2. Finds username and password fields
+3. Enters credentials (demo/password)
+4. Taps the login button
+5. Verifies navigation to Home screen
+6. Confirms "Welcome to Home" text appears
+
+---
+
+## Step 9: Run Test on Specific Device (30 seconds)
+
+If you have multiple devices registered:
 
 ```bash
-# Check connected devices
-./scripts/check-devices.sh
+# By device ID
+node tests/login-test.js android-emulator
+
+# By friendly name (case-insensitive)
+node tests/login-test.js "Android Emulator"
 ```
 
-Update `config/devices.yml` with your device UDIDs and details.
+---
 
-## Step 4: Start the Farm
+## Success! 🎉
 
-```bash
-./scripts/start.sh
-```
+You now have a working Mobile Test Farm setup!
 
-Services will start:
-- Selenium Hub: http://localhost:4444
-- Appium (Android): http://localhost:4723
-- Appium (iOS): http://localhost:4724
-- Web UI: http://localhost:8080
+### What You've Accomplished:
 
-## Step 5: Run Your First Test
+✅ Installed Appium and dependencies
+✅ Started Appium server
+✅ Connected and registered a device
+✅ Built the test app
+✅ Ran your first automated test
 
-Open http://localhost:8080 in your browser:
+### Next Steps:
 
-1. Select devices to test on
-2. Select test to run
-3. Click "Run Selected Tests"
-4. View results in real-time
+1. **Add More Devices:**
+   ```bash
+   npm run devices register
+   ```
 
-## Writing Your First Test
+2. **Write More Tests:**
+   - See [Writing Tests Guide](docs/writing-tests.md)
+   - Example tests in `tests/` directory
 
-See [docs/writing-tests.md](docs/writing-tests.md) for:
-- Example test code
-- Page Object Model pattern
-- Best practices
-- Troubleshooting
+3. **Test on Multiple Devices:**
+   ```javascript
+   // Example: tests/multi-device-test.js
+   const DeviceManager = require('./lib/device-manager');
+   const manager = new DeviceManager();
 
-## Common Commands
+   const devices = manager.listActiveDevices();
+   for (const device of devices) {
+     console.log(`Testing on ${device.friendlyName}...`);
+     // Run test
+   }
+   ```
 
-```bash
-# Start the farm
-./scripts/start.sh
+4. **Explore Documentation:**
+   - [Device Management Guide](docs/device-management.md)
+   - [Phase 1 Completion Report](docs/phase1-completion.md)
+   - [Android Setup Guide](docs/setup-android.md)
 
-# Stop the farm
-./scripts/stop.sh
-
-# Check device status
-./scripts/check-devices.sh
-
-# View container logs
-podman logs appium-android
-podman logs appium-ios
-podman logs test-runner
-
-# Check container status
-podman ps
-```
+---
 
 ## Troubleshooting
 
-### No devices detected
+### "No devices found"
+```bash
+# Check ADB connection
+adb devices
 
-1. Check USB connections
-2. Verify USB debugging is enabled
-3. Check device authorization
-4. Run: `./scripts/check-devices.sh`
+# Restart ADB if needed
+adb kill-server && adb start-server
 
-### Container won't start
+# Try discovery again
+npm run devices sync
+```
+
+### "Appium connection refused"
+```bash
+# Check if Appium is running
+curl http://localhost:4723/status
+
+# If not, start Appium
+npx appium
+```
+
+### "Device unauthorized"
+1. Check your device for USB debugging authorization prompt
+2. Select "Always allow from this computer"
+3. Click OK
+4. Run `adb devices` again
+
+### Test fails with "Element not found"
+```bash
+# App might not be installed
+cd ~/expo-arch-example-app
+npx expo run:android
+
+# Or rebuild
+cd ~/expo-arch-example-app/android
+./gradlew clean
+cd ..
+npx expo run:android
+```
+
+---
+
+## Quick Reference
+
+### Essential Commands
 
 ```bash
-# Check logs
-podman logs <container-name>
+# Device Management
+npm run devices list          # List all devices
+npm run devices sync          # Discover devices
+npm run devices register      # Add new device
 
-# Rebuild container
-podman-compose build <service-name>
-podman-compose up -d <service-name>
+# Testing
+npm run test:login            # Run login test
+node tests/login-test.js "Device Name"  # Test specific device
+
+# Appium
+npx appium                    # Start server
+curl http://localhost:4723/status  # Check status
+
+# Android
+adb devices                   # List connected devices
+adb logcat                    # View device logs
+emulator -list-avds           # List emulators
 ```
 
-### Web UI not accessible
+### File Locations
 
-```bash
-# Check if container is running
-podman ps | grep test-runner
+- **Test Farm**: `~/mobile-test-farm/`
+- **Test App**: `~/expo-arch-example-app/`
+- **APK**: `~/expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk`
+- **Device Config**: `~/mobile-test-farm/config/devices.json`
+- **Test Scripts**: `~/mobile-test-farm/tests/`
 
-# Check logs
-podman logs test-runner
-
-# Verify port is not in use
-netstat -tlnp | grep 8080
-```
-
-## Next Steps
-
-1. **Configure your apps** - Update device configurations with your app details
-2. **Write tests** - Create test files in `tests/android/` and `tests/ios/`
-3. **Organize tests** - Use Page Object Model for better maintainability
-4. **Automate** - Set up scheduled test runs
-5. **Monitor** - Review test results and screenshots
-
-## Project Structure
-
-```
-mobile-test-farm/
-├── compose.yml              # Container orchestration
-├── docker/                  # Container definitions
-│   ├── appium-android/
-│   ├── appium-ios/
-│   └── test-runner/
-├── tests/                   # Your test files
-│   ├── android/
-│   ├── ios/
-│   └── common/
-├── config/                  # Configuration files
-│   ├── devices.yml         # Device definitions
-│   └── capabilities.yml    # Appium capabilities
-├── results/                 # Test results
-│   ├── screenshots/
-│   ├── videos/
-│   └── reports/
-├── web-ui/                  # Web dashboard
-├── scripts/                 # Utility scripts
-└── docs/                    # Documentation
-```
+---
 
 ## Support
 
-- Check [PLAN.md](PLAN.md) for architecture details
-- Review [docs/](docs/) for comprehensive guides
-- See test examples in `tests/` directory
+Need help?
+- 📖 Check [README.md](README.md) for detailed documentation
+- 🔧 See [Troubleshooting](#troubleshooting) section above
+- 📝 Review [docs/](docs/) for guides
+- 🐛 Report issues on GitHub
 
-## Tips
-
-- Keep devices charged and connected
-- Disable screen lock on devices
-- Run tests regularly to catch issues early
-- Use descriptive test names
-- Take screenshots on failures
-- Keep tests independent and isolated
+**Happy Testing!** 🚀

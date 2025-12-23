@@ -4,12 +4,19 @@ const DeviceManager = require('../lib/device-manager');
 // Get device from command line argument or use default
 const deviceNameOrId = process.argv[2] || 'android-emulator-1';
 
-// App configuration
-const APP_CONFIG = {
-  'appium:app': '/Users/vanyahuaman/expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk',
-  'appium:appPackage': 'com.vanyahuaman.expoarchexampleapp',
-  'appium:appActivity': '.MainActivity',
-  'appium:noReset': false,
+// Platform-specific app configurations
+const APP_CONFIGS = {
+  android: {
+    'appium:app': '/Users/vanyahuaman/expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk',
+    'appium:appPackage': 'com.vanyahuaman.expoarchexampleapp',
+    'appium:appActivity': '.MainActivity',
+    'appium:noReset': false,
+  },
+  ios: {
+    'appium:app': '/Users/vanyahuaman/Library/Developer/Xcode/DerivedData/expoarchexampleapp-hkwwfuedzurdeibfyglrulesvlly/Build/Products/Debug-iphonesimulator/expoarchexampleapp.app',
+    'appium:bundleId': 'com.vanyahuaman.expoarchexampleapp',
+    'appium:noReset': false,
+  },
 };
 
 async function runTest() {
@@ -32,6 +39,13 @@ async function runTest() {
   console.log(`   Type: ${device.type}`);
   console.log(`   Device ID: ${device.deviceId}\n`);
 
+  // Select app config based on platform
+  const APP_CONFIG = APP_CONFIGS[device.platform];
+  if (!APP_CONFIG) {
+    console.error(`❌ No app configuration found for platform: ${device.platform}`);
+    process.exit(1);
+  }
+
   // Get capabilities with app config
   const capabilities = manager.getCapabilities(deviceNameOrId, APP_CONFIG);
 
@@ -51,8 +65,9 @@ async function runTest() {
     await driver.pause(3000);
     console.log('⏳ Waiting for login screen...');
 
-    // Find username input by testID
-    const usernameInput = await driver.$('~Username input');
+    // Find username input (use testID for iOS, accessibilityLabel for Android)
+    const usernameSelector = device.platform === 'ios' ? '~username-input' : '~Username input';
+    const usernameInput = await driver.$(usernameSelector);
     await usernameInput.waitForDisplayed({ timeout: 10000 });
     console.log('✅ Found username input');
 
@@ -61,7 +76,8 @@ async function runTest() {
     console.log('📝 Entered username: demo');
 
     // Find password input
-    const passwordInput = await driver.$('~Password input');
+    const passwordSelector = device.platform === 'ios' ? '~password-input' : '~Password input';
+    const passwordInput = await driver.$(passwordSelector);
     await passwordInput.waitForDisplayed({ timeout: 5000 });
     console.log('✅ Found password input');
 
@@ -70,7 +86,8 @@ async function runTest() {
     console.log('📝 Entered password');
 
     // Find and click login button
-    const loginButton = await driver.$('~Login button');
+    const loginButtonSelector = device.platform === 'ios' ? '~login-button' : '~Login button';
+    const loginButton = await driver.$(loginButtonSelector);
     await loginButton.waitForDisplayed({ timeout: 5000 });
     console.log('✅ Found login button');
 
@@ -80,13 +97,16 @@ async function runTest() {
     // Wait for navigation to home screen
     await driver.pause(2000);
 
-    // Verify we're on the home screen by checking for a home element
-    const homeElement = await driver.$('android=new UiSelector().textContains("Home Dashboard")');
-    const isDisplayed = await homeElement.isDisplayed();
+    // Verify we're on the home screen by checking for home text
+    try {
+      const homeElement = device.platform === 'android'
+        ? await driver.$('android=new UiSelector().textContains("Home Dashboard")')
+        : await driver.$('-ios predicate string:label == "Home Dashboard"');
 
-    if (isDisplayed) {
+      await homeElement.waitForDisplayed({ timeout: 5000 });
       console.log('✅ Login successful! Home screen loaded');
-    } else {
+    } catch (error) {
+      console.error('❌ Could not verify home screen:', error.message);
       throw new Error('Home screen not found after login');
     }
 

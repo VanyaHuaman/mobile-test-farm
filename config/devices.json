@@ -13,10 +13,25 @@
         "appium:automationName": "UiAutomator2",
         "appium:deviceName": "emulator-5554"
       }
+    },
+    "iphone-16-pro-simulator": {
+      "friendlyName": "iPhone 16 Pro Simulator",
+      "deviceId": "AE9BA913-29AC-4B5C-B718-8200F5106756",
+      "platform": "ios",
+      "type": "simulator",
+      "model": "iPhone 16 Pro",
+      "osVersion": "iOS 18",
+      "active": true,
+      "capabilities": {
+        "platformName": "iOS",
+        "appium:automationName": "XCUITest",
+        "appium:udid": "AE9BA913-29AC-4B5C-B718-8200F5106756"
+      },
+      "notes": "Test device for iOS automation"
     }
   },
   "metadata": {
-    "lastUpdated": "2024-12-21T23:45:00Z",
+    "lastUpdated": "2025-12-23T06:22:57.040Z",
     "version": "1.0.0"
   }
 }
