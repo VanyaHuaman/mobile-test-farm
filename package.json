@@ -8,9 +8,10 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "node tests/login-test.js",
+    "test": "node tests/specs/login.spec.js",
     "appium": "appium",
     "test:login": "node tests/login-test.js",
+    "test:login:pom": "node tests/specs/login.spec.js",
     "test:login:release": "node tests/login-test-release.js",
     "devices": "node bin/devices.js",
     "devices:list": "node bin/devices.js list",
