@@ -25,6 +25,8 @@ wheels/
 
 # Test results
 results/
+screenshots/
+videos/
 *.png
 *.jpg
 *.mp4

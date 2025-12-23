@@ -2,6 +2,7 @@ const { remote } = require('webdriverio');
 const DeviceManager = require('../../lib/device-manager');
 const config = require('../../config/test.config');
 const AllureReporter = require('./AllureReporter');
+const VideoRecorder = require('./VideoRecorder');
 const fs = require('fs');
 const path = require('path');
 
@@ -11,6 +12,7 @@ const path = require('path');
  * Provides:
  * - Driver initialization
  * - Screenshot on failure
+ * - Video recording
  * - Device management
  * - Allure reporting integration
  * - Common test utilities
@@ -22,6 +24,7 @@ class TestBase {
     this.deviceManager = new DeviceManager();
     this.testName = '';
     this.allure = AllureReporter;
+    this.videoRecorder = null;
   }
 
   /**
@@ -101,13 +104,21 @@ class TestBase {
   }
 
   /**
-   * Execute test with automatic screenshot on failure
+   * Execute test with automatic screenshot and video on failure
    * @param {Function} testFunction - Test function to execute
    * @returns {Promise<void>}
    */
   async executeTest(testFunction) {
+    let testPassed = false;
+
     try {
+      // Start video recording if enabled
+      if (config.videos.enabled && this.videoRecorder) {
+        await this.videoRecorder.startRecording();
+      }
+
       await testFunction();
+      testPassed = true;
       console.log('✅ Test passed successfully');
     } catch (error) {
       console.error('❌ Test failed:', error.message);
@@ -115,10 +126,40 @@ class TestBase {
       // Take screenshot on failure if enabled
       if (config.screenshots.onFailure && this.driver) {
         console.log('📸 Taking screenshot of failure...');
-        await this.takeScreenshot('FAILURE');
+        const screenshotPath = await this.takeScreenshot('FAILURE');
+
+        // Attach to Allure report
+        if (screenshotPath) {
+          this.allure.attachScreenshot('Failure Screenshot', screenshotPath);
+        }
       }
 
       throw error;
+    } finally {
+      // Stop video recording
+      if (this.videoRecorder && this.videoRecorder.isCurrentlyRecording()) {
+        const shouldSaveVideo = config.videos.enabled ||
+                               (config.videos.onFailure && !testPassed);
+
+        if (shouldSaveVideo) {
+          console.log('🎥 Stopping video recording...');
+          const videoPath = await this.videoRecorder.stopRecording(
+            testPassed ? 'SUCCESS' : 'FAILURE'
+          );
+
+          if (videoPath) {
+            console.log(`📹 Video saved: ${videoPath}`);
+
+            // Attach to Allure report if test failed
+            if (!testPassed) {
+              this.allure.attachVideo('Test Execution Video', videoPath);
+            }
+          }
+        } else {
+          // Discard recording if not needed
+          await this.videoRecorder.stopRecording();
+        }
+      }
     }
   }
 
@@ -163,6 +204,17 @@ class TestBase {
   async runTest(deviceNameOrId, appConfig, testFunction, testName = 'test') {
     try {
       await this.initializeDriver(deviceNameOrId, appConfig, testName);
+
+      // Initialize video recorder after driver is ready
+      if ((config.videos.enabled || config.videos.onFailure) && this.driver && this.device) {
+        this.videoRecorder = new VideoRecorder(
+          this.driver,
+          this.device.platform,
+          testName
+        );
+        console.log('🎥 Video recorder initialized\n');
+      }
+
       await this.executeTest(testFunction);
       return true;
     } catch (error) {
@@ -170,6 +222,11 @@ class TestBase {
       throw error;
     } finally {
       await this.cleanup();
+
+      // Cleanup old videos
+      if (config.videos.enabled || config.videos.onFailure) {
+        VideoRecorder.cleanupOldVideos(config.videos.maxVideos);
+      }
     }
   }
 }

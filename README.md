@@ -13,7 +13,8 @@ Automated mobile device testing infrastructure for running tests across multiple
 ✅ **Automated Testing** - Run end-to-end tests with Appium + WebDriverIO
 ✅ **Parallel Test Execution** - Run tests across multiple devices simultaneously
 ✅ **Page Object Model** - Maintainable test architecture with automatic screenshot on failure
-✅ **HTML Test Reports** - Beautiful Allure reports with charts and history
+✅ **Video Recording** - Automatic video recording on test failure for debugging
+✅ **HTML Test Reports** - Beautiful Allure reports with charts, videos, and history
 ✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
 ✅ **Modern Test App** - Expo app with New Architecture (Fabric + TurboModules)
 ✅ **Device Registry** - Centralized device configuration and management
@@ -268,6 +269,7 @@ npx expo run:ios
 
 ## Documentation
 
+- **[Video Recording Guide](docs/video-recording.md)** - Automatic video recording for debugging
 - **[HTML Reporting Guide](docs/html-reporting.md)** - Beautiful test reports with Allure
 - **[CI/CD Integration Guide](docs/ci-cd-integration.md)** - Automated testing with GitHub Actions
 - **[Device Management Guide](docs/device-management.md)** - Complete device management documentation
@@ -314,9 +316,11 @@ npx expo run:ios
 
 **Reporting:**
 - ✅ Allure HTML report integration
-- ✅ Rich test metadata (steps, screenshots, logs)
+- ✅ Rich test metadata (steps, screenshots, logs, videos)
 - ✅ Historical trend tracking
 - ✅ Report generation and viewing scripts
+- ✅ Automatic video recording on test failure
+- ✅ Video attachment to Allure reports
 
 **Test Application:**
 - ✅ Expo Router + React Native New Architecture
@@ -341,13 +345,15 @@ npx expo run:ios
 
 ### Phase 5: HTML Test Reporting ✅ COMPLETE
 
-### Phase 6: Next Steps (Optional)
-- [ ] Video recording of test runs
+### Phase 6: Video Recording ✅ COMPLETE
+
+### Phase 7: Next Steps (Optional)
 - [ ] Advanced test cases (forms, lists, navigation)
 - [ ] Performance metrics collection
 - [ ] Web UI for test management
 - [ ] Firebase Test Lab integration
 - [ ] Visual regression testing
+- [ ] Cloud device farm integration
 
 ## Troubleshooting
 

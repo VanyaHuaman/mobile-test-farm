@@ -266,6 +266,26 @@ jobs:
           npm run test:parallel:all tests/specs/login.spec.js
         continue-on-error: false
 
+      - name: Generate Allure Report
+        if: always()
+        run: npm run report:generate
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 30
+
+      - name: Upload Allure Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results/
+          retention-days: 7
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -273,9 +293,18 @@ jobs:
           name: test-results
           path: |
             screenshots/
+            videos/
             *.log
             config/devices.json
           retention-days: 30
+
+      - name: Upload Videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: videos/
+          retention-days: 14
 
       - name: Upload Appium logs
         if: always()
@@ -311,4 +340,14 @@ jobs:
           if [ -d "screenshots" ]; then
             echo "### Screenshots" >> $GITHUB_STEP_SUMMARY
             echo "Screenshots available in artifacts" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -d "videos" ]; then
+            echo "### Videos" >> $GITHUB_STEP_SUMMARY
+            echo "Test execution videos available in artifacts" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -d "allure-report" ]; then
+            echo "### Allure Report" >> $GITHUB_STEP_SUMMARY
+            echo "HTML test report available in artifacts" >> $GITHUB_STEP_SUMMARY
           fi

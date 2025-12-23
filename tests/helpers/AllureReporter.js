@@ -40,6 +40,20 @@ class AllureReporter {
   }
 
   /**
+   * Attach a video to the report
+   * @param {string} name - Video name
+   * @param {string|Buffer} video - Video path or buffer
+   */
+  static attachVideo(name, video) {
+    if (typeof video === 'string' && fs.existsSync(video)) {
+      const buffer = fs.readFileSync(video);
+      allure.addAttachment(name, buffer, 'video/mp4');
+    } else if (Buffer.isBuffer(video)) {
+      allure.addAttachment(name, video, 'video/mp4');
+    }
+  }
+
+  /**
    * Attach text log to the report
    * @param {string} name - Log name
    * @param {string} content - Log content

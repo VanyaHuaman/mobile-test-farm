@@ -65,6 +65,15 @@ const config = {
     path: process.env.SCREENSHOTS_PATH || path.join(__dirname, '../screenshots'),
   },
 
+  // Video Recording Settings
+  videos: {
+    enabled: process.env.VIDEOS_ENABLED === 'true',
+    onFailure: process.env.VIDEOS_ON_FAILURE !== 'false',  // Record only on failure (default)
+    quality: process.env.VIDEO_QUALITY || 'medium',        // low, medium, high
+    path: process.env.VIDEOS_PATH || path.join(__dirname, '../videos'),
+    maxVideos: parseInt(process.env.MAX_VIDEOS || '10', 10), // Keep last N videos
+  },
+
   // Logging Settings
   logging: {
     level: process.env.LOG_LEVEL || 'info',
