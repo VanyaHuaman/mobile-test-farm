@@ -5,7 +5,12 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+
+// Simple UUID v4 generator (no external dependencies)
+function uuidv4() {
+  return crypto.randomUUID();
+}
 
 class TestRunner {
   constructor(io) {
