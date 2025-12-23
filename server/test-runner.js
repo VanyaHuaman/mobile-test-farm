@@ -125,15 +125,15 @@ class TestRunner {
     console.log(`Executing: ${command} ${args.join(' ')}`);
 
     // Spawn process
-    const process = spawn(command, args, {
+    const childProcess = spawn(command, args, {
       cwd: projectRoot,
       env: { ...process.env, ...config.env },
     });
 
-    this.activeProcesses.set(runId, process);
+    this.activeProcesses.set(runId, childProcess);
 
     // Capture stdout
-    process.stdout.on('data', (data) => {
+    childProcess.stdout.on('data', (data) => {
       const output = data.toString();
       testRun.output.push({
         type: 'stdout',
@@ -150,7 +150,7 @@ class TestRunner {
     });
 
     // Capture stderr
-    process.stderr.on('data', (data) => {
+    childProcess.stderr.on('data', (data) => {
       const output = data.toString();
       testRun.output.push({
         type: 'stderr',
@@ -167,7 +167,7 @@ class TestRunner {
     });
 
     // Handle process completion
-    process.on('close', (code) => {
+    childProcess.on('close', (code) => {
       testRun.status = code === 0 ? 'passed' : 'failed';
       testRun.endTime = new Date();
       testRun.duration = testRun.endTime - testRun.startTime;
@@ -182,7 +182,7 @@ class TestRunner {
     });
 
     // Handle process errors
-    process.on('error', (error) => {
+    childProcess.on('error', (error) => {
       testRun.status = 'error';
       testRun.endTime = new Date();
       testRun.duration = testRun.endTime - testRun.startTime;
@@ -210,10 +210,10 @@ class TestRunner {
       return null;
     }
 
-    const process = this.activeProcesses.get(runId);
+    const childProcess = this.activeProcesses.get(runId);
 
-    if (process) {
-      process.kill('SIGTERM');
+    if (childProcess) {
+      childProcess.kill('SIGTERM');
 
       testRun.status = 'stopped';
       testRun.endTime = new Date();
