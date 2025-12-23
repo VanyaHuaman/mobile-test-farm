@@ -55,5 +55,7 @@ appium.log
 # Environment
 .env
 .env.local
+
+# Allow specific lib files
 !lib/device-manager.js
-.env
+!lib/parallel-runner.js
