@@ -416,6 +416,7 @@ function showTestOutput(test) {
   const sectionEl = document.getElementById('test-output-section');
   const infoEl = document.getElementById('test-info');
   const outputEl = document.getElementById('test-output');
+  const stopBtn = document.getElementById('stop-test-btn');
 
   infoEl.innerHTML = `
     <strong>${test.suiteName}</strong> •
@@ -425,6 +426,7 @@ function showTestOutput(test) {
 
   outputEl.textContent = '';
   sectionEl.style.display = 'block';
+  stopBtn.style.display = 'inline-block'; // Show stop button when test starts
 
   // Scroll to output
   sectionEl.scrollIntoView({ behavior: 'smooth' });
@@ -438,6 +440,7 @@ function appendTestOutput(text) {
 
 function showTestCompletion(test) {
   const infoEl = document.getElementById('test-info');
+  const stopBtn = document.getElementById('stop-test-btn');
   const statusColor = test.status === 'passed' ? 'var(--success)' : 'var(--danger)';
 
   infoEl.innerHTML = `
@@ -445,6 +448,9 @@ function showTestCompletion(test) {
     Duration: ${formatDuration(test.duration)} •
     Status: <span style="color: ${statusColor}">${test.status.toUpperCase()}</span>
   `;
+
+  // Hide stop button when test completes
+  stopBtn.style.display = 'none';
 }
 
 async function stopCurrentTest() {
