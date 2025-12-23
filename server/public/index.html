@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Test Farm - Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <h1 class="logo">Mobile Test Farm</h1>
+        <div class="header-stats">
+          <div class="stat">
+            <span class="stat-label">Devices</span>
+            <span class="stat-value" id="device-count">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Active Tests</span>
+            <span class="stat-value" id="active-tests">0</span>
+          </div>
+          <div class="stat status-indicator">
+            <span class="status-dot" id="server-status"></span>
+            <span class="stat-label">Server</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="container">
+      <!-- Navigation Tabs -->
+      <nav class="tabs">
+        <button class="tab active" data-tab="devices">Devices</button>
+        <button class="tab" data-tab="tests">Run Tests</button>
+        <button class="tab" data-tab="results">Test Results</button>
+        <button class="tab" data-tab="reports">Reports</button>
+      </nav>
+
+      <!-- Devices Tab -->
+      <section id="devices-tab" class="tab-content active">
+        <div class="section-header">
+          <h2>Device Management</h2>
+          <div class="button-group">
+            <button class="btn btn-secondary" onclick="discoverDevices()">
+              <span class="icon">🔍</span> Discover Devices
+            </button>
+            <button class="btn btn-primary" onclick="showRegisterModal()">
+              <span class="icon">➕</span> Register Device
+            </button>
+          </div>
+        </div>
+
+        <div id="devices-loading" class="loading">Loading devices...</div>
+        <div id="devices-error" class="error" style="display: none;"></div>
+        <div id="devices-list" class="devices-grid"></div>
+        <div id="devices-empty" class="empty-state" style="display: none;">
+          <div class="empty-icon">📱</div>
+          <h3>No Devices Registered</h3>
+          <p>Get started by discovering and registering your connected devices</p>
+          <button class="btn btn-primary" onclick="discoverDevices()">Discover Devices</button>
+        </div>
+      </section>
+
+      <!-- Tests Tab -->
+      <section id="tests-tab" class="tab-content">
+        <div class="section-header">
+          <h2>Run Test Suite</h2>
+        </div>
+
+        <div class="test-runner-form">
+          <div class="form-group">
+            <label for="test-suite">Select Test Suite</label>
+            <select id="test-suite" class="form-control">
+              <option value="">Loading test suites...</option>
+            </select>
+            <div class="form-help" id="suite-description"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="test-devices">Select Devices</label>
+            <div id="test-devices" class="checkbox-group"></div>
+            <div class="form-help">Select devices to run tests on (leave empty for default device)</div>
+          </div>
+
+          <button class="btn btn-success btn-lg" onclick="runTests()" id="run-tests-btn">
+            <span class="icon">▶️</span> Run Tests
+          </button>
+        </div>
+
+        <div id="test-output-section" style="display: none;">
+          <h3>Test Execution</h3>
+          <div class="test-output-header">
+            <div class="test-info" id="test-info"></div>
+            <button class="btn btn-danger btn-sm" onclick="stopCurrentTest()">
+              <span class="icon">⏹</span> Stop Test
+            </button>
+          </div>
+          <div class="terminal" id="test-output"></div>
+        </div>
+      </section>
+
+      <!-- Results Tab -->
+      <section id="results-tab" class="tab-content">
+        <div class="section-header">
+          <h2>Test Results</h2>
+          <button class="btn btn-secondary" onclick="loadTestRuns()">
+            <span class="icon">🔄</span> Refresh
+          </button>
+        </div>
+
+        <div id="results-loading" class="loading">Loading test results...</div>
+        <div id="results-list" class="results-list"></div>
+        <div id="results-empty" class="empty-state" style="display: none;">
+          <div class="empty-icon">📊</div>
+          <h3>No Test Results Yet</h3>
+          <p>Run your first test to see results here</p>
+        </div>
+      </section>
+
+      <!-- Reports Tab -->
+      <section id="reports-tab" class="tab-content">
+        <div class="section-header">
+          <h2>Test Reports & Artifacts</h2>
+        </div>
+
+        <div class="reports-grid">
+          <div class="report-card">
+            <div class="report-icon">📈</div>
+            <h3>Allure Report</h3>
+            <p>Comprehensive test report with charts and history</p>
+            <a href="/reports/latest" target="_blank" class="btn btn-primary">View Report</a>
+          </div>
+
+          <div class="report-card">
+            <div class="report-icon">📸</div>
+            <h3>Screenshots</h3>
+            <p id="screenshot-count">Loading...</p>
+            <button class="btn btn-secondary" onclick="viewArtifacts('screenshots')">View Screenshots</button>
+          </div>
+
+          <div class="report-card">
+            <div class="report-icon">🎥</div>
+            <h3>Video Recordings</h3>
+            <p id="video-count">Loading...</p>
+            <button class="btn btn-secondary" onclick="viewArtifacts('videos')">View Videos</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Register Device Modal -->
+  <div id="register-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Register New Device</h2>
+        <button class="modal-close" onclick="closeRegisterModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="register-form" onsubmit="registerDevice(event)">
+          <div class="form-group">
+            <label for="register-friendly-name">Friendly Name *</label>
+            <input type="text" id="register-friendly-name" class="form-control" required
+              placeholder="e.g., Lenovo 11-inch Tablet">
+          </div>
+
+          <div class="form-group">
+            <label for="register-device-id">Device ID *</label>
+            <input type="text" id="register-device-id" class="form-control" required
+              placeholder="e.g., emulator-5554 or ZY223K7LXM">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="register-platform">Platform *</label>
+              <select id="register-platform" class="form-control" required>
+                <option value="">Select platform...</option>
+                <option value="android">Android</option>
+                <option value="ios">iOS</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="register-type">Type *</label>
+              <select id="register-type" class="form-control" required>
+                <option value="">Select type...</option>
+                <option value="emulator">Emulator</option>
+                <option value="simulator">Simulator</option>
+                <option value="physical">Physical Device</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="register-model">Model</label>
+              <input type="text" id="register-model" class="form-control" placeholder="e.g., Pixel 64">
+            </div>
+
+            <div class="form-group">
+              <label for="register-os-version">OS Version</label>
+              <input type="text" id="register-os-version" class="form-control" placeholder="e.g., Android 14">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="register-notes">Notes</label>
+            <textarea id="register-notes" class="form-control" rows="3"
+              placeholder="Optional notes about this device"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeRegisterModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Register Device</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discovered Devices Modal -->
+  <div id="discovered-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Discovered Devices</h2>
+        <button class="modal-close" onclick="closeDiscoveredModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="discovered-devices-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Artifacts Modal -->
+  <div id="artifacts-modal" class="modal">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="artifacts-title">Artifacts</h2>
+        <button class="modal-close" onclick="closeArtifactsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="artifacts-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

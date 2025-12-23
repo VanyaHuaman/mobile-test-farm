@@ -23,8 +23,29 @@ Automated mobile device testing infrastructure for running tests across multiple
 ✅ **Multi-Platform Notifications** - Slack, Teams, Discord, Email, Custom Webhooks
 ✅ **Test Retry Logic** - Automatic retry for failed tests with configurable attempts
 ✅ **Nightly Test Runs** - Scheduled daily test execution via GitHub Actions
+✅ **Web Dashboard** - User-friendly web UI for device management and test execution
 
 ## Quick Start
+
+### Option 1: Web Dashboard (Recommended for Teams)
+
+```bash
+# Start the dashboard server
+npm run dashboard
+```
+
+Open your browser to: **http://localhost:3000**
+
+The web dashboard provides:
+- Visual device management
+- One-click test execution
+- Real-time test output
+- Results browser
+- No command-line knowledge required
+
+See [Web Dashboard Guide](docs/web-dashboard.md) for detailed instructions.
+
+### Option 2: Command Line
 
 ### 1. Install Dependencies
 
@@ -258,6 +279,10 @@ npm run appium                   # Start Appium server
 
 # Quick Wins
 npm run notify:test              # Test notification configuration
+
+# Web Dashboard
+npm run dashboard                # Start web dashboard server (http://localhost:3000)
+npm run dashboard:dev            # Start dashboard with auto-reload (requires nodemon)
 ```
 
 ## Quick Wins
@@ -339,6 +364,7 @@ npx expo run:ios
 
 ## Documentation
 
+- **[Web Dashboard Guide](docs/web-dashboard.md)** - User-friendly web UI for test management
 - **[Quick Wins Guide](docs/quick-wins.md)** - Multi-platform notifications, test retry, nightly runs
 - **[Test Suites Guide](docs/test-suites.md)** - Comprehensive test suite documentation
 - **[Video Recording Guide](docs/video-recording.md)** - Automatic video recording for debugging
@@ -403,6 +429,16 @@ npx expo run:ios
 - ✅ Nightly test runs via GitHub Actions (scheduled + manual)
 - ✅ Test summary reports with aggregated results
 
+**Web Dashboard:**
+- ✅ Express.js server with REST API
+- ✅ Socket.IO for real-time updates
+- ✅ Modern responsive web UI
+- ✅ Device management interface
+- ✅ One-click test execution
+- ✅ Live test output streaming
+- ✅ Results browser
+- ✅ Report and artifact viewing
+
 **Test Application:**
 - ✅ Expo Router + React Native New Architecture
 - ✅ Cross-platform app (Android & iOS)
@@ -436,7 +472,16 @@ npx expo run:ios
 - ✅ Nightly test runs via GitHub Actions
 - ✅ Test summary reports
 
-### Phase 9: Next Steps (Optional)
+### Phase 9: Web Dashboard ✅ COMPLETE
+- ✅ Express.js server with REST API and WebSocket
+- ✅ Modern responsive web UI (HTML/CSS/JavaScript)
+- ✅ Device management interface (discover, register, remove)
+- ✅ Test execution interface (select suites/devices, run tests)
+- ✅ Real-time test output streaming
+- ✅ Test results browser
+- ✅ Reports and artifacts viewing
+
+### Phase 10: Next Steps (Optional)
 - [ ] Performance metrics collection
 - [ ] Web UI for test management
 - [ ] Firebase Test Lab integration
@@ -496,6 +541,6 @@ For issues and questions:
 
 ---
 
-**Version:** 3.0.0
-**Status:** Phases 1-8 Complete (Android, iOS, Parallel Testing, CI/CD, Reporting, Quick Wins)
+**Version:** 4.0.0
+**Status:** Phases 1-9 Complete (Android, iOS, Parallel Testing, CI/CD, Reporting, Quick Wins, Web Dashboard)
 **Last Updated:** December 2025
