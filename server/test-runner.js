@@ -110,13 +110,20 @@ class TestRunner {
    */
   _executeTest(runId, suite, devices, config) {
     const testRun = this.testRuns.get(runId);
+    const executionMode = config.executionMode || 'sequential';
 
-    // If multiple devices, run tests sequentially on each device
-    if (devices.length > 1 && devices[0] !== 'default') {
-      this._executeMultiDeviceTest(runId, suite, devices, config, 0);
-    } else {
-      // Single device execution
+    // Single device or default
+    if (devices.length <= 1 || devices[0] === 'default') {
       this._executeSingleDeviceTest(runId, suite, devices, config);
+      return;
+    }
+
+    // Multiple devices - check execution mode
+    if (executionMode === 'parallel') {
+      this._executeParallelTest(runId, suite, devices, config);
+    } else {
+      // Sequential execution (default)
+      this._executeMultiDeviceTest(runId, suite, devices, config, 0);
     }
   }
 
@@ -328,6 +335,123 @@ class TestRunner {
   }
 
   /**
+   * Execute tests in parallel across multiple devices
+   */
+  _executeParallelTest(runId, suite, devices, config) {
+    const testRun = this.testRuns.get(runId);
+    const projectRoot = path.join(__dirname, '..');
+
+    console.log(`Starting parallel execution on ${devices.length} devices`);
+
+    // Add header to output
+    const header = `\n${'='.repeat(70)}\nParallel Test Execution on ${devices.length} devices\n${'='.repeat(70)}\n`;
+    testRun.output.push({
+      type: 'stdout',
+      timestamp: new Date(),
+      text: header,
+    });
+    this.io.emit('test:output', {
+      runId,
+      type: 'stdout',
+      text: header,
+    });
+
+    // Spawn a process for each device
+    const processes = [];
+    const deviceResults = new Map();
+
+    devices.forEach((device, index) => {
+      const command = 'npm';
+      const args = ['run', suite.script, '--', device];
+
+      console.log(`[${index + 1}/${devices.length}] Spawning: ${command} ${args.join(' ')}`);
+
+      const childProcess = spawn(command, args, {
+        cwd: projectRoot,
+        env: { ...process.env, ...config.env },
+      });
+
+      processes.push({ device, process: childProcess, index });
+      deviceResults.set(device, { status: 'running', output: [] });
+
+      // Capture stdout with device prefix
+      childProcess.stdout.on('data', (data) => {
+        const output = data.toString();
+        const prefixedOutput = `[${device}] ${output}`;
+
+        testRun.output.push({
+          type: 'stdout',
+          timestamp: new Date(),
+          text: prefixedOutput,
+        });
+
+        this.io.emit('test:output', {
+          runId,
+          type: 'stdout',
+          text: prefixedOutput,
+        });
+
+        deviceResults.get(device).output.push(output);
+      });
+
+      // Capture stderr with device prefix
+      childProcess.stderr.on('data', (data) => {
+        const output = data.toString();
+        const prefixedOutput = `[${device}] ${output}`;
+
+        testRun.output.push({
+          type: 'stderr',
+          timestamp: new Date(),
+          text: prefixedOutput,
+        });
+
+        this.io.emit('test:output', {
+          runId,
+          type: 'stderr',
+          text: prefixedOutput,
+        });
+      });
+
+      // Handle process completion
+      childProcess.on('close', (code) => {
+        deviceResults.get(device).status = code === 0 ? 'passed' : 'failed';
+        deviceResults.get(device).exitCode = code;
+
+        console.log(`[${index + 1}/${devices.length}] Device ${device} completed with code ${code}`);
+
+        // Check if all processes have completed
+        const allCompleted = Array.from(deviceResults.values()).every(r => r.status !== 'running');
+
+        if (allCompleted) {
+          // All tests finished
+          const allPassed = Array.from(deviceResults.values()).every(r => r.status === 'passed');
+
+          testRun.status = allPassed ? 'passed' : 'failed';
+          testRun.endTime = new Date();
+          testRun.duration = testRun.endTime - testRun.startTime;
+          testRun.deviceResults = Object.fromEntries(deviceResults);
+
+          this.activeProcesses.delete(runId);
+          this.io.emit('test:completed', testRun);
+
+          console.log(`Parallel test run ${runId} completed - ${allPassed ? 'PASSED' : 'FAILED'}`);
+        }
+      });
+
+      // Handle process errors
+      childProcess.on('error', (error) => {
+        deviceResults.get(device).status = 'error';
+        deviceResults.get(device).error = error.message;
+
+        console.error(`[${index + 1}/${devices.length}] Device ${device} error:`, error);
+      });
+    });
+
+    // Store all processes
+    this.activeProcesses.set(runId, { type: 'parallel', processes });
+  }
+
+  /**
    * Stop a running test
    */
   stopTest(runId) {
@@ -337,10 +461,20 @@ class TestRunner {
       return null;
     }
 
-    const childProcess = this.activeProcesses.get(runId);
+    const activeProcess = this.activeProcesses.get(runId);
 
-    if (childProcess) {
-      childProcess.kill('SIGTERM');
+    if (activeProcess) {
+      // Check if it's a parallel execution with multiple processes
+      if (activeProcess.type === 'parallel' && activeProcess.processes) {
+        // Kill all parallel processes
+        activeProcess.processes.forEach(({ process, device }) => {
+          process.kill('SIGTERM');
+          console.log(`Stopped parallel test on device: ${device}`);
+        });
+      } else {
+        // Single process
+        activeProcess.kill('SIGTERM');
+      }
 
       testRun.status = 'stopped';
       testRun.endTime = new Date();

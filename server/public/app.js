@@ -379,6 +379,8 @@ async function runTests() {
   const suite = document.getElementById('test-suite').value;
   const deviceCheckboxes = document.querySelectorAll('input[name="test-device"]:checked');
   const devices = Array.from(deviceCheckboxes).map(cb => cb.value);
+  const executionModeEl = document.querySelector('input[name="execution-mode"]:checked');
+  const executionMode = executionModeEl ? executionModeEl.value : 'sequential';
 
   if (!suite) {
     alert('Please select a test suite');
@@ -389,7 +391,13 @@ async function runTests() {
     const response = await fetch(`${API_BASE}/tests/run`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ suite, devices }),
+      body: JSON.stringify({
+        suite,
+        devices,
+        config: {
+          executionMode,
+        },
+      }),
     });
 
     const data = await response.json();

@@ -87,6 +87,21 @@
             <div class="form-help">Select devices to run tests on (leave empty for default device)</div>
           </div>
 
+          <div class="form-group">
+            <label for="execution-mode">Execution Mode (when multiple devices selected)</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="execution-mode" value="sequential" checked>
+                <span>Sequential - Run tests one device at a time (clear output)</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="execution-mode" value="parallel">
+                <span>Parallel - Run tests on all devices simultaneously (faster)</span>
+              </label>
+            </div>
+            <div class="form-help">Sequential provides clearer output; Parallel is faster but output is mixed</div>
+          </div>
+
           <button class="btn btn-success btn-lg" onclick="runTests()" id="run-tests-btn">
             <span class="icon">▶️</span> Run Tests
           </button>
