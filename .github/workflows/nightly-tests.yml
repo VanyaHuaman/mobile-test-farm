@@ -1,0 +1,263 @@
+name: Nightly Test Suite
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day (cron: minute hour day month weekday)
+    - cron: '0 2 * * *'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - login
+          - form
+          - list
+          - profile
+          - navigation
+
+jobs:
+  nightly-tests:
+    name: Nightly Test Execution
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Install Android SDK components
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          sdkmanager --install "emulator" "system-images;android-34;google_apis;arm64-v8a"
+
+      - name: Create Android AVD
+        run: |
+          avdmanager create avd \
+            --name test_emulator \
+            --package "system-images;android-34;google_apis;arm64-v8a" \
+            --device "pixel_6" \
+            --force
+
+      - name: Start Android Emulator
+        run: |
+          nohup $ANDROID_HOME/emulator/emulator \
+            -avd test_emulator \
+            -no-snapshot-save \
+            -no-window \
+            -no-audio \
+            -no-boot-anim \
+            -gpu swiftshader_indirect \
+            -camera-back none \
+            -camera-front none \
+            > emulator.log 2>&1 &
+
+          $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+          $ANDROID_HOME/platform-tools/adb devices
+
+      - name: Set up iOS Simulator
+        run: |
+          SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone 16 Pro" | head -1 | grep -o -E '[0-9A-F-]{36}')
+
+          if [ -z "$SIMULATOR_UDID" ]; then
+            SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -o -E '[0-9A-F-]{36}')
+          fi
+
+          xcrun simctl boot "$SIMULATOR_UDID" || true
+
+          for i in {1..30}; do
+            if xcrun simctl list | grep "$SIMULATOR_UDID" | grep -q "Booted"; then
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Install Appium and drivers
+        run: |
+          npm install -g appium@3.1.2
+          appium driver install uiautomator2@6.7.5
+          appium driver install xcuitest@10.12.2
+
+      - name: Start Appium server
+        run: |
+          nohup appium > appium.log 2>&1 &
+
+          for i in {1..30}; do
+            if curl -s http://localhost:4723/status > /dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Checkout test app
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/expo-arch-example-app
+          path: expo-arch-example-app
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install test app dependencies
+        working-directory: expo-arch-example-app
+        run: npm install
+
+      - name: Build Android app
+        working-directory: expo-arch-example-app
+        run: |
+          npx expo prebuild --platform android --clean
+          cd android
+          ./gradlew assembleDebug
+
+          APK_PATH=$(find . -name "*.apk" -path "*/outputs/apk/debug/*" | head -1)
+          cp "$APK_PATH" ../../apps/android-debug.apk
+
+      - name: Build iOS app
+        working-directory: expo-arch-example-app
+        run: |
+          npx expo prebuild --platform ios --clean
+
+          cd ios
+          pod install
+
+          xcodebuild \
+            -workspace *.xcworkspace \
+            -scheme expoarchexampleapp \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            -destination 'generic/platform=iOS Simulator'
+
+          APP_PATH=$(find build -name "*.app" | head -1)
+          mkdir -p ../../apps
+          cp -r "$APP_PATH" ../../apps/ios-debug.app
+
+      - name: Create apps directory
+        run: mkdir -p apps
+
+      - name: Update test configuration
+        run: |
+          cat > .env << EOF
+          ANDROID_APP_DEBUG=./apps/android-debug.apk
+          IOS_APP_SIMULATOR=./apps/ios-debug.app
+          NOTIFICATIONS_ENABLED=true
+          SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}
+          TEST_RETRY_ENABLED=true
+          TEST_MAX_RETRIES=2
+          EOF
+
+      - name: Discover and register devices
+        run: |
+          npm run devices:sync
+
+          node -e "
+          const DeviceManager = require('./lib/device-manager');
+          const manager = new DeviceManager();
+
+          const androidDevices = manager.discoverAndroidDevices();
+          if (androidDevices.length > 0) {
+            const device = androidDevices[0];
+            try {
+              manager.registerDevice('ci-android-emulator', {
+                friendlyName: 'CI Android Emulator',
+                deviceId: device.deviceId,
+                platform: 'android',
+                type: 'emulator',
+                model: device.model,
+                osVersion: 'Android 14',
+                notes: 'GitHub Actions Nightly Tests'
+              });
+            } catch (e) {}
+          }
+
+          const iosDevices = manager.discoverIOSSimulators();
+          if (iosDevices.length > 0) {
+            const device = iosDevices[0];
+            try {
+              manager.registerDevice('ci-ios-simulator', {
+                friendlyName: 'CI iOS Simulator',
+                deviceId: device.deviceId,
+                platform: 'ios',
+                type: 'simulator',
+                model: device.model,
+                osVersion: device.osVersion,
+                notes: 'GitHub Actions Nightly Tests'
+              });
+            } catch (e) {}
+          }
+          "
+
+      - name: Run nightly test suite
+        run: |
+          if [ "${{ github.event.inputs.test_suite }}" == "all" ] || [ -z "${{ github.event.inputs.test_suite }}" ]; then
+            echo "Running all test suites..."
+            npm run test:suite:all
+          else
+            echo "Running ${{ github.event.inputs.test_suite }} test suite..."
+            npm run test:${{ github.event.inputs.test_suite }}
+          fi
+        continue-on-error: false
+
+      - name: Generate Allure Report
+        if: always()
+        run: npm run report:generate
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-allure-report
+          path: allure-report/
+          retention-days: 30
+
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-test-artifacts
+          path: |
+            screenshots/
+            videos/
+            *.log
+          retention-days: 14
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Nightly Test Suite Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered**: Nightly Schedule (2 AM UTC)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Runner**: macOS 14" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node.js**: ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY

@@ -30,7 +30,8 @@
     "devices": "node bin/devices.js",
     "devices:list": "node bin/devices.js list",
     "devices:sync": "node bin/devices.js sync",
-    "devices:register": "node bin/devices.js register"
+    "devices:register": "node bin/devices.js register",
+    "notify:test": "node bin/test-notification.js"
   },
   "bin": {
     "devices": "./bin/devices.js"
