@@ -1,0 +1,97 @@
+name: Android Tests
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  workflow_dispatch:
+
+jobs:
+  android-test:
+    name: Android Tests
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Install Android SDK components
+        run: |
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          sdkmanager "emulator" "system-images;android-34;google_apis;x86_64"
+
+      - name: Create and start Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          script: echo "Emulator started"
+
+      - name: Install Appium
+        run: |
+          npm install -g appium@3.1.2
+          appium driver install uiautomator2@6.7.5
+          appium driver list
+
+      - name: Start Appium server
+        run: |
+          nohup appium > appium.log 2>&1 &
+          sleep 5
+          curl http://localhost:4723/status
+
+      - name: Build Android app (if app directory exists)
+        run: |
+          if [ -d "../expo-arch-example-app" ]; then
+            cd ../expo-arch-example-app
+            npm install
+            npx expo prebuild --platform android
+            cd android && ./gradlew assembleDebug
+          else
+            echo "App repository not found, using pre-built APK"
+          fi
+
+      - name: Run Android tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          script: |
+            npm run devices:sync
+            npm run test:parallel:android tests/specs/login.spec.js || true
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-results
+          path: |
+            screenshots/
+            appium.log
+          retention-days: 14

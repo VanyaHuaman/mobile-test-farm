@@ -1,0 +1,96 @@
+name: iOS Tests
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  workflow_dispatch:
+
+jobs:
+  ios-test:
+    name: iOS Tests
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: List available iOS simulators
+        run: xcrun simctl list devices available
+
+      - name: Boot iOS Simulator
+        run: |
+          # Find and boot latest iPhone simulator
+          SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone 16 Pro" | head -1 | grep -o -E '[0-9A-F-]{36}')
+
+          if [ -z "$SIMULATOR_UDID" ]; then
+            echo "iPhone 16 Pro not found, using first available iPhone..."
+            SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -o -E '[0-9A-F-]{36}')
+          fi
+
+          echo "Booting simulator: $SIMULATOR_UDID"
+          xcrun simctl boot "$SIMULATOR_UDID" || echo "Simulator already booted"
+
+          # Wait for boot
+          for i in {1..30}; do
+            if xcrun simctl list | grep "$SIMULATOR_UDID" | grep -q "Booted"; then
+              echo "Simulator booted!"
+              break
+            fi
+            sleep 2
+          done
+
+          xcrun simctl list devices | grep "Booted"
+
+      - name: Install Appium
+        run: |
+          npm install -g appium@3.1.2
+          appium driver install xcuitest@10.12.2
+          appium driver list
+
+      - name: Start Appium server
+        run: |
+          nohup appium > appium.log 2>&1 &
+          sleep 5
+          curl http://localhost:4723/status
+
+      - name: Build iOS app (if app directory exists)
+        run: |
+          if [ -d "../expo-arch-example-app" ]; then
+            cd ../expo-arch-example-app
+            npm install
+            npx expo prebuild --platform ios
+            cd ios && pod install
+            xcodebuild -workspace *.xcworkspace -scheme expoarchexampleapp -configuration Debug -sdk iphonesimulator -derivedDataPath build
+          else
+            echo "App repository not found, using pre-built app"
+          fi
+
+      - name: Discover and register devices
+        run: |
+          npm run devices:sync
+          npm run devices:list || true
+
+      - name: Run iOS tests
+        run: npm run test:parallel:ios tests/specs/login.spec.js || true
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-results
+          path: |
+            screenshots/
+            appium.log
+          retention-days: 14

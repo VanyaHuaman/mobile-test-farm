@@ -1,0 +1,314 @@
+name: Mobile Test Farm CI
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Mobile Tests
+    runs-on: macos-14
+    timeout-minutes: 45
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Install Android SDK components
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          sdkmanager --install "emulator" "system-images;android-34;google_apis;arm64-v8a"
+
+      - name: Create Android AVD
+        run: |
+          echo "Creating AVD..."
+          avdmanager create avd \
+            --name test_emulator \
+            --package "system-images;android-34;google_apis;arm64-v8a" \
+            --device "pixel_6" \
+            --force
+
+      - name: Start Android Emulator
+        run: |
+          echo "Starting Android emulator..."
+          nohup $ANDROID_HOME/emulator/emulator \
+            -avd test_emulator \
+            -no-snapshot-save \
+            -no-window \
+            -no-audio \
+            -no-boot-anim \
+            -gpu swiftshader_indirect \
+            -camera-back none \
+            -camera-front none \
+            > emulator.log 2>&1 &
+
+          echo "Waiting for emulator to boot..."
+          $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+
+          echo "Emulator ready!"
+          $ANDROID_HOME/platform-tools/adb devices
+
+      - name: Set up iOS Simulator
+        run: |
+          echo "Available iOS Simulators:"
+          xcrun simctl list devices available
+
+          # Boot iPhone 16 Pro if available, otherwise latest iPhone
+          SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone 16 Pro" | head -1 | grep -o -E '[0-9A-F-]{36}')
+
+          if [ -z "$SIMULATOR_UDID" ]; then
+            echo "iPhone 16 Pro not found, using latest iPhone..."
+            SIMULATOR_UDID=$(xcrun simctl list devices available | grep "iPhone" | head -1 | grep -o -E '[0-9A-F-]{36}')
+          fi
+
+          echo "Booting simulator: $SIMULATOR_UDID"
+          xcrun simctl boot "$SIMULATOR_UDID" || true
+
+          # Wait for simulator to boot
+          for i in {1..30}; do
+            if xcrun simctl list | grep "$SIMULATOR_UDID" | grep -q "Booted"; then
+              echo "Simulator booted successfully!"
+              break
+            fi
+            echo "Waiting for simulator to boot... ($i/30)"
+            sleep 2
+          done
+
+          echo "Active simulators:"
+          xcrun simctl list devices | grep "Booted"
+
+      - name: Install Appium and drivers
+        run: |
+          echo "Installing Appium..."
+          npm install -g appium@3.1.2
+
+          echo "Installing Appium drivers..."
+          appium driver install uiautomator2@6.7.5
+          appium driver install xcuitest@10.12.2
+
+          echo "Verifying Appium installation..."
+          appium driver list
+
+      - name: Start Appium server
+        run: |
+          echo "Starting Appium server..."
+          nohup appium > appium.log 2>&1 &
+
+          # Wait for Appium to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:4723/status > /dev/null 2>&1; then
+              echo "Appium server is ready!"
+              break
+            fi
+            echo "Waiting for Appium server... ($i/30)"
+            sleep 1
+          done
+
+          # Verify Appium is running
+          curl http://localhost:4723/status || (cat appium.log && exit 1)
+
+      - name: Checkout test app repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/expo-arch-example-app
+          path: expo-arch-example-app
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install test app dependencies
+        working-directory: expo-arch-example-app
+        run: npm install
+
+      - name: Build Android test app
+        working-directory: expo-arch-example-app
+        run: |
+          echo "Building Android app..."
+          npx expo prebuild --platform android --clean
+          cd android
+          ./gradlew assembleDebug
+
+          # Copy APK to mobile-test-farm
+          APK_PATH=$(find . -name "*.apk" -path "*/outputs/apk/debug/*" | head -1)
+          echo "APK found at: $APK_PATH"
+          cp "$APK_PATH" ../../apps/android-debug.apk
+          ls -lh ../../apps/android-debug.apk
+
+      - name: Build iOS test app
+        working-directory: expo-arch-example-app
+        run: |
+          echo "Building iOS app..."
+          npx expo prebuild --platform ios --clean
+
+          cd ios
+
+          # Install pods
+          pod install
+
+          # Build for simulator
+          xcodebuild \
+            -workspace *.xcworkspace \
+            -scheme expoarchexampleapp \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            -destination 'generic/platform=iOS Simulator'
+
+          # Find and copy .app bundle
+          APP_PATH=$(find build -name "*.app" | head -1)
+          echo "App found at: $APP_PATH"
+          mkdir -p ../../apps
+          cp -r "$APP_PATH" ../../apps/ios-debug.app
+          ls -lh ../../apps/
+
+      - name: Create apps directory
+        run: mkdir -p apps
+
+      - name: Update test configuration
+        run: |
+          # Create .env file with app paths
+          cat > .env << EOF
+          ANDROID_APP_DEBUG=./apps/android-debug.apk
+          IOS_APP_SIMULATOR=./apps/ios-debug.app
+          EOF
+
+          cat .env
+
+      - name: Discover and register devices
+        run: |
+          echo "Discovering connected devices..."
+          npm run devices:sync
+
+          echo "Current devices:"
+          npm run devices:list || true
+
+          # Register Android emulator if not already registered
+          node -e "
+          const DeviceManager = require('./lib/device-manager');
+          const manager = new DeviceManager();
+
+          const androidDevices = manager.discoverAndroidDevices();
+          console.log('Android devices:', androidDevices);
+
+          if (androidDevices.length > 0) {
+            const device = androidDevices[0];
+            try {
+              manager.registerDevice('ci-android-emulator', {
+                friendlyName: 'CI Android Emulator',
+                deviceId: device.deviceId,
+                platform: 'android',
+                type: 'emulator',
+                model: device.model,
+                osVersion: 'Android 14',
+                notes: 'GitHub Actions CI emulator'
+              });
+              console.log('✅ Registered Android emulator');
+            } catch (e) {
+              console.log('Android emulator already registered or error:', e.message);
+            }
+          }
+
+          const iosDevices = manager.discoverIOSSimulators();
+          console.log('iOS devices:', iosDevices);
+
+          if (iosDevices.length > 0) {
+            const device = iosDevices[0];
+            try {
+              manager.registerDevice('ci-ios-simulator', {
+                friendlyName: 'CI iOS Simulator',
+                deviceId: device.deviceId,
+                platform: 'ios',
+                type: 'simulator',
+                model: device.model,
+                osVersion: device.osVersion,
+                notes: 'GitHub Actions CI simulator'
+              });
+              console.log('✅ Registered iOS simulator');
+            } catch (e) {
+              console.log('iOS simulator already registered or error:', e.message);
+            }
+          }
+          "
+
+          echo "Final device list:"
+          npm run devices:list
+
+      - name: Run parallel tests
+        run: |
+          echo "Running tests in parallel across all devices..."
+          npm run test:parallel:all tests/specs/login.spec.js
+        continue-on-error: false
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            screenshots/
+            *.log
+            config/devices.json
+          retention-days: 30
+
+      - name: Upload Appium logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appium-logs
+          path: appium.log
+          retention-days: 7
+
+      - name: Upload Emulator logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-logs
+          path: emulator.log
+          retention-days: 7
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Runner**: macOS 14" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node.js**: ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Appium**: 3.1.2" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Devices Tested" >> $GITHUB_STEP_SUMMARY
+          echo "- Android Emulator (Pixel 6, API 34)" >> $GITHUB_STEP_SUMMARY
+          echo "- iOS Simulator (iPhone 16 Pro)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "screenshots" ]; then
+            echo "### Screenshots" >> $GITHUB_STEP_SUMMARY
+            echo "Screenshots available in artifacts" >> $GITHUB_STEP_SUMMARY
+          fi

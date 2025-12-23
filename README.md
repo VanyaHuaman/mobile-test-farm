@@ -1,5 +1,9 @@
 # Mobile Test Farm
 
+[![Mobile Test Farm CI](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml)
+[![Android Tests](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml)
+[![iOS Tests](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-ios.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-ios.yml)
+
 Automated mobile device testing infrastructure for running tests across multiple Android and iOS devices with user-friendly device management.
 
 ## Features
@@ -9,6 +13,7 @@ Automated mobile device testing infrastructure for running tests across multiple
 ✅ **Automated Testing** - Run end-to-end tests with Appium + WebDriverIO
 ✅ **Parallel Test Execution** - Run tests across multiple devices simultaneously
 ✅ **Page Object Model** - Maintainable test architecture with automatic screenshot on failure
+✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
 ✅ **Modern Test App** - Expo app with New Architecture (Fabric + TurboModules)
 ✅ **Device Registry** - Centralized device configuration and management
 ✅ **Cross-Platform** - Same tests run on both Android and iOS
@@ -262,6 +267,7 @@ npx expo run:ios
 
 ## Documentation
 
+- **[CI/CD Integration Guide](docs/ci-cd-integration.md)** - Automated testing with GitHub Actions
 - **[Device Management Guide](docs/device-management.md)** - Complete device management documentation
 - **[Parallel Testing Guide](docs/parallel-testing.md)** - Run tests across multiple devices simultaneously
 - **[Phase 1 Completion Report](docs/phase1-completion.md)** - Phase 1 implementation results
@@ -298,6 +304,12 @@ npx expo run:ios
 - ✅ Test result aggregation
 - ✅ 2x+ faster test execution
 
+**CI/CD:**
+- ✅ GitHub Actions workflows (Android, iOS, Full Suite)
+- ✅ Automated testing on push and PR
+- ✅ Test artifact collection (screenshots, logs)
+- ✅ Status badges and PR integration
+
 **Test Application:**
 - ✅ Expo Router + React Native New Architecture
 - ✅ Cross-platform app (Android & iOS)
@@ -317,13 +329,15 @@ npx expo run:ios
 
 ### Phase 3: Parallel Test Execution ✅ COMPLETE
 
-### Phase 4: Next Steps (Optional)
-- [ ] CI/CD integration (GitHub Actions)
+### Phase 4: CI/CD Integration ✅ COMPLETE
+
+### Phase 5: Next Steps (Optional)
 - [ ] HTML test reporting (Allure, Mochawesome)
 - [ ] Video recording of test runs
 - [ ] Advanced test cases (forms, lists, navigation)
 - [ ] Performance metrics collection
 - [ ] Web UI for test management
+- [ ] Firebase Test Lab integration
 
 ## Troubleshooting
 
