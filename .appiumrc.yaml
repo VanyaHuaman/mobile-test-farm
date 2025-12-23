@@ -1,0 +1,30 @@
+# Appium 3 Server Configuration
+# This file configures the Appium server settings for mobile test automation
+
+server:
+  # Server connection settings
+  port: 4723
+  address: '0.0.0.0'
+  base-path: '/'
+
+  # Logging configuration
+  log-level: info
+  log-timestamp: true
+  local-timezone: true
+  log-no-colors: false
+
+  # Security settings
+  relaxed-security: false
+  allow-insecure: []
+  deny-insecure: []
+
+  # Session configuration
+  session-override: true  # Allow overriding sessions
+  default-capabilities: {}
+
+  # Performance settings
+  keep-alive-timeout: 600  # 10 minutes
+
+# Driver-specific configuration
+# Drivers are installed separately via: npx appium driver install <name>
+# Current installed drivers: uiautomator2, xcuitest

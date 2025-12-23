@@ -56,3 +56,4 @@ appium.log
 .env
 .env.local
 !lib/device-manager.js
+.env

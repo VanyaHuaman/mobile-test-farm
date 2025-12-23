@@ -1,21 +1,22 @@
 const { remote } = require('webdriverio');
 const DeviceManager = require('../lib/device-manager');
+const config = require('../config/test.config');
 
 // Get device from command line argument or use default
 const deviceNameOrId = process.argv[2] || 'android-emulator-1';
 
-// Platform-specific app configurations
+// Platform-specific app configurations using centralized config
 const APP_CONFIGS = {
   android: {
-    'appium:app': '/Users/vanyahuaman/expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk',
-    'appium:appPackage': 'com.vanyahuaman.expoarchexampleapp',
-    'appium:appActivity': '.MainActivity',
-    'appium:noReset': false,
+    'appium:app': config.apps.android.debug,
+    'appium:appPackage': config.appInfo.android.package,
+    'appium:appActivity': config.appInfo.android.activity,
+    'appium:noReset': config.behavior.noReset,
   },
   ios: {
-    'appium:app': '/Users/vanyahuaman/Library/Developer/Xcode/DerivedData/expoarchexampleapp-hkwwfuedzurdeibfyglrulesvlly/Build/Products/Debug-iphonesimulator/expoarchexampleapp.app',
-    'appium:bundleId': 'com.vanyahuaman.expoarchexampleapp',
-    'appium:noReset': false,
+    'appium:app': config.apps.ios.simulator,
+    'appium:bundleId': config.appInfo.ios.bundleId,
+    'appium:noReset': config.behavior.noReset,
   },
 };
 
@@ -51,12 +52,17 @@ async function runTest() {
 
   console.log('🔧 Capabilities:', JSON.stringify(capabilities, null, 2), '\n');
 
+  // Use configuration for Appium connection
   const driver = await remote({
-    hostname: 'localhost',
-    port: 4723,
-    path: '/',
+    hostname: config.appium.host,
+    port: config.appium.port,
+    path: config.appium.path,
     capabilities,
   });
+
+  // Set implicit wait timeout (Appium 3 best practice)
+  // WebDriverIO uses setTimeout for implicit waits
+  await driver.setTimeout({ implicit: config.timeouts.implicit });
 
   try {
     console.log('✅ App launched successfully');
@@ -68,34 +74,35 @@ async function runTest() {
     // Find username input (use testID for iOS, accessibilityLabel for Android)
     const usernameSelector = device.platform === 'ios' ? '~username-input' : '~Username input';
     const usernameInput = await driver.$(usernameSelector);
-    await usernameInput.waitForDisplayed({ timeout: 10000 });
+    // Implicit wait is set globally, but we can add explicit wait for critical elements
+    await usernameInput.waitForDisplayed({ timeout: config.timeouts.explicit });
     console.log('✅ Found username input');
 
-    // Enter username
-    await usernameInput.setValue('demo');
-    console.log('📝 Entered username: demo');
+    // Enter username from config
+    await usernameInput.setValue(config.testUsers.default.username);
+    console.log(`📝 Entered username: ${config.testUsers.default.username}`);
 
     // Find password input
     const passwordSelector = device.platform === 'ios' ? '~password-input' : '~Password input';
     const passwordInput = await driver.$(passwordSelector);
-    await passwordInput.waitForDisplayed({ timeout: 5000 });
+    // With implicit wait, this should be faster
     console.log('✅ Found password input');
 
-    // Enter password
-    await passwordInput.setValue('password');
+    // Enter password from config
+    await passwordInput.setValue(config.testUsers.default.password);
     console.log('📝 Entered password');
 
     // Find and click login button
     const loginButtonSelector = device.platform === 'ios' ? '~login-button' : '~Login button';
     const loginButton = await driver.$(loginButtonSelector);
-    await loginButton.waitForDisplayed({ timeout: 5000 });
+    // Implicit wait handles this automatically
     console.log('✅ Found login button');
 
     await loginButton.click();
     console.log('🔘 Clicked login button');
 
-    // Wait for navigation to home screen
-    await driver.pause(2000);
+    // Wait for navigation to home screen (reduced from 2000ms - implicit wait helps)
+    await driver.pause(1000);
 
     // Verify we're on the home screen by checking for home text
     try {
@@ -103,7 +110,8 @@ async function runTest() {
         ? await driver.$('android=new UiSelector().textContains("Home Dashboard")')
         : await driver.$('-ios predicate string:label == "Home Dashboard"');
 
-      await homeElement.waitForDisplayed({ timeout: 5000 });
+      // Use explicit timeout for verification
+      await homeElement.waitForDisplayed({ timeout: config.timeouts.explicit });
       console.log('✅ Login successful! Home screen loaded');
     } catch (error) {
       console.error('❌ Could not verify home screen:', error.message);
