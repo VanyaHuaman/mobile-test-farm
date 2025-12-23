@@ -33,6 +33,11 @@ results/
 htmlcov/
 .coverage
 
+# Allure reports
+allure-results/
+allure-report/
+.allure/
+
 # IDE
 .vscode/
 .idea/

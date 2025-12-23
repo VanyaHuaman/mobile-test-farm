@@ -18,6 +18,10 @@
     "test:parallel:ios": "node bin/parallel-test.js ios",
     "test:parallel:android": "node bin/parallel-test.js android",
     "test:parallel:help": "node bin/parallel-test.js help",
+    "report:generate": "node bin/generate-report.js",
+    "report:open": "npx allure open allure-report",
+    "report:serve": "npx allure serve allure-results",
+    "report:clean": "rm -rf allure-results allure-report",
     "devices": "node bin/devices.js",
     "devices:list": "node bin/devices.js list",
     "devices:sync": "node bin/devices.js sync",
@@ -40,6 +44,8 @@
   "homepage": "https://github.com/VanyaHuaman/mobile-test-farm#readme",
   "devDependencies": {
     "@appium/doctor": "^2.1.15",
+    "@wdio/allure-reporter": "^9.21.0",
+    "allure-commandline": "^2.36.0",
     "appium-uiautomator2-driver": "^6.7.5",
     "appium-xcuitest-driver": "^10.12.2",
     "webdriverio": "^9.21.0"

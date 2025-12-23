@@ -1,6 +1,7 @@
 const { remote } = require('webdriverio');
 const DeviceManager = require('../../lib/device-manager');
 const config = require('../../config/test.config');
+const AllureReporter = require('./AllureReporter');
 const fs = require('fs');
 const path = require('path');
 
@@ -11,6 +12,7 @@ const path = require('path');
  * - Driver initialization
  * - Screenshot on failure
  * - Device management
+ * - Allure reporting integration
  * - Common test utilities
  */
 class TestBase {
@@ -19,6 +21,7 @@ class TestBase {
     this.device = null;
     this.deviceManager = new DeviceManager();
     this.testName = '';
+    this.allure = AllureReporter;
   }
 
   /**

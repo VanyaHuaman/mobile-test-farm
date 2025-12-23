@@ -13,6 +13,7 @@ Automated mobile device testing infrastructure for running tests across multiple
 ✅ **Automated Testing** - Run end-to-end tests with Appium + WebDriverIO
 ✅ **Parallel Test Execution** - Run tests across multiple devices simultaneously
 ✅ **Page Object Model** - Maintainable test architecture with automatic screenshot on failure
+✅ **HTML Test Reports** - Beautiful Allure reports with charts and history
 ✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
 ✅ **Modern Test App** - Expo app with New Architecture (Fabric + TurboModules)
 ✅ **Device Registry** - Centralized device configuration and management
@@ -267,6 +268,7 @@ npx expo run:ios
 
 ## Documentation
 
+- **[HTML Reporting Guide](docs/html-reporting.md)** - Beautiful test reports with Allure
 - **[CI/CD Integration Guide](docs/ci-cd-integration.md)** - Automated testing with GitHub Actions
 - **[Device Management Guide](docs/device-management.md)** - Complete device management documentation
 - **[Parallel Testing Guide](docs/parallel-testing.md)** - Run tests across multiple devices simultaneously
@@ -310,6 +312,12 @@ npx expo run:ios
 - ✅ Test artifact collection (screenshots, logs)
 - ✅ Status badges and PR integration
 
+**Reporting:**
+- ✅ Allure HTML report integration
+- ✅ Rich test metadata (steps, screenshots, logs)
+- ✅ Historical trend tracking
+- ✅ Report generation and viewing scripts
+
 **Test Application:**
 - ✅ Expo Router + React Native New Architecture
 - ✅ Cross-platform app (Android & iOS)
@@ -331,13 +339,15 @@ npx expo run:ios
 
 ### Phase 4: CI/CD Integration ✅ COMPLETE
 
-### Phase 5: Next Steps (Optional)
-- [ ] HTML test reporting (Allure, Mochawesome)
+### Phase 5: HTML Test Reporting ✅ COMPLETE
+
+### Phase 6: Next Steps (Optional)
 - [ ] Video recording of test runs
 - [ ] Advanced test cases (forms, lists, navigation)
 - [ ] Performance metrics collection
 - [ ] Web UI for test management
 - [ ] Firebase Test Lab integration
+- [ ] Visual regression testing
 
 ## Troubleshooting
 
