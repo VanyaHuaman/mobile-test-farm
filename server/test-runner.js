@@ -464,6 +464,19 @@ class TestRunner {
     const activeProcess = this.activeProcesses.get(runId);
 
     if (activeProcess) {
+      // Add stop message to output
+      const stopMessage = '\n\n⏹️  Test manually stopped by user\n';
+      testRun.output.push({
+        type: 'stdout',
+        timestamp: new Date(),
+        text: stopMessage,
+      });
+      this.io.emit('test:output', {
+        runId,
+        type: 'stdout',
+        text: stopMessage,
+      });
+
       // Check if it's a parallel execution with multiple processes
       if (activeProcess.type === 'parallel' && activeProcess.processes) {
         // Kill all parallel processes

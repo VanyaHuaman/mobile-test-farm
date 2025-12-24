@@ -457,6 +457,10 @@ async function stopCurrentTest() {
   if (!currentTestRunId) return;
 
   try {
+    // Add message to output that test is being stopped
+    const stopMessage = '\n\n⏹️  Test manually stopped by user\n';
+    appendTestOutput(stopMessage);
+
     const response = await fetch(`${API_BASE}/tests/runs/${currentTestRunId}/stop`, {
       method: 'POST',
     });
@@ -465,6 +469,12 @@ async function stopCurrentTest() {
 
     if (!data.success) {
       throw new Error(data.error);
+    }
+
+    // Hide stop button after stopping
+    const stopBtn = document.getElementById('stop-test-btn');
+    if (stopBtn) {
+      stopBtn.style.display = 'none';
     }
   } catch (error) {
     alert(`Error stopping test: ${error.message}`);
