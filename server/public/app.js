@@ -250,12 +250,17 @@ async function registerSelectedDevices() {
     return;
   }
 
+  const results = {
+    success: [],
+    failed: [],
+  };
+
   for (const checkbox of checkboxes) {
     const deviceId = checkbox.value;
     const id = deviceId.replace(/[^a-z0-9]/gi, '-').toLowerCase();
 
     try {
-      await fetch(`${API_BASE}/devices/register`, {
+      const response = await fetch(`${API_BASE}/devices/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -266,13 +271,32 @@ async function registerSelectedDevices() {
           type: deviceId.includes('emulator') || deviceId.includes('simulator') ? 'emulator' : 'physical',
         }),
       });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        results.failed.push({ deviceId, error: data.error });
+      } else {
+        results.success.push(deviceId);
+      }
     } catch (error) {
-      console.error('Error registering device:', error);
+      results.failed.push({ deviceId, error: error.message });
     }
   }
 
   closeDiscoveredModal();
   loadDevices();
+
+  // Show results summary
+  if (results.failed.length > 0) {
+    const failedList = results.failed.map(f => `  • ${f.deviceId}: ${f.error}`).join('\n');
+    const message = results.success.length > 0
+      ? `✅ Registered ${results.success.length} device(s)\n\n❌ Failed to register ${results.failed.length} device(s):\n${failedList}`
+      : `❌ Failed to register devices:\n${failedList}`;
+    alert(message);
+  } else if (results.success.length > 0) {
+    alert(`✅ Successfully registered ${results.success.length} device(s)`);
+  }
 }
 
 // ============================================================================
