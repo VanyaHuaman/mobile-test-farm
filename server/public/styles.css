@@ -325,6 +325,11 @@ body {
   color: #383d41;
 }
 
+.badge-info {
+  background: #cfe2ff;
+  color: #084298;
+}
+
 /* Forms */
 .form-group {
   margin-bottom: 1.5rem;
@@ -387,6 +392,24 @@ textarea.form-control {
 
 .checkbox-label:hover {
   background: var(--bg);
+}
+
+.checkbox-label.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg);
+}
+
+.checkbox-label.disabled:hover {
+  background: var(--bg);
+}
+
+.checkbox-label.disabled input {
+  cursor: not-allowed;
+}
+
+.checkbox-label input {
+  cursor: pointer;
 }
 
 .radio-group {

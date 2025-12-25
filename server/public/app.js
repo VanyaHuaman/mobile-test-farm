@@ -190,49 +190,82 @@ async function removeDevice(deviceId) {
 
 async function discoverDevices() {
   try {
-    const response = await fetch(`${API_BASE}/devices/discover`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ platform: 'all' }),
-    });
-    const data = await response.json();
+    // Fetch both discovered and registered devices
+    const [discoveredResponse, registeredResponse] = await Promise.all([
+      fetch(`${API_BASE}/devices/discover`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: 'all' }),
+      }),
+      fetch(`${API_BASE}/devices`),
+    ]);
 
-    if (!data.success) {
-      throw new Error(data.error);
+    const discoveredData = await discoveredResponse.json();
+    const registeredData = await registeredResponse.json();
+
+    if (!discoveredData.success) {
+      throw new Error(discoveredData.error);
     }
 
-    if (data.devices.length === 0) {
+    if (discoveredData.devices.length === 0) {
       alert('No devices found. Make sure devices are connected and powered on.');
       return;
     }
 
-    showDiscoveredDevices(data.devices);
+    // Create a map of registered deviceIds for quick lookup
+    const registeredDeviceIds = new Set(
+      registeredData.devices.map(d => d.deviceId)
+    );
+
+    showDiscoveredDevices(discoveredData.devices, registeredDeviceIds);
   } catch (error) {
     alert(`Error discovering devices: ${error.message}`);
   }
 }
 
-function showDiscoveredDevices(devices) {
+function showDiscoveredDevices(devices, registeredDeviceIds) {
   const modal = document.getElementById('discovered-modal');
   const listEl = document.getElementById('discovered-devices-list');
 
+  const newDevices = devices.filter(d => !registeredDeviceIds.has(d.deviceId));
+  const alreadyRegistered = devices.filter(d => registeredDeviceIds.has(d.deviceId));
+
   listEl.innerHTML = `
-    <p>Found ${devices.length} device(s). Select devices to register:</p>
+    <p>Found ${devices.length} device(s). ${newDevices.length} available to register:</p>
     <div style="margin-top: 1rem;">
-      ${devices.map(device => `
-        <div class="checkbox-label">
-          <input type="checkbox" value="${device.deviceId}" id="disc-${device.deviceId}">
-          <div>
-            <strong>${device.model || device.deviceId}</strong><br>
-            <small>${device.platform} • ${device.deviceId}</small>
+      ${devices.map(device => {
+        const isRegistered = registeredDeviceIds.has(device.deviceId);
+        return `
+          <div class="checkbox-label ${isRegistered ? 'disabled' : ''}">
+            <input
+              type="checkbox"
+              value="${device.deviceId}"
+              id="disc-${device.deviceId}"
+              ${isRegistered ? 'disabled' : ''}
+            >
+            <div style="flex: 1;">
+              <strong>${device.model || device.deviceId}</strong>
+              ${isRegistered ? '<span class="badge badge-info" style="margin-left: 0.5rem;">Already Registered</span>' : ''}
+              <br>
+              <small>${device.platform} • ${device.deviceId}</small>
+            </div>
           </div>
-        </div>
-      `).join('')}
+        `;
+      }).join('')}
     </div>
-    <div class="form-actions">
-      <button class="btn btn-secondary" onclick="closeDiscoveredModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="registerSelectedDevices()">Register Selected</button>
-    </div>
+    ${newDevices.length > 0 ? `
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeDiscoveredModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="registerSelectedDevices()">Register Selected</button>
+      </div>
+    ` : `
+      <div class="form-actions">
+        <button class="btn btn-secondary" onclick="closeDiscoveredModal()">Close</button>
+      </div>
+      <p style="margin-top: 1rem; color: var(--text-secondary); text-align: center;">
+        All discovered devices are already registered.
+      </p>
+    `}
   `;
 
   modal.classList.add('active');
