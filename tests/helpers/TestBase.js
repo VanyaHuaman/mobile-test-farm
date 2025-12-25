@@ -39,29 +39,49 @@ class TestBase {
     console.log('🚀 Initializing test driver...');
     console.log(`📱 Target device: ${deviceNameOrId}\n`);
 
-    // Get device
-    this.device = this.deviceManager.getDevice(deviceNameOrId);
+    // Check if it's a cloud device
+    const isCloudDevice = this.deviceManager.isCloudDeviceId(deviceNameOrId);
+
+    // Get device (local or cloud)
+    this.device = isCloudDevice
+      ? this.deviceManager.getDeviceUnified(deviceNameOrId)
+      : this.deviceManager.getDevice(deviceNameOrId);
+
     if (!this.device) {
-      console.error(`❌ Device '${deviceNameOrId}' not found in registry`);
+      console.error(`❌ Device '${deviceNameOrId}' not found`);
       console.log('\n💡 Available devices:');
       this.deviceManager.printDevices();
       throw new Error(`Device '${deviceNameOrId}' not found`);
     }
 
-    console.log(`✅ Device found: ${this.device.friendlyName}`);
-    console.log(`   Platform: ${this.device.platform}`);
-    console.log(`   Type: ${this.device.type}`);
-    console.log(`   Device ID: ${this.device.deviceId}\n`);
+    if (isCloudDevice) {
+      console.log(`✅ Cloud device: ${deviceNameOrId}`);
+      console.log(`   Provider: ${this.device.provider}`);
+      console.log(`   Type: cloud\n`);
+    } else {
+      console.log(`✅ Device found: ${this.device.friendlyName}`);
+      console.log(`   Platform: ${this.device.platform}`);
+      console.log(`   Type: ${this.device.type}`);
+      console.log(`   Device ID: ${this.device.deviceId}\n`);
+    }
 
-    // Get capabilities
-    const capabilities = this.deviceManager.getCapabilities(deviceNameOrId, appConfig);
+    // Get capabilities (supports both local and cloud)
+    const capabilities = await this.deviceManager.getCapabilitiesUnified(deviceNameOrId, appConfig);
     console.log('🔧 Capabilities:', JSON.stringify(capabilities, null, 2), '\n');
+
+    // Get hub URL (local Appium or cloud provider hub)
+    const hubUrl = this.deviceManager.getHubUrl(deviceNameOrId);
+    console.log(`🌐 Hub URL: ${hubUrl}\n`);
+
+    // Parse hub URL
+    const url = new URL(hubUrl);
 
     // Create driver
     this.driver = await remote({
-      hostname: config.appium.host,
-      port: config.appium.port,
-      path: config.appium.path,
+      protocol: url.protocol.replace(':', ''),
+      hostname: url.hostname,
+      port: url.port || (url.protocol === 'https:' ? 443 : 80),
+      path: url.pathname,
       capabilities,
     });
 
