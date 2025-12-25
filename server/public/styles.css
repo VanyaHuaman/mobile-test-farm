@@ -239,6 +239,26 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+.device-card-cloud {
+  border-left: 3px solid #0ea5e9;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+}
+
+.device-section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.device-section-header h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.25rem;
+}
+
 .device-header {
   display: flex;
   justify-content: space-between;
@@ -328,6 +348,31 @@ body {
 .badge-info {
   background: #cfe2ff;
   color: #084298;
+}
+
+.badge-cloud {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.badge-browserstack {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.badge-saucelabs {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-aws {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.badge-firebase {
+  background: #fef9c3;
+  color: #854d0e;
 }
 
 /* Forms */

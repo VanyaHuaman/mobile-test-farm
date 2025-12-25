@@ -105,28 +105,69 @@ async function loadDevices() {
     listEl.innerHTML = '';
     emptyEl.style.display = 'none';
 
-    const response = await fetch(`${API_BASE}/devices`);
-    const data = await response.json();
+    // Fetch both local and cloud devices
+    const [localResponse, cloudResponse] = await Promise.all([
+      fetch(`${API_BASE}/devices`),
+      fetch(`${API_BASE}/devices/cloud`),
+    ]);
+
+    const localData = await localResponse.json();
+    const cloudData = await cloudResponse.json();
 
     loadingEl.style.display = 'none';
 
-    if (!data.success) {
-      throw new Error(data.error);
+    if (!localData.success) {
+      throw new Error(localData.error);
     }
 
-    // Update device count
-    document.getElementById('device-count').textContent = data.count;
+    const localDevices = localData.devices || [];
+    const cloudDevices = (cloudData.success && cloudData.devices) || [];
+    const totalCount = localDevices.length + cloudDevices.length;
 
-    if (data.devices.length === 0) {
+    // Update device count
+    document.getElementById('device-count').textContent = totalCount;
+
+    if (totalCount === 0) {
       emptyEl.style.display = 'block';
       return;
     }
 
-    // Render devices
-    listEl.innerHTML = data.devices.map(device => renderDeviceCard(device)).join('');
+    // Render devices with sections
+    let html = '';
+
+    // Local devices section
+    if (localDevices.length > 0) {
+      html += `
+        <div class="device-section-header">
+          <h3>Local Devices (${localDevices.length})</h3>
+        </div>
+        ${localDevices.map(device => renderDeviceCard(device)).join('')}
+      `;
+    }
+
+    // Cloud devices section
+    if (cloudDevices.length > 0) {
+      html += `
+        <div class="device-section-header" style="margin-top: 2rem;">
+          <h3>Cloud Devices (${cloudDevices.length})</h3>
+          <span class="badge badge-info">Available on Demand</span>
+        </div>
+        ${cloudDevices.slice(0, 20).map(device => renderDeviceCard(device)).join('')}
+      `;
+
+      if (cloudDevices.length > 20) {
+        html += `
+          <div class="info-message" style="margin-top: 1rem;">
+            Showing 20 of ${cloudDevices.length} cloud devices. More devices available via API.
+          </div>
+        `;
+      }
+    }
+
+    listEl.innerHTML = html;
 
     // Update test device checkboxes
-    updateTestDeviceCheckboxes(data.devices);
+    updateTestDeviceCheckboxes([...localDevices, ...cloudDevices]);
   } catch (error) {
     loadingEl.style.display = 'none';
     errorEl.textContent = `Error loading devices: ${error.message}`;
@@ -136,16 +177,19 @@ async function loadDevices() {
 
 function renderDeviceCard(device) {
   const platformIcon = device.platform === 'android' ? '🤖' : '🍎';
-  const typeIcon = device.type === 'physical' ? '📱' : device.type === 'emulator' ? '🖥️' : '💻';
+  const isCloudDevice = device.type === 'cloud';
+  const typeIcon = isCloudDevice ? '☁️' : device.type === 'physical' ? '📱' : device.type === 'emulator' ? '🖥️' : '💻';
 
   return `
-    <div class="device-card">
+    <div class="device-card ${isCloudDevice ? 'device-card-cloud' : ''}">
       <div class="device-header">
         <div class="device-icon">${platformIcon} ${typeIcon}</div>
         <div class="device-actions">
-          <button class="icon-btn" onclick="removeDevice('${device.id}')" title="Remove device">
-            🗑️
-          </button>
+          ${!isCloudDevice ? `
+            <button class="icon-btn" onclick="removeDevice('${device.id}')" title="Remove device">
+              🗑️
+            </button>
+          ` : ''}
         </div>
       </div>
       <div class="device-name">${device.friendlyName}</div>
@@ -153,13 +197,19 @@ function renderDeviceCard(device) {
         <div class="device-meta-item">
           <span class="badge badge-${device.platform}">${device.platform}</span>
           <span class="badge badge-${device.type}">${device.type}</span>
+          ${isCloudDevice && device.provider ? `<span class="badge badge-${device.provider}">${device.provider}</span>` : ''}
         </div>
         <div class="device-meta-item">
-          <strong>ID:</strong> ${device.deviceId}
+          <strong>ID:</strong> ${device.id}
         </div>
         ${device.model ? `<div class="device-meta-item"><strong>Model:</strong> ${device.model}</div>` : ''}
         ${device.osVersion ? `<div class="device-meta-item"><strong>OS:</strong> ${device.osVersion}</div>` : ''}
         ${device.notes ? `<div class="device-meta-item"><em>${device.notes}</em></div>` : ''}
+        ${isCloudDevice && device.available !== undefined ? `
+          <div class="device-meta-item">
+            <strong>Status:</strong> ${device.available ? '✅ Available' : '⏸️ Busy'}
+          </div>
+        ` : ''}
       </div>
     </div>
   `;

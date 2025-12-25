@@ -116,6 +116,81 @@ app.post('/api/devices/discover', (req, res) => {
 });
 
 /**
+ * GET /api/devices/cloud
+ * Discover cloud devices from all enabled providers
+ */
+app.get('/api/devices/cloud', async (req, res) => {
+  try {
+    const cloudDevices = await deviceManager.discoverCloudDevices();
+
+    res.json({
+      success: true,
+      count: cloudDevices.length,
+      devices: cloudDevices,
+      cloudEnabled: deviceManager.isCloudEnabled(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/devices/all
+ * Get all devices (local + cloud)
+ */
+app.get('/api/devices/all', async (req, res) => {
+  try {
+    const includeCloud = req.query.includeCloud !== 'false';
+    const allDevices = await deviceManager.listAllDevices({ includeCloud });
+
+    res.json({
+      success: true,
+      count: allDevices.length,
+      devices: allDevices,
+      cloudEnabled: deviceManager.isCloudEnabled(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * GET /api/cloud/providers
+ * Get cloud provider status
+ */
+app.get('/api/cloud/providers', (req, res) => {
+  try {
+    if (!deviceManager.isCloudEnabled()) {
+      return res.json({
+        success: true,
+        enabled: false,
+        providers: [],
+      });
+    }
+
+    const cloudManager = deviceManager.getCloudManager();
+    const providers = cloudManager.getProvidersStatus();
+
+    res.json({
+      success: true,
+      enabled: true,
+      providers,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
  * POST /api/devices/register
  * Register a new device
  */
