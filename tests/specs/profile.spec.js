@@ -2,7 +2,7 @@ const TestBase = require('../helpers/TestBase');
 const LoginPage = require('../pages/LoginPage');
 const HomePage = require('../pages/HomePage');
 const ProfilePage = require('../pages/ProfilePage');
-const AllureReporter = require('../helpers/AllureReporter');
+const AllureReporter = require('../helpers/StandaloneAllureReporter');
 const testData = require('../data/testData');
 const config = require('../../config/test.config');
 

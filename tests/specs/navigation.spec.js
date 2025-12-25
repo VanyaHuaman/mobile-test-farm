@@ -4,7 +4,7 @@ const HomePage = require('../pages/HomePage');
 const FormPage = require('../pages/FormPage');
 const ListPage = require('../pages/ListPage');
 const ProfilePage = require('../pages/ProfilePage');
-const AllureReporter = require('../helpers/AllureReporter');
+const AllureReporter = require('../helpers/StandaloneAllureReporter');
 const config = require('../../config/test.config');
 
 // Get device from command line argument or use default

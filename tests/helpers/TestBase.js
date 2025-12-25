@@ -1,7 +1,7 @@
 const { remote } = require('webdriverio');
 const DeviceManager = require('../../lib/device-manager');
 const config = require('../../config/test.config');
-const AllureReporter = require('./AllureReporter');
+const AllureReporter = require('./StandaloneAllureReporter');
 const VideoRecorder = require('./VideoRecorder');
 const fs = require('fs');
 const path = require('path');
@@ -112,8 +112,8 @@ class TestBase {
     let testPassed = false;
 
     try {
-      // Start video recording if enabled
-      if (config.videos.enabled && this.videoRecorder) {
+      // Start video recording if enabled OR if recording on failure
+      if ((config.videos.enabled || config.videos.onFailure) && this.videoRecorder) {
         await this.videoRecorder.startRecording();
       }
 
@@ -202,8 +202,19 @@ class TestBase {
    * @param {string} testName - Test name
    */
   async runTest(deviceNameOrId, appConfig, testFunction, testName = 'test') {
+    let testPassed = false;
+    let testError = null;
+
+    // Start Allure test
+    this.allure.startTest(testName, `${testName} on ${deviceNameOrId}`);
+
     try {
       await this.initializeDriver(deviceNameOrId, appConfig, testName);
+
+      // Add device info to Allure
+      if (this.device) {
+        this.allure.addDeviceInfo(this.device);
+      }
 
       // Initialize video recorder after driver is ready
       if ((config.videos.enabled || config.videos.onFailure) && this.driver && this.device) {
@@ -216,12 +227,21 @@ class TestBase {
       }
 
       await this.executeTest(testFunction);
+      testPassed = true;
       return true;
     } catch (error) {
       console.error('\n❌ Test failed:', error.message);
+      testError = error;
       throw error;
     } finally {
       await this.cleanup();
+
+      // End Allure test with appropriate status
+      if (testPassed) {
+        this.allure.endTest('passed');
+      } else {
+        this.allure.endTest('failed', testError?.message, testError?.stack);
+      }
 
       // Cleanup old videos
       if (config.videos.enabled || config.videos.onFailure) {

@@ -202,7 +202,7 @@ app.delete('/api/devices/:id', (req, res) => {
       });
     }
 
-    deviceManager.removeDevice(req.params.id);
+    deviceManager.unregisterDevice(req.params.id);
 
     // Broadcast device removal
     io.emit('device:removed', { id: req.params.id });
@@ -358,11 +358,19 @@ app.post('/api/tests/runs/:runId/stop', (req, res) => {
 app.get('/api/reports', (req, res) => {
   try {
     const reportsDir = path.join(__dirname, '..', 'allure-report');
+    const resultsDir = path.join(__dirname, '..', 'allure-results');
 
-    if (!fs.existsSync(reportsDir)) {
+    const hasReport = fs.existsSync(reportsDir) && fs.existsSync(path.join(reportsDir, 'index.html'));
+    const hasResults = fs.existsSync(resultsDir) && fs.readdirSync(resultsDir).length > 0;
+
+    if (!hasReport) {
       return res.json({
         success: true,
         reports: [],
+        hasResults,
+        message: hasResults
+          ? 'Test results available. Click "Generate Report" to create the Allure report.'
+          : 'No test results yet. Run some tests first.',
       });
     }
 
@@ -377,6 +385,44 @@ app.get('/api/reports', (req, res) => {
     res.json({
       success: true,
       reports,
+      hasResults,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * POST /api/reports/generate
+ * Generate Allure report from test results
+ */
+app.post('/api/reports/generate', (req, res) => {
+  try {
+    const resultsDir = path.join(__dirname, '..', 'allure-results');
+    const reportsDir = path.join(__dirname, '..', 'allure-report');
+
+    if (!fs.existsSync(resultsDir) || fs.readdirSync(resultsDir).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No test results available. Run some tests first.',
+      });
+    }
+
+    const { execSync } = require('child_process');
+
+    // Generate the Allure report
+    execSync(`npx allure generate "${resultsDir}" -o "${reportsDir}" --clean`, {
+      cwd: path.join(__dirname, '..'),
+      stdio: 'pipe',
+    });
+
+    res.json({
+      success: true,
+      message: 'Report generated successfully',
+      path: '/reports/latest',
     });
   } catch (error) {
     res.status(500).json({

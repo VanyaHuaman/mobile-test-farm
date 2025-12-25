@@ -553,9 +553,10 @@ function renderResultCard(run) {
 
 async function loadArtifactCounts() {
   try {
-    const [screenshots, videos] = await Promise.all([
+    const [screenshots, videos, reports] = await Promise.all([
       fetch(`${API_BASE}/artifacts/screenshots`).then(r => r.json()),
       fetch(`${API_BASE}/artifacts/videos`).then(r => r.json()),
+      fetch(`${API_BASE}/reports`).then(r => r.json()),
     ]);
 
     document.getElementById('screenshot-count').textContent =
@@ -563,8 +564,66 @@ async function loadArtifactCounts() {
 
     document.getElementById('video-count').textContent =
       `${videos.videos?.length || 0} video(s) available`;
+
+    // Update Allure report card
+    updateAllureReportCard(reports);
   } catch (error) {
     console.error('Error loading artifact counts:', error);
+  }
+}
+
+function updateAllureReportCard(data) {
+  const statusEl = document.getElementById('allure-status');
+  const actionsEl = document.getElementById('allure-actions');
+
+  if (data.reports && data.reports.length > 0) {
+    // Report exists
+    const report = data.reports[0];
+    statusEl.textContent = `Last generated: ${formatDateTime(report.createdAt)}`;
+    actionsEl.innerHTML = `
+      <a href="${report.path}" target="_blank" class="btn btn-primary">View Report</a>
+      ${data.hasResults ? '<button class="btn btn-secondary" onclick="generateAllureReport()" style="margin-left: 0.5rem;">Regenerate</button>' : ''}
+    `;
+  } else if (data.hasResults) {
+    // Results exist but no report generated
+    statusEl.textContent = 'Test results available. Generate report to view.';
+    actionsEl.innerHTML = `
+      <button class="btn btn-primary" onclick="generateAllureReport()">Generate Report</button>
+    `;
+  } else {
+    // No results at all
+    statusEl.textContent = 'No test results yet. Run some tests first.';
+    actionsEl.innerHTML = `
+      <button class="btn btn-secondary" disabled>No Results</button>
+    `;
+  }
+}
+
+async function generateAllureReport() {
+  const statusEl = document.getElementById('allure-status');
+  const actionsEl = document.getElementById('allure-actions');
+
+  // Show loading state
+  statusEl.textContent = 'Generating report...';
+  actionsEl.innerHTML = '<button class="btn btn-secondary" disabled>Generating...</button>';
+
+  try {
+    const response = await fetch(`${API_BASE}/reports/generate`, {
+      method: 'POST',
+    });
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error);
+    }
+
+    // Reload to show the new report
+    loadArtifactCounts();
+  } catch (error) {
+    statusEl.textContent = `Error: ${error.message}`;
+    actionsEl.innerHTML = `
+      <button class="btn btn-primary" onclick="generateAllureReport()">Retry</button>
+    `;
   }
 }
 
