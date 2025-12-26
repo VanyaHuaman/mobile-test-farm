@@ -70,7 +70,15 @@ class TestBase {
 
     // Get capabilities (supports both local and cloud)
     // Extract platform-specific config (only android or ios, not both)
-    const platformConfig = this.device.platform === 'android' ? appConfig.android : appConfig.ios;
+    // Handle both nested format {android: {...}, ios: {...}} and direct format {...}
+    let platformConfig;
+    if (appConfig.android || appConfig.ios) {
+      // Nested format - extract platform-specific config
+      platformConfig = this.device.platform === 'android' ? appConfig.android : appConfig.ios;
+    } else {
+      // Direct format - already platform-specific
+      platformConfig = appConfig;
+    }
     const capabilities = await this.deviceManager.getCapabilitiesUnified(deviceNameOrId, platformConfig);
     console.log('🔧 Capabilities:', JSON.stringify(capabilities, null, 2), '\n');
 
