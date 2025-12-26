@@ -1,0 +1,203 @@
+{
+  "uuid": "users-faker-advanced-001",
+  "lastMigration": 32,
+  "name": "Users API - Advanced Faker.js Example",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "route-faker-001",
+      "type": "http",
+      "documentation": "Get random user with realistic Faker.js data - generates different data on each request",
+      "method": "get",
+      "endpoint": "users/random",
+      "responses": [
+        {
+          "uuid": "response-faker-001",
+          "body": "{\n  \"id\": {{faker 'number.int' min=1 max=1000}},\n  \"name\": \"{{faker 'person.fullName'}}\",\n  \"email\": \"{{faker 'internet.email'}}\",\n  \"username\": \"{{faker 'internet.userName'}}\",\n  \"phone\": \"{{faker 'phone.number'}}\",\n  \"website\": \"{{faker 'internet.domainName'}}\",\n  \"avatar\": \"{{faker 'image.avatar'}}\",\n  \"company\": {\n    \"name\": \"{{faker 'company.name'}}\",\n    \"catchPhrase\": \"{{faker 'company.catchPhrase'}}\",\n    \"bs\": \"{{faker 'company.buzzPhrase'}}\"\n  },\n  \"address\": {\n    \"street\": \"{{faker 'location.streetAddress'}}\",\n    \"city\": \"{{faker 'location.city'}}\",\n    \"state\": \"{{faker 'location.state'}}\",\n    \"zipcode\": \"{{faker 'location.zipCode'}}\",\n    \"country\": \"{{faker 'location.country'}}\",\n    \"coordinates\": {\n      \"lat\": \"{{faker 'location.latitude'}}\",\n      \"lng\": \"{{faker 'location.longitude'}}\"\n    }\n  },\n  \"bio\": \"{{faker 'lorem.paragraph'}}\",\n  \"joinedDate\": \"{{faker 'date.past'}}\",\n  \"isActive\": {{faker 'datatype.boolean'}},\n  \"role\": \"{{faker 'helpers.arrayElement' '[\"admin\",\"user\",\"moderator\"]'}}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Random User",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-faker-002",
+      "type": "http",
+      "documentation": "Get list of users with Faker.js - generates array of realistic users using repeat helper",
+      "method": "get",
+      "endpoint": "users/faker",
+      "responses": [
+        {
+          "uuid": "response-faker-002",
+          "body": "[\n  {{#repeat 10}}\n  {\n    \"id\": {{@index}},\n    \"name\": \"{{faker 'person.fullName'}}\",\n    \"email\": \"{{faker 'internet.email'}}\",\n    \"username\": \"{{faker 'internet.userName'}}\",\n    \"avatar\": \"{{faker 'image.avatar'}}\",\n    \"role\": \"{{faker 'helpers.arrayElement' '[\"admin\",\"user\",\"moderator\"]'}}\",\n    \"status\": \"{{faker 'helpers.arrayElement' '[\"active\",\"inactive\",\"pending\"]'}}\",\n    \"lastLogin\": \"{{faker 'date.recent'}}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Faker Users List",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-faker-003",
+      "type": "http",
+      "documentation": "Get user profile with seeded Faker.js data - same ID always returns same data using faker seed",
+      "method": "get",
+      "endpoint": "users/:id/profile",
+      "responses": [
+        {
+          "uuid": "response-faker-003",
+          "body": "{{setVar 'seed' (urlParam 'id')}}\n{{faker 'seed' (int seed)}}\n{\n  \"id\": {{urlParam 'id'}},\n  \"firstName\": \"{{faker 'person.firstName'}}\",\n  \"lastName\": \"{{faker 'person.lastName'}}\",\n  \"email\": \"{{faker 'internet.email'}}\",\n  \"phone\": \"{{faker 'phone.number'}}\",\n  \"dateOfBirth\": \"{{faker 'date.birthdate' min=18 max=80}}\",\n  \"gender\": \"{{faker 'person.sex'}}\",\n  \"profilePicture\": \"{{faker 'image.avatar'}}\",\n  \"bio\": \"{{faker 'lorem.sentences' 3}}\",\n  \"interests\": [\n    \"{{faker 'commerce.department'}}\",\n    \"{{faker 'commerce.department'}}\",\n    \"{{faker 'commerce.department'}}\"\n  ],\n  \"socialMedia\": {\n    \"twitter\": \"@{{faker 'internet.userName'}}\",\n    \"linkedin\": \"{{faker 'internet.url'}}\",\n    \"github\": \"{{faker 'internet.userName'}}\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Seeded Profile",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-faker-004",
+      "type": "http",
+      "documentation": "Get products with Faker.js commerce data - realistic product catalog",
+      "method": "get",
+      "endpoint": "products",
+      "responses": [
+        {
+          "uuid": "response-faker-004",
+          "body": "[\n  {{#repeat 20}}\n  {\n    \"id\": {{@index}},\n    \"name\": \"{{faker 'commerce.productName'}}\",\n    \"description\": \"{{faker 'commerce.productDescription'}}\",\n    \"price\": {{faker 'commerce.price' min=10 max=1000}},\n    \"category\": \"{{faker 'commerce.department'}}\",\n    \"sku\": \"{{faker 'string.alphanumeric' 10}}\",\n    \"inStock\": {{faker 'datatype.boolean'}},\n    \"rating\": {{faker 'number.float' min=1 max=5 precision=0.1}},\n    \"reviews\": {{faker 'number.int' min=0 max=500}},\n    \"image\": \"{{faker 'image.url'}}\",\n    \"color\": \"{{faker 'color.human'}}\",\n    \"material\": \"{{faker 'commerce.productMaterial'}}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Products List",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "route-faker-001"
+    },
+    {
+      "type": "route",
+      "uuid": "route-faker-002"
+    },
+    {
+      "type": "route",
+      "uuid": "route-faker-003"
+    },
+    {
+      "type": "route",
+      "uuid": "route-faker-004"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "X-Mock-Server",
+      "value": "Mockoon-Faker"
+    },
+    {
+      "key": "X-Faker-Version",
+      "value": "Advanced"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}

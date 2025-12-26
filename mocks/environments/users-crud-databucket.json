@@ -1,0 +1,211 @@
+{
+  "uuid": "users-crud-databucket-001",
+  "lastMigration": 32,
+  "name": "Users API - CRUD with Data Buckets",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "route-crud-001",
+      "type": "crud",
+      "documentation": "CRUD - Get all users from data bucket",
+      "method": "",
+      "endpoint": "users",
+      "responses": [
+        {
+          "uuid": "response-crud-001",
+          "body": "",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "DATABUCKET",
+          "filePath": "",
+          "databucketID": "databucket-users",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": "CRUD"
+    },
+    {
+      "uuid": "route-crud-002",
+      "type": "http",
+      "documentation": "Create new user - adds to data bucket",
+      "method": "post",
+      "endpoint": "users",
+      "responses": [
+        {
+          "uuid": "response-crud-002",
+          "body": "{\n  \"id\": \"{{faker 'number.int' min=1000 max=9999}}\",\n  \"name\": \"{{body 'name'}}\",\n  \"email\": \"{{body 'email'}}\",\n  \"role\": \"{{body 'role' 'user'}}\",\n  \"createdAt\": \"{{now}}\",\n  \"updatedAt\": \"{{now}}\"\n}",
+          "latency": 200,
+          "statusCode": 201,
+          "label": "User Created",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Location",
+              "value": "/users/{{faker 'number.int' min=1000 max=9999}}"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-crud-003",
+      "type": "http",
+      "documentation": "Update user - modifies user in data bucket",
+      "method": "put",
+      "endpoint": "users/:id",
+      "responses": [
+        {
+          "uuid": "response-crud-003",
+          "body": "{\n  \"id\": {{urlParam 'id'}},\n  \"name\": \"{{body 'name'}}\",\n  \"email\": \"{{body 'email'}}\",\n  \"role\": \"{{body 'role'}}\",\n  \"updatedAt\": \"{{now}}\"\n}",
+          "latency": 150,
+          "statusCode": 200,
+          "label": "User Updated",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-crud-004",
+      "type": "http",
+      "documentation": "Delete user - removes from data bucket",
+      "method": "delete",
+      "endpoint": "users/:id",
+      "responses": [
+        {
+          "uuid": "response-crud-004",
+          "body": "{\n  \"success\": true,\n  \"message\": \"User {{urlParam 'id'}} deleted successfully\"\n}",
+          "latency": 100,
+          "statusCode": 200,
+          "label": "User Deleted",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "route-crud-001"
+    },
+    {
+      "type": "route",
+      "uuid": "route-crud-002"
+    },
+    {
+      "type": "route",
+      "uuid": "route-crud-003"
+    },
+    {
+      "type": "route",
+      "uuid": "route-crud-004"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "X-Mock-Server",
+      "value": "Mockoon-CRUD"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [
+    {
+      "uuid": "databucket-users",
+      "id": "databucket-users",
+      "name": "Users Data Bucket",
+      "documentation": "Persistent storage for users - supports CRUD operations",
+      "value": "[\n  {\n    \"id\": 1,\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"role\": \"admin\",\n    \"createdAt\": \"2025-01-01T00:00:00Z\",\n    \"updatedAt\": \"2025-01-01T00:00:00Z\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Jane Smith\",\n    \"email\": \"jane@example.com\",\n    \"role\": \"user\",\n    \"createdAt\": \"2025-01-02T00:00:00Z\",\n    \"updatedAt\": \"2025-01-02T00:00:00Z\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Bob Johnson\",\n    \"email\": \"bob@example.com\",\n    \"role\": \"moderator\",\n    \"createdAt\": \"2025-01-03T00:00:00Z\",\n    \"updatedAt\": \"2025-01-03T00:00:00Z\"\n  }\n]"
+    }
+  ],
+  "callbacks": []
+}

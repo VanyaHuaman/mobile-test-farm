@@ -1,0 +1,446 @@
+{
+  "uuid": "users-response-rules-001",
+  "lastMigration": 32,
+  "name": "Users API - Response Rules & Conditional Logic",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "route-rules-001",
+      "type": "http",
+      "documentation": "Get users with filtering by role - returns different responses based on query parameter",
+      "method": "get",
+      "endpoint": "users",
+      "responses": [
+        {
+          "uuid": "response-rules-001-admin",
+          "body": "[\n  {\"id\": 1, \"name\": \"Admin User\", \"role\": \"admin\", \"permissions\": [\"read\", \"write\", \"delete\"]},\n  {\"id\": 2, \"name\": \"Super Admin\", \"role\": \"admin\", \"permissions\": [\"read\", \"write\", \"delete\", \"manage\"]}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Admin Users",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "role",
+              "value": "admin",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "response-rules-001-moderator",
+          "body": "[\n  {\"id\": 3, \"name\": \"Mod User 1\", \"role\": \"moderator\", \"permissions\": [\"read\", \"write\"]},\n  {\"id\": 4, \"name\": \"Mod User 2\", \"role\": \"moderator\", \"permissions\": [\"read\", \"write\"]}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Moderator Users",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "role",
+              "value": "moderator",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "response-rules-001-default",
+          "body": "[\n  {\"id\": 5, \"name\": \"Regular User 1\", \"role\": \"user\", \"permissions\": [\"read\"]},\n  {\"id\": 6, \"name\": \"Regular User 2\", \"role\": \"user\", \"permissions\": [\"read\"]},\n  {\"id\": 7, \"name\": \"Regular User 3\", \"role\": \"user\", \"permissions\": [\"read\"]}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Regular Users (Default)",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-rules-002",
+      "type": "http",
+      "documentation": "Login endpoint with conditional responses - returns success/error based on request body",
+      "method": "post",
+      "endpoint": "auth/login",
+      "responses": [
+        {
+          "uuid": "response-rules-002-success",
+          "body": "{\n  \"success\": true,\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock.token\",\n  \"user\": {\n    \"id\": 1,\n    \"username\": \"admin\",\n    \"role\": \"admin\"\n  }\n}",
+          "latency": 500,
+          "statusCode": 200,
+          "label": "Login Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "username",
+              "value": "admin",
+              "invert": false,
+              "operator": "equals"
+            },
+            {
+              "target": "body",
+              "modifier": "password",
+              "value": "password",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "response-rules-002-invalid",
+          "body": "{\n  \"success\": false,\n  \"error\": \"Invalid username or password\"\n}",
+          "latency": 500,
+          "statusCode": 401,
+          "label": "Invalid Credentials",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-rules-003",
+      "type": "http",
+      "documentation": "Get user with authorization - requires Authorization header, returns 401 if missing",
+      "method": "get",
+      "endpoint": "users/me",
+      "responses": [
+        {
+          "uuid": "response-rules-003-authorized",
+          "body": "{\n  \"id\": 1,\n  \"name\": \"Authenticated User\",\n  \"email\": \"user@example.com\",\n  \"role\": \"user\",\n  \"verified\": true\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Authorized",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "",
+              "invert": false,
+              "operator": "regex",
+              "value": "^Bearer .+"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "response-rules-003-unauthorized",
+          "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"Authorization header required\"\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "Unauthorized",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-rules-004",
+      "type": "http",
+      "documentation": "Paginated users - returns different pages based on query params",
+      "method": "get",
+      "endpoint": "users/paginated",
+      "responses": [
+        {
+          "uuid": "response-rules-004-page1",
+          "body": "{\n  \"data\": [\n    {\"id\": 1, \"name\": \"User 1\"},\n    {\"id\": 2, \"name\": \"User 2\"},\n    {\"id\": 3, \"name\": \"User 3\"}\n  ],\n  \"page\": 1,\n  \"perPage\": 3,\n  \"total\": 10,\n  \"totalPages\": 4\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Page 1",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "page",
+              "value": "1",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "response-rules-004-page2",
+          "body": "{\n  \"data\": [\n    {\"id\": 4, \"name\": \"User 4\"},\n    {\"id\": 5, \"name\": \"User 5\"},\n    {\"id\": 6, \"name\": \"User 6\"}\n  ],\n  \"page\": 2,\n  \"perPage\": 3,\n  \"total\": 10,\n  \"totalPages\": 4\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Page 2",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "page",
+              "value": "2",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-rules-005",
+      "type": "http",
+      "documentation": "Search users - returns different results based on search query",
+      "method": "get",
+      "endpoint": "users/search",
+      "responses": [
+        {
+          "uuid": "response-rules-005-john",
+          "body": "[\n  {\"id\": 1, \"name\": \"John Doe\", \"email\": \"john@example.com\"},\n  {\"id\": 2, \"name\": \"Johnny Smith\", \"email\": \"johnny@example.com\"}\n]",
+          "latency": 200,
+          "statusCode": 200,
+          "label": "Search: john",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "q",
+              "value": "john",
+              "invert": false,
+              "operator": "regex",
+              "value": "john"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "response-rules-005-empty",
+          "body": "[]",
+          "latency": 100,
+          "statusCode": 200,
+          "label": "No Results",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "route-rules-001"
+    },
+    {
+      "type": "route",
+      "uuid": "route-rules-002"
+    },
+    {
+      "type": "route",
+      "uuid": "route-rules-003"
+    },
+    {
+      "type": "route",
+      "uuid": "route-rules-004"
+    },
+    {
+      "type": "route",
+      "uuid": "route-rules-005"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "X-Mock-Server",
+      "value": "Mockoon-ResponseRules"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}

@@ -1,0 +1,442 @@
+{
+  "uuid": "error-scenarios-001",
+  "lastMigration": 32,
+  "name": "Error Scenarios - Testing Error Handling",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "route-error-001",
+      "type": "http",
+      "documentation": "404 Not Found - Resource doesn't exist",
+      "method": "get",
+      "endpoint": "users/999",
+      "responses": [
+        {
+          "uuid": "response-error-001",
+          "body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"User with ID 999 not found\",\n  \"statusCode\": 404\n}",
+          "latency": 0,
+          "statusCode": 404,
+          "label": "User Not Found",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-002",
+      "type": "http",
+      "documentation": "500 Internal Server Error - Simulates server crash",
+      "method": "get",
+      "endpoint": "users/error/500",
+      "responses": [
+        {
+          "uuid": "response-error-002",
+          "body": "{\n  \"error\": \"Internal Server Error\",\n  \"message\": \"An unexpected error occurred on the server\",\n  \"statusCode\": 500,\n  \"timestamp\": \"{{now}}\"\n}",
+          "latency": 1000,
+          "statusCode": 500,
+          "label": "Server Error",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-003",
+      "type": "http",
+      "documentation": "503 Service Unavailable - Simulates service down for maintenance",
+      "method": "get",
+      "endpoint": "users/error/503",
+      "responses": [
+        {
+          "uuid": "response-error-003",
+          "body": "{\n  \"error\": \"Service Unavailable\",\n  \"message\": \"The service is temporarily unavailable. Please try again later.\",\n  \"statusCode\": 503,\n  \"retryAfter\": 60\n}",
+          "latency": 500,
+          "statusCode": 503,
+          "label": "Service Unavailable",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Retry-After",
+              "value": "60"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-004",
+      "type": "http",
+      "documentation": "401 Unauthorized - Missing or invalid auth token",
+      "method": "get",
+      "endpoint": "users/error/401",
+      "responses": [
+        {
+          "uuid": "response-error-004",
+          "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"Authentication required. Please provide a valid token.\",\n  \"statusCode\": 401\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "Unauthorized",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "WWW-Authenticate",
+              "value": "Bearer realm=\"API\""
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-005",
+      "type": "http",
+      "documentation": "403 Forbidden - User doesn't have permission",
+      "method": "delete",
+      "endpoint": "users/error/403",
+      "responses": [
+        {
+          "uuid": "response-error-005",
+          "body": "{\n  \"error\": \"Forbidden\",\n  \"message\": \"You don't have permission to perform this action\",\n  \"statusCode\": 403,\n  \"requiredRole\": \"admin\"\n}",
+          "latency": 0,
+          "statusCode": 403,
+          "label": "Forbidden",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-006",
+      "type": "http",
+      "documentation": "400 Bad Request - Invalid input data",
+      "method": "post",
+      "endpoint": "users/error/400",
+      "responses": [
+        {
+          "uuid": "response-error-006",
+          "body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Validation failed\",\n  \"statusCode\": 400,\n  \"errors\": [\n    {\n      \"field\": \"email\",\n      \"message\": \"Email is required\"\n    },\n    {\n      \"field\": \"name\",\n      \"message\": \"Name must be at least 3 characters\"\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 400,
+          "label": "Validation Error",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-007",
+      "type": "http",
+      "documentation": "429 Too Many Requests - Rate limit exceeded",
+      "method": "get",
+      "endpoint": "users/error/429",
+      "responses": [
+        {
+          "uuid": "response-error-007",
+          "body": "{\n  \"error\": \"Too Many Requests\",\n  \"message\": \"Rate limit exceeded. Please try again later.\",\n  \"statusCode\": 429,\n  \"limit\": 100,\n  \"remaining\": 0,\n  \"resetAt\": \"{{dateTimeShift days=0 hours=0 minutes=5}}\"\n}",
+          "latency": 0,
+          "statusCode": 429,
+          "label": "Rate Limited",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "X-RateLimit-Limit",
+              "value": "100"
+            },
+            {
+              "key": "X-RateLimit-Remaining",
+              "value": "0"
+            },
+            {
+              "key": "X-RateLimit-Reset",
+              "value": "{{dateTimeShift days=0 hours=0 minutes=5}}"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-008",
+      "type": "http",
+      "documentation": "Slow Response - Simulates network latency (5 second delay)",
+      "method": "get",
+      "endpoint": "users/slow",
+      "responses": [
+        {
+          "uuid": "response-error-008",
+          "body": "[\n  {\"id\": 1, \"name\": \"User 1\"},\n  {\"id\": 2, \"name\": \"User 2\"}\n]",
+          "latency": 5000,
+          "statusCode": 200,
+          "label": "Slow Response",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-009",
+      "type": "http",
+      "documentation": "Timeout - Simulates request timeout (15 second delay)",
+      "method": "get",
+      "endpoint": "users/timeout",
+      "responses": [
+        {
+          "uuid": "response-error-009",
+          "body": "{\n  \"error\": \"Request Timeout\",\n  \"message\": \"The request took too long to complete\"\n}",
+          "latency": 15000,
+          "statusCode": 408,
+          "label": "Request Timeout",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-error-010",
+      "type": "http",
+      "documentation": "Network Error - Empty response (simulates connection failure)",
+      "method": "get",
+      "endpoint": "users/network-error",
+      "responses": [
+        {
+          "uuid": "response-error-010",
+          "body": "",
+          "latency": 2000,
+          "statusCode": 0,
+          "label": "Network Error",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "route-error-001"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-002"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-003"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-004"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-005"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-006"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-007"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-008"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-009"
+    },
+    {
+      "type": "route",
+      "uuid": "route-error-010"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "X-Mock-Server",
+      "value": "Mockoon-Errors"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}
