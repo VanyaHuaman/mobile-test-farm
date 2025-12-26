@@ -26,8 +26,9 @@ Automated mobile device testing infrastructure for running tests across multiple
 ✅ **Test Retry Logic** - Automatic retry for failed tests with configurable attempts
 ✅ **Nightly Test Runs** - Scheduled daily test execution via GitHub Actions
 ✅ **Web Dashboard** - User-friendly web UI for device management and test execution
-✅ **API Mocking** - Mockoon CLI integration for realistic API mocking and traffic recording
+✅ **Transparent API Mocking** - MITM proxy + Mockoon for zero-code-change mocking on Android & iOS
 ✅ **Test Variants** - Multiple test configurations for different scenarios (500 errors, timeouts, etc.)
+✅ **Traffic Recording** - Automatic API call recording on test failure for debugging
 
 ## Quick Start
 
@@ -274,6 +275,100 @@ npm run test:parallel tests/specs/form.spec.js --cloud --provider=browserstack
 
 See [Parallel Testing Guide](docs/parallel-testing.md) and [Cloud Integration Guide](docs/CLOUD_INTEGRATION.md) for detailed information.
 
+## API Mocking with MITM Proxy
+
+The test farm includes a transparent API mocking system that works on both Android and iOS **without any app code changes**. Apps believe they're calling the real API, but traffic is transparently intercepted and redirected to Mockoon mock server.
+
+### How It Works
+
+```
+Mobile App → HTTPS API Call → MITM Proxy (port 8888) →
+Mockoon (port 3001) → Mock Response → App
+```
+
+**Key Benefits:**
+- ✅ Zero app code changes required
+- ✅ Works on both Android and iOS
+- ✅ Transparent certificate handling
+- ✅ Automatic traffic recording on failure
+- ✅ Test different API scenarios (errors, timeouts, edge cases)
+
+### Quick Example
+
+```bash
+# Enable mocking for a test run
+MOCKOON_ENABLED=true npm run test:users -- pixel-9
+
+# The test will use mock data instead of real API
+# App is completely unaware of the mocking
+```
+
+### Create Custom Mocks
+
+Edit `mocks/environments/jsonplaceholder-simple.json`:
+
+```json
+{
+  "routes": [
+    {
+      "method": "get",
+      "endpoint": "users",
+      "responses": [{
+        "body": "[{\"id\": 1, \"name\": \"Test User\"}]",
+        "statusCode": 200
+      }]
+    }
+  ]
+}
+```
+
+### Test Different Scenarios
+
+**Test 500 Error:**
+```bash
+MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/error-500.json npm run test:users
+```
+
+**Test Network Timeout:**
+```bash
+MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/timeout.json npm run test:users
+```
+
+**Test Empty Response:**
+```bash
+MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/empty.json npm run test:users
+```
+
+### Platform-Specific Setup
+
+**Android:**
+- Automatically configured via `adb` device proxy
+- Debug builds trust mitmproxy certificate
+- No app code changes needed
+
+**iOS:**
+- Uses macOS system proxy settings
+- Certificate installed in macOS keychain
+- Metro bundler bypass configured automatically
+- No app code changes needed
+
+### Debugging Failed Tests
+
+When a test fails with mocking enabled, transaction logs are automatically saved to `mocks/recordings/`:
+
+```bash
+# View failed test transactions
+cat mocks/recordings/FAILED-users-api-test-pixel-9-2025-12-26.json
+```
+
+The log shows:
+- All API calls intercepted
+- Request/response details
+- Mock server activity
+- Proxy routing information
+
+See [API Mocking Guide](docs/MOCKING.md) and [MITM Setup Guide](docs/MITM_SETUP.md) for detailed configuration.
+
 ## Available Commands
 
 ### Device Management
@@ -394,21 +489,26 @@ npx expo run:ios
 
 ## Documentation
 
+### Core Guides
 - **[Web Dashboard Guide](docs/web-dashboard.md)** - User-friendly web UI for test management
+- **[API Mocking Guide](docs/MOCKING.md)** - Transparent API mocking with MITM proxy + Mockoon
+- **[MITM Proxy Setup](docs/MITM_SETUP.md)** - Detailed MITM proxy configuration for Android & iOS
 - **[Cloud Integration Guide](docs/CLOUD_INTEGRATION.md)** - BrowserStack, Sauce Labs, AWS, Firebase integration
-- **[Quick Wins Guide](docs/quick-wins.md)** - Multi-platform notifications, test retry, nightly runs
+- **[Parallel Testing Guide](docs/parallel-testing.md)** - Run tests across multiple devices simultaneously
+- **[Device Management Guide](docs/device-management.md)** - Complete device management documentation
+
+### Testing & Reporting
 - **[Test Suites Guide](docs/test-suites.md)** - Comprehensive test suite documentation
-- **[Test Variants Guide](docs/TEST-VARIANTS.md)** - Run tests with different mock scenarios (NEW)
-- **[API Mocking Guide](docs/MOCKING.md)** - Mockoon CLI integration and traffic recording (NEW)
+- **[Test Variants Guide](docs/TEST-VARIANTS.md)** - Run tests with different mock scenarios
+- **[Writing Tests Guide](docs/writing-tests.md)** - How to write automated tests
 - **[Video Recording Guide](docs/video-recording.md)** - Automatic video recording for debugging
 - **[HTML Reporting Guide](docs/html-reporting.md)** - Beautiful test reports with Allure
-- **[CI/CD Integration Guide](docs/ci-cd-integration.md)** - Automated testing with GitHub Actions
-- **[Device Management Guide](docs/device-management.md)** - Complete device management documentation
-- **[Parallel Testing Guide](docs/parallel-testing.md)** - Run tests across multiple devices simultaneously
-- **[Phase 1 Completion Report](docs/phase1-completion.md)** - Phase 1 implementation results
+
+### Setup & Configuration
 - **[Android Setup Guide](docs/setup-android.md)** - Android development environment setup
 - **[iOS Setup Guide](docs/setup-ios.md)** - iOS development environment setup
-- **[Writing Tests Guide](docs/writing-tests.md)** - How to write automated tests
+- **[CI/CD Integration Guide](docs/ci-cd-integration.md)** - Automated testing with GitHub Actions
+- **[Quick Wins Guide](docs/quick-wins.md)** - Multi-platform notifications, test retry, nightly runs
 
 ## Current Status
 
@@ -484,16 +584,28 @@ npx expo run:ios
 - ✅ Results browser
 - ✅ Report and artifact viewing
 
+**API Mocking & Testing:**
+- ✅ Transparent MITM proxy (mitmproxy) for traffic interception
+- ✅ Mockoon integration for mock API responses
+- ✅ Zero app code changes required for mocking
+- ✅ Platform-specific proxy configuration (Android via adb, iOS via macOS)
+- ✅ Automatic certificate trust in debug builds
+- ✅ Transaction logging on test failure
+- ✅ Support for multiple mock environments (errors, timeouts, edge cases)
+- ✅ Test variants for different API scenarios
+
 **Test Application:**
 - ✅ Expo Router + React Native New Architecture
 - ✅ Cross-platform app (Android & iOS)
 - ✅ Comprehensive testID coverage
 - ✅ Debug and release build support
+- ✅ Debug-specific network security config (Android)
 
 **Test Results:**
-- ✅ iOS: iPhone 16 Pro Simulator - PASSED
-- ✅ Android: Pixel 64 Emulator - PASSED
+- ✅ iOS: iPhone 16 Pro Simulator - PASSED (with MITM mocking)
+- ✅ Android: Pixel 64 Emulator - PASSED (with MITM mocking)
 - ✅ Parallel Execution: Both platforms simultaneously - PASSED
+- ✅ Mock Verification: Confirmed traffic flows through Mockoon transparently
 
 ## Roadmap
 
@@ -591,7 +703,8 @@ ISC
 
 For issues and questions:
 - Check the [documentation](docs/)
-- Review [Phase 1 Completion Report](docs/phase1-completion.md)
+- Review the [API Mocking Guide](docs/MOCKING.md) for mocking setup
+- Review the [MITM Setup Guide](docs/MITM_SETUP.md) for proxy configuration
 - Open an issue on GitHub
 
 ---

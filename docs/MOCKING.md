@@ -1,10 +1,12 @@
-# API Mocking with Mockoon CLI
+# Transparent API Mocking with MITM Proxy + Mockoon
 
-The Mobile Test Farm integrates **Mockoon CLI** for API mocking, traffic recording, and test isolation. This enables you to:
+The Mobile Test Farm features a **transparent API mocking system** that works on both Android and iOS **without any app code changes**. Using MITM proxy + Mockoon CLI, the system:
 
+✅ **Zero Code Changes** - Apps believe they're calling the real API
+✅ **Works on Android & iOS** - Platform-specific proxy configuration
 ✅ **Mock API endpoints** - Control API responses for reliable tests
 ✅ **Record traffic** - Capture all API requests/responses for debugging
-✅ **Proxy mode** - Forward unmocked requests to real APIs
+✅ **Automatic certificate trust** - Debug builds configured automatically
 ✅ **Save logs on failure** - Automatically save traffic when tests fail
 ✅ **Test offline** - Run tests without backend dependency
 ✅ **Simulate errors** - Test error handling with controlled failure scenarios
@@ -45,25 +47,57 @@ mocks/recordings/
 
 ### Architecture
 
+The system uses a **two-layer interception architecture**:
+
 ```
-Mobile App → Mockoon Server (localhost:3001) → Real API (optional)
-              ↓
-         Records all traffic
-         Mocks specific endpoints
-         Proxies unmocked requests
-              ↓
-         Saves logs on test failure
+Mobile App
+    ↓
+    HTTPS API Call (e.g., https://jsonplaceholder.typicode.com/users)
+    ↓
+MITM Proxy (port 8888)
+    ↓ Transparently intercepts & redirects
+    ↓
+Mockoon Server (localhost:3001)
+    ↓ Checks mock routes
+    ↓
+    ├─→ Route mocked? → Return mock response
+    └─→ Not mocked? → Proxy to real API (if proxy mode enabled)
+    ↓
+App receives response (completely unaware of mocking)
 ```
+
+**Key Components:**
+
+1. **MITM Proxy (mitmproxy)** - Intercepts HTTPS traffic transparently
+2. **Mockoon Server** - Serves mock API responses
+3. **Platform Proxy Config** - Routes device traffic through MITM
+   - Android: `adb` device proxy (`10.0.2.2:8888`)
+   - iOS: macOS system proxy (`localhost:8888`)
 
 ### Workflow
 
-1. **Test starts** → Mockoon server starts automatically
-2. **App makes API calls** → Mockoon intercepts requests
-3. **Mockoon checks routes** →
+1. **Test starts** →
+   - Mockoon server starts (port 3001)
+   - MITM proxy starts (port 8888)
+   - Device proxy configured automatically
+
+2. **App makes HTTPS API call** →
+   - Traffic routes through MITM proxy
+   - MITM redirects to Mockoon
+   - App certificate validates (trusted in debug builds)
+
+3. **Mockoon handles request** →
    - If route is mocked → return mock response
    - If not mocked AND proxy enabled → forward to real API
-4. **Test fails** → Traffic logs saved to `mocks/recordings/`
-5. **Test ends** → Mockoon server stops automatically
+   - Records all traffic
+
+4. **Test fails** →
+   - Traffic logs saved to `mocks/recordings/`
+   - Includes: requests, responses, proxy routing
+
+5. **Test ends** →
+   - Mockoon and MITM proxy **persist** (reused for next test)
+   - Device proxy **persists** (no reconfiguration needed)
 
 ---
 
