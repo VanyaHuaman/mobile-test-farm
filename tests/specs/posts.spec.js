@@ -17,7 +17,6 @@ const path = require('path');
 
 async function runPostsTest() {
   const testBase = new TestBase();
-  const postsPage = new PostsPage(testBase.driver);
 
   const deviceArg = process.argv[2] || 'android-emulator-1';
 
@@ -39,6 +38,9 @@ async function runPostsTest() {
     deviceArg,
     appConfig,
     async () => {
+      // Initialize page object INSIDE runTest callback (after driver is initialized)
+      const postsPage = new PostsPage(testBase.driver);
+
       testBase.allure.step('Navigate to Posts screen', async () => {
         // Wait for home screen
         await testBase.driver.pause(2000);
