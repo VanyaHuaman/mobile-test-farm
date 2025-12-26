@@ -83,7 +83,7 @@ class TestBase {
     this.driver = await remote({
       protocol: url.protocol.replace(':', ''),
       hostname: url.hostname,
-      port: url.port || (url.protocol === 'https:' ? 443 : 80),
+      port: url.port ? parseInt(url.port, 10) : (url.protocol === 'https:' ? 443 : 80),
       path: url.pathname,
       capabilities,
     });
