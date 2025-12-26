@@ -52,14 +52,28 @@ See [Web Dashboard Guide](docs/web-dashboard.md) for detailed instructions.
 
 ### Option 2: Command Line
 
-### 1. Install Dependencies
+### 1. Install Node.js 22.21.1 LTS
+
+Appium 3.x requires Node.js 22.x for proper ES Module support:
+
+```bash
+# Using nvm (recommended)
+nvm install 22.21.1
+nvm use 22.21.1
+
+# Verify installation
+node --version  # Should show v22.21.1
+npm --version   # Should show 10.9.4
+```
+
+### 2. Install Dependencies
 
 ```bash
 cd mobile-test-farm
 npm install
 ```
 
-### 2. Start Appium Server
+### 3. Start Appium Server
 
 ```bash
 npx appium
@@ -67,7 +81,7 @@ npx appium
 
 Leave this running in the background.
 
-### 3. Connect and Register Devices
+### 4. Connect and Register Devices
 
 **For Android Emulator:**
 ```bash
@@ -85,7 +99,7 @@ npm run devices register
 - Run `npm run devices sync` to discover
 - Run `npm run devices register` to add with friendly name
 
-### 4. Run Your First Test
+### 5. Run Your First Test
 
 ```bash
 # Run on default device (android-emulator-1)
@@ -100,10 +114,14 @@ node tests/login-test.js "Lenovo 11-inch Tablet"
 ### Required Software
 
 **macOS:**
-- Node.js 18+ and npm
+- Node.js 22.21.1 LTS (Jod) - Required for Appium 3.x
+- npm 10.9.4 (comes with Node.js)
+- Appium 3.1.2 (installed via `npm install -g appium`)
 - Android SDK with platform-tools (for ADB)
 - Java Development Kit (JDK) 11+
 - Xcode (for iOS support)
+- mitmproxy (for API mocking): `brew install mitmproxy`
+- Mockoon CLI (for mock server): Installed via project dependencies
 
 **Environment Variables:**
 ```bash
