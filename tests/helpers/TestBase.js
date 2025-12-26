@@ -69,7 +69,9 @@ class TestBase {
     }
 
     // Get capabilities (supports both local and cloud)
-    const capabilities = await this.deviceManager.getCapabilitiesUnified(deviceNameOrId, appConfig);
+    // Extract platform-specific config (only android or ios, not both)
+    const platformConfig = this.device.platform === 'android' ? appConfig.android : appConfig.ios;
+    const capabilities = await this.deviceManager.getCapabilitiesUnified(deviceNameOrId, platformConfig);
     console.log('🔧 Capabilities:', JSON.stringify(capabilities, null, 2), '\n');
 
     // Get hub URL (local Appium or cloud provider hub)
