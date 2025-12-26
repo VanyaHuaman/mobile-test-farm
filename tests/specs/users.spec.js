@@ -40,7 +40,8 @@ async function runUsersTest() {
     appConfig,
     async () => {
       // Initialize page objects INSIDE runTest callback (after driver is initialized)
-      const loginPage = new LoginPage(testBase.driver);
+      const platform = testBase.getPlatform();
+      const loginPage = new LoginPage(testBase.driver, platform);
       const usersPage = new UsersPage(testBase.driver);
 
       testBase.allure.step('Login to app', async () => {
