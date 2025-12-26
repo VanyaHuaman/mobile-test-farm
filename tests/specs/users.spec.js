@@ -12,6 +12,7 @@
 
 const TestBase = require('../helpers/TestBase');
 const LoginPage = require('../pages/LoginPage');
+const HomePage = require('../pages/HomePage');
 const UsersPage = require('../pages/UsersPage');
 const config = require('../../config/test.config');
 const path = require('path');
@@ -42,6 +43,7 @@ async function runUsersTest() {
       // Initialize page objects INSIDE runTest callback (after driver is initialized)
       const platform = testBase.getPlatform();
       const loginPage = new LoginPage(testBase.driver, platform);
+      const homePage = new HomePage(testBase.driver, platform);
       const usersPage = new UsersPage(testBase.driver);
 
       testBase.allure.step('Login to app', async () => {
@@ -50,10 +52,15 @@ async function runUsersTest() {
 
         // Login with default credentials
         await loginPage.loginWithDefaultCredentials();
+        console.log('✅ Login action completed');
 
-        // Wait for home screen after login
-        await testBase.driver.pause(2000);
-        console.log('✅ Logged in successfully');
+        // Wait for navigation
+        await testBase.driver.pause(1000);
+
+        // Verify home page loaded
+        await homePage.waitForPageLoad();
+        await homePage.verifyOnHomePage();
+        console.log('✅ Home page loaded successfully');
       });
 
       testBase.allure.step('Navigate to Users screen', async () => {
