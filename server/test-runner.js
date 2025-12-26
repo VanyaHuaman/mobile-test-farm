@@ -6,6 +6,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const { getAllTestsWithVariants } = require('../config/test-variants');
 
 // Simple UUID v4 generator (no external dependencies)
 function uuidv4() {
@@ -20,53 +21,10 @@ class TestRunner {
   }
 
   /**
-   * Get available test suites
+   * Get available test suites (including variants)
    */
   getAvailableSuites() {
-    return [
-      {
-        id: 'login',
-        name: 'Login Test Suite',
-        description: 'Tests login functionality with valid and invalid credentials',
-        script: 'test:login:pom',
-        estimatedDuration: '30s',
-      },
-      {
-        id: 'form',
-        name: 'Form Test Suite',
-        description: 'Tests form filling, validation, and submission',
-        script: 'test:form',
-        estimatedDuration: '45s',
-      },
-      {
-        id: 'list',
-        name: 'List Test Suite',
-        description: 'Tests list filtering, item interaction, and navigation',
-        script: 'test:list',
-        estimatedDuration: '60s',
-      },
-      {
-        id: 'profile',
-        name: 'Profile Test Suite',
-        description: 'Tests profile display and settings navigation',
-        script: 'test:profile',
-        estimatedDuration: '40s',
-      },
-      {
-        id: 'navigation',
-        name: 'Navigation Test Suite',
-        description: 'Tests complete app navigation flow',
-        script: 'test:navigation',
-        estimatedDuration: '90s',
-      },
-      {
-        id: 'all',
-        name: 'All Test Suites',
-        description: 'Run all test suites sequentially',
-        script: 'test:suite:all',
-        estimatedDuration: '4m',
-      },
-    ];
+    return getAllTestsWithVariants();
   }
 
   /**
@@ -80,6 +38,18 @@ class TestRunner {
       throw new Error(`Test suite not found: ${suiteId}`);
     }
 
+    // Merge variant configuration into config
+    const finalConfig = { ...config };
+    if (suite.variantConfig) {
+      // Apply variant environment variables
+      finalConfig.env = {
+        ...config.env,
+        ...suite.variantConfig.env,
+      };
+      // Store mock config for reference
+      finalConfig.mockConfig = suite.variantConfig.mockConfig;
+    }
+
     const testRun = {
       id: runId,
       suite: suite.id,
@@ -91,7 +61,9 @@ class TestRunner {
       duration: null,
       output: [],
       result: null,
-      config,
+      config: finalConfig,
+      hasVariants: suite.hasVariants,
+      baseTestId: suite.baseTestId,
     };
 
     this.testRuns.set(runId, testRun);
@@ -100,7 +72,7 @@ class TestRunner {
     this.io.emit('test:started', testRun);
 
     // Execute test
-    this._executeTest(runId, suite, devices, config);
+    this._executeTest(runId, suite, devices, finalConfig);
 
     return runId;
   }

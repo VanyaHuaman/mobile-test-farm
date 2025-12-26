@@ -26,6 +26,8 @@ Automated mobile device testing infrastructure for running tests across multiple
 ✅ **Test Retry Logic** - Automatic retry for failed tests with configurable attempts
 ✅ **Nightly Test Runs** - Scheduled daily test execution via GitHub Actions
 ✅ **Web Dashboard** - User-friendly web UI for device management and test execution
+✅ **API Mocking** - Mockoon CLI integration for realistic API mocking and traffic recording
+✅ **Test Variants** - Multiple test configurations for different scenarios (500 errors, timeouts, etc.)
 
 ## Quick Start
 
@@ -396,6 +398,8 @@ npx expo run:ios
 - **[Cloud Integration Guide](docs/CLOUD_INTEGRATION.md)** - BrowserStack, Sauce Labs, AWS, Firebase integration
 - **[Quick Wins Guide](docs/quick-wins.md)** - Multi-platform notifications, test retry, nightly runs
 - **[Test Suites Guide](docs/test-suites.md)** - Comprehensive test suite documentation
+- **[Test Variants Guide](docs/TEST-VARIANTS.md)** - Run tests with different mock scenarios (NEW)
+- **[API Mocking Guide](docs/MOCKING.md)** - Mockoon CLI integration and traffic recording (NEW)
 - **[Video Recording Guide](docs/video-recording.md)** - Automatic video recording for debugging
 - **[HTML Reporting Guide](docs/html-reporting.md)** - Beautiful test reports with Allure
 - **[CI/CD Integration Guide](docs/ci-cd-integration.md)** - Automated testing with GitHub Actions

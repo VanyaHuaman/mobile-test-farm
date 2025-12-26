@@ -770,3 +770,20 @@ textarea.form-control {
     white-space: nowrap;
   }
 }
+
+/* Badges for Test Variants */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.badge-mock {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}

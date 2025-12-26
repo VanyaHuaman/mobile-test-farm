@@ -451,13 +451,58 @@ async function loadTestSuites() {
     }
 
     const selectEl = document.getElementById('test-suite');
-    selectEl.innerHTML = data.suites.map(suite => `
-      <option value="${suite.id}">${suite.name} (${suite.estimatedDuration})</option>
-    `).join('');
+
+    // Group suites: base tests first, then variants
+    const baseTests = data.suites.filter(s => !s.hasVariants);
+    const variantTests = data.suites.filter(s => s.hasVariants);
+
+    // Build grouped options
+    let optionsHTML = '';
+
+    // Add base tests
+    if (baseTests.length > 0) {
+      optionsHTML += '<optgroup label="Standard Tests">';
+      optionsHTML += baseTests.map(suite => `
+        <option value="${suite.id}">${suite.name} (${suite.estimatedDuration})</option>
+      `).join('');
+      optionsHTML += '</optgroup>';
+    }
+
+    // Add variant tests grouped by base test
+    if (variantTests.length > 0) {
+      // Group variants by base test
+      const variantGroups = {};
+      variantTests.forEach(variant => {
+        const baseId = variant.baseTestId;
+        if (!variantGroups[baseId]) {
+          variantGroups[baseId] = [];
+        }
+        variantGroups[baseId].push(variant);
+      });
+
+      // Add each variant group
+      Object.keys(variantGroups).forEach(baseId => {
+        const groupName = baseId.charAt(0).toUpperCase() + baseId.slice(1) + ' Tests (with Mocks)';
+        optionsHTML += `<optgroup label="${groupName}">`;
+        optionsHTML += variantGroups[baseId].map(variant => `
+          <option value="${variant.id}">${variant.name} (${variant.estimatedDuration})</option>
+        `).join('');
+        optionsHTML += '</optgroup>';
+      });
+    }
+
+    selectEl.innerHTML = optionsHTML;
 
     selectEl.addEventListener('change', () => {
       const suite = data.suites.find(s => s.id === selectEl.value);
-      document.getElementById('suite-description').textContent = suite ? suite.description : '';
+      if (suite) {
+        let description = suite.description;
+        // Add badge for variant tests
+        if (suite.hasVariants) {
+          description = `🎭 ${description}`;
+        }
+        document.getElementById('suite-description').textContent = description;
+      }
     });
 
     selectEl.dispatchEvent(new Event('change'));
@@ -628,10 +673,17 @@ async function loadTestRuns() {
 }
 
 function renderResultCard(run) {
+  // Check if this is a variant test
+  const isVariant = run.hasVariants || (run.config && run.config.mockConfig);
+  const mockBadge = isVariant ? '<span class="badge badge-mock">🎭 Mock</span>' : '';
+
   return `
     <div class="result-card ${run.status}">
       <div class="result-header">
-        <div class="result-title">${run.suiteName}</div>
+        <div class="result-title">
+          ${run.suiteName}
+          ${mockBadge}
+        </div>
         <span class="result-status ${run.status}">${run.status.toUpperCase()}</span>
       </div>
       <div class="result-meta">
