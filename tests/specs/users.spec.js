@@ -11,6 +11,7 @@
  */
 
 const TestBase = require('../helpers/TestBase');
+const LoginPage = require('../pages/LoginPage');
 const UsersPage = require('../pages/UsersPage');
 const config = require('../../config/test.config');
 const path = require('path');
@@ -38,13 +39,23 @@ async function runUsersTest() {
     deviceArg,
     appConfig,
     async () => {
-      // Initialize page object INSIDE runTest callback (after driver is initialized)
+      // Initialize page objects INSIDE runTest callback (after driver is initialized)
+      const loginPage = new LoginPage(testBase.driver);
       const usersPage = new UsersPage(testBase.driver);
 
-      testBase.allure.step('Navigate to Users screen', async () => {
-        // Wait for home screen
+      testBase.allure.step('Login to app', async () => {
+        console.log('🔐 Logging in...');
         await testBase.driver.pause(2000);
 
+        // Login with default credentials
+        await loginPage.loginWithDefaultCredentials();
+
+        // Wait for home screen after login
+        await testBase.driver.pause(2000);
+        console.log('✅ Logged in successfully');
+      });
+
+      testBase.allure.step('Navigate to Users screen', async () => {
         // Click Users button
         const usersButton = await testBase.driver.$('~menu-item-users');
         await usersButton.waitForDisplayed({ timeout: 10000 });
