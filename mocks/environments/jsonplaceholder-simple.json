@@ -1,0 +1,123 @@
+{
+  "uuid": "simple-api-mock-001",
+  "lastMigration": 32,
+  "name": "JSONPlaceholder API Mock - Simple Example",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3001,
+  "hostname": "0.0.0.0",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "route-001",
+      "type": "http",
+      "documentation": "Get user by ID - Simple mock returning test user",
+      "method": "get",
+      "endpoint": "users/:id",
+      "responses": [
+        {
+          "uuid": "response-001",
+          "body": "{\n  \"id\": {{urlParam 'id'}},\n  \"name\": \"Test User {{urlParam 'id'}}\",\n  \"email\": \"user{{urlParam 'id'}}@test.com\",\n  \"username\": \"testuser{{urlParam 'id'}}\",\n  \"phone\": \"555-0001\",\n  \"website\": \"test.com\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "route-002",
+      "type": "http",
+      "documentation": "Get all posts - Simple mock returning array of posts",
+      "method": "get",
+      "endpoint": "posts",
+      "responses": [
+        {
+          "uuid": "response-002",
+          "body": "[\n  {\n    \"userId\": 1,\n    \"id\": 1,\n    \"title\": \"Test Post 1\",\n    \"body\": \"This is a mocked post for testing\"\n  },\n  {\n    \"userId\": 1,\n    \"id\": 2,\n    \"title\": \"Test Post 2\",\n    \"body\": \"Another mocked post\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "route-001"
+    },
+    {
+      "type": "route",
+      "uuid": "route-002"
+    }
+  ],
+  "proxyMode": true,
+  "proxyHost": "https://jsonplaceholder.typicode.com",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "X-Mock-Server",
+      "value": "Mockoon"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}

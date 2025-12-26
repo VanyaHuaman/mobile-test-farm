@@ -1,5 +1,6 @@
 const { remote } = require('webdriverio');
 const DeviceManager = require('../../lib/device-manager');
+const MockoonManager = require('../../lib/MockoonManager');
 const config = require('../../config/test.config');
 const AllureReporter = require('./StandaloneAllureReporter');
 const VideoRecorder = require('./VideoRecorder');
@@ -22,6 +23,8 @@ class TestBase {
     this.driver = null;
     this.device = null;
     this.deviceManager = new DeviceManager();
+    this.mockoonManager = new MockoonManager();
+    this.currentMockId = null;
     this.testName = '';
     this.allure = AllureReporter;
     this.videoRecorder = null;
@@ -224,11 +227,26 @@ class TestBase {
   async runTest(deviceNameOrId, appConfig, testFunction, testName = 'test') {
     let testPassed = false;
     let testError = null;
+    const startTime = Date.now();
 
     // Start Allure test
     this.allure.startTest(testName, `${testName} on ${deviceNameOrId}`);
 
     try {
+      // Start Mockoon server if mocking is enabled
+      if (config.mocking && config.mocking.enabled) {
+        console.log('🎭 Starting Mockoon mock server...');
+        this.currentMockId = await this.mockoonManager.startMock(
+          config.mocking.mockFile,
+          {
+            port: config.mocking.port,
+            proxyUrl: config.mocking.proxyUrl,
+            verbose: config.mocking.verbose || false
+          }
+        );
+        console.log('');
+      }
+
       await this.initializeDriver(deviceNameOrId, appConfig, testName);
 
       // Add device info to Allure
@@ -255,6 +273,23 @@ class TestBase {
       throw error;
     } finally {
       await this.cleanup();
+
+      // Save Mockoon transaction logs on failure
+      if (!testPassed && this.currentMockId && config.mocking && config.mocking.saveLogsOnFailure) {
+        const duration = Date.now() - startTime;
+        await this.mockoonManager.saveLogsOnFailure(this.currentMockId, {
+          name: testName,
+          deviceId: deviceNameOrId,
+          error: testError?.message,
+          duration
+        });
+      }
+
+      // Stop Mockoon server
+      if (this.currentMockId) {
+        await this.mockoonManager.stopMock(this.currentMockId);
+        this.currentMockId = null;
+      }
 
       // End Allure test with appropriate status
       if (testPassed) {

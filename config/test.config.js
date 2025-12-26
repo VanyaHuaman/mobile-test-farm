@@ -74,6 +74,17 @@ const config = {
     maxVideos: parseInt(process.env.MAX_VIDEOS || '10', 10), // Keep last N videos
   },
 
+  // API Mocking Settings (Mockoon CLI)
+  mocking: {
+    enabled: process.env.MOCKOON_ENABLED === 'true',
+    port: parseInt(process.env.MOCKOON_PORT || '3001', 10),
+    mockFile: process.env.MOCKOON_MOCK_FILE || path.join(__dirname, '../mocks/environments/jsonplaceholder-simple.json'),
+    proxyUrl: process.env.MOCKOON_PROXY_URL || '',  // Empty = no proxy, or 'https://api.example.com'
+    saveLogsOnFailure: process.env.MOCKOON_SAVE_LOGS_ON_FAILURE !== 'false',
+    verbose: process.env.MOCKOON_VERBOSE === 'true',
+    recordingsPath: process.env.MOCKOON_RECORDINGS_PATH || path.join(__dirname, '../mocks/recordings'),
+  },
+
   // Logging Settings
   logging: {
     level: process.env.LOG_LEVEL || 'info',
