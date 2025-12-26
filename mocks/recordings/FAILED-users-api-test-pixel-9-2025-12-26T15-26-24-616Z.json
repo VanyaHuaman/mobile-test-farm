@@ -1,0 +1,42 @@
+{
+  "status": "FAILED",
+  "mockId": "mock-1766762758299",
+  "timestamp": "2025-12-26T15:26:24.616Z",
+  "test": {
+    "name": "users-api-test",
+    "deviceId": "pixel-9",
+    "error": "element (\"~username-input\") still not displayed after 10000ms",
+    "duration": 26317
+  },
+  "totalTransactions": 2,
+  "transactions": [
+    {
+      "app": "mockoon-server",
+      "environmentName": "JSONPlaceholder API Mock - Simple Example",
+      "environmentUUID": "239cc350-be44-44ac-8ec1-e125ab75fb9d",
+      "level": "info",
+      "message": "Creating proxy to https://jsonplaceholder.typicode.com",
+      "timestamp": "2025-12-26T15:25:59.058Z"
+    },
+    {
+      "app": "mockoon-server",
+      "environmentName": "JSONPlaceholder API Mock - Simple Example",
+      "environmentUUID": "239cc350-be44-44ac-8ec1-e125ab75fb9d",
+      "level": "info",
+      "message": "Server started on port 3001",
+      "timestamp": "2025-12-26T15:25:59.063Z"
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "proxiedCount": 0,
+    "mockedCount": 2,
+    "errorCount": 0,
+    "methods": {
+      "UNKNOWN": 2
+    },
+    "endpoints": {
+      "UNKNOWN": 2
+    }
+  }
+}

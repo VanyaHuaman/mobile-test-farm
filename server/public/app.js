@@ -285,25 +285,47 @@ function showDiscoveredDevices(devices, registeredDeviceIds) {
     <div style="margin-top: 1rem;">
       ${devices.map(device => {
         const isRegistered = registeredDeviceIds.has(device.deviceId);
+        const defaultName = device.model || `Device ${device.deviceId}`;
         return `
-          <div class="checkbox-label ${isRegistered ? 'disabled' : ''}">
-            <input
-              type="checkbox"
-              value="${device.deviceId}"
-              id="disc-${device.deviceId}"
-              ${isRegistered ? 'disabled' : ''}
-            >
-            <div style="flex: 1;">
-              <strong>${device.model || device.deviceId}</strong>
-              ${isRegistered ? '<span class="badge badge-info" style="margin-left: 0.5rem;">Already Registered</span>' : ''}
-              <br>
-              <small>${device.platform} • ${device.deviceId}</small>
+          <div class="checkbox-label ${isRegistered ? 'disabled' : ''}" style="flex-direction: column; align-items: flex-start; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; width: 100%; margin-bottom: ${isRegistered ? '0' : '0.5rem'};">
+              <input
+                type="checkbox"
+                value="${device.deviceId}"
+                id="disc-${device.deviceId}"
+                ${isRegistered ? 'disabled' : ''}
+              >
+              <div style="flex: 1; margin-left: 0.5rem;">
+                <strong>${device.model || device.deviceId}</strong>
+                ${isRegistered ? '<span class="badge badge-info" style="margin-left: 0.5rem;">Already Registered</span>' : ''}
+                <br>
+                <small>${device.platform} • ${device.deviceId}</small>
+              </div>
             </div>
+            ${!isRegistered ? `
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Friendly name (e.g., 'My Galaxy S24')"
+                value="${defaultName}"
+                id="name-${device.deviceId}"
+                style="margin-left: 2rem; width: calc(100% - 2rem);"
+              >
+            ` : ''}
           </div>
         `;
       }).join('')}
     </div>
     ${newDevices.length > 0 ? `
+      <div style="margin-top: 1.5rem; padding: 1rem; background: var(--background-secondary); border-radius: 8px;">
+        <label style="display: flex; align-items: center; cursor: pointer;">
+          <input type="checkbox" id="install-mitm-cert-checkbox" checked style="margin-right: 0.5rem;">
+          <span>Install MITM certificate for mocking (recommended)</span>
+        </label>
+        <small style="color: var(--text-secondary); margin-left: 1.5rem; display: block; margin-top: 0.25rem;">
+          Allows transparent API mocking via MITM proxy
+        </small>
+      </div>
       <div class="form-actions">
         <button class="btn btn-secondary" onclick="closeDiscoveredModal()">Cancel</button>
         <button class="btn btn-primary" onclick="registerSelectedDevices()">Register Selected</button>
@@ -333,6 +355,10 @@ async function registerSelectedDevices() {
     return;
   }
 
+  // Check if MITM certificate should be installed
+  const installMitmCertCheckbox = document.getElementById('install-mitm-cert-checkbox');
+  const installMitmCert = installMitmCertCheckbox ? installMitmCertCheckbox.checked : false;
+
   const results = {
     success: [],
     failed: [],
@@ -340,7 +366,17 @@ async function registerSelectedDevices() {
 
   for (const checkbox of checkboxes) {
     const deviceId = checkbox.value;
-    const id = deviceId.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+
+    // Get the custom friendly name from the input field
+    const nameInput = document.getElementById(`name-${deviceId}`);
+    const friendlyName = nameInput ? nameInput.value.trim() : `Device ${deviceId}`;
+
+    if (!friendlyName) {
+      results.failed.push({ deviceId, error: 'Friendly name cannot be empty' });
+      continue;
+    }
+
+    const id = friendlyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
     try {
       const response = await fetch(`${API_BASE}/devices/register`, {
@@ -348,10 +384,11 @@ async function registerSelectedDevices() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id,
-          friendlyName: `Device ${deviceId}`,
+          friendlyName,
           deviceId,
           platform: deviceId.includes('emulator') ? 'android' : 'ios',
           type: deviceId.includes('emulator') || deviceId.includes('simulator') ? 'emulator' : 'physical',
+          installMitmCert,
         }),
       });
 

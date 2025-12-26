@@ -36,7 +36,10 @@
     "devices:register": "node bin/devices.js register",
     "notify:test": "node bin/test-notification.js",
     "dashboard": "node server/index.js",
-    "dashboard:dev": "nodemon server/index.js"
+    "dashboard:dev": "nodemon server/index.js",
+    "setup:mitm": "node bin/setup-mitm.js",
+    "setup:mitm:android": "node bin/setup-mitm.js --android",
+    "setup:mitm:ios": "node bin/setup-mitm.js --ios"
   },
   "bin": {
     "devices": "./bin/devices.js"

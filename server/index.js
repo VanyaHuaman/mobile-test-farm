@@ -15,6 +15,7 @@ const fs = require('fs');
 
 const DeviceManager = require('../lib/device-manager');
 const TestRunner = require('./test-runner');
+const MitmProxyManager = require('../lib/MitmProxyManager');
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Initialize managers
 const deviceManager = new DeviceManager();
 const testRunner = new TestRunner(io);
+const mitmProxyManager = new MitmProxyManager();
 
 // ============================================================================
 // DEVICE API ENDPOINTS
@@ -194,9 +196,9 @@ app.get('/api/cloud/providers', (req, res) => {
  * POST /api/devices/register
  * Register a new device
  */
-app.post('/api/devices/register', (req, res) => {
+app.post('/api/devices/register', async (req, res) => {
   try {
-    const { id, friendlyName, deviceId, platform, type, model, osVersion, notes } = req.body;
+    const { id, friendlyName, deviceId, platform, type, model, osVersion, notes, installMitmCert } = req.body;
 
     if (!id || !friendlyName || !deviceId || !platform) {
       return res.status(400).json({
@@ -215,12 +217,35 @@ app.post('/api/devices/register', (req, res) => {
       notes,
     });
 
+    // Install MITM certificate if requested
+    if (installMitmCert === true) {
+      console.log(`\n🔐 Installing MITM certificate for device: ${friendlyName}...`);
+
+      try {
+        const certInstalled = await mitmProxyManager.installCertificateOnDevice({
+          platform,
+          deviceId,
+        });
+
+        if (certInstalled) {
+          deviceManager.markMitmCertInstalled(id, true);
+          console.log(`✅ MITM certificate installation initiated for ${friendlyName}\n`);
+        } else {
+          console.log(`⚠️  MITM certificate installation failed for ${friendlyName}\n`);
+        }
+      } catch (certError) {
+        console.error(`❌ Error installing MITM certificate: ${certError.message}\n`);
+        // Don't fail registration if cert install fails
+      }
+    }
+
     // Broadcast device registration to all connected clients
     io.emit('device:registered', device);
 
     res.json({
       success: true,
       device,
+      mitmCertInstalled: device.mitmCertInstalled || false,
     });
   } catch (error) {
     res.status(400).json({

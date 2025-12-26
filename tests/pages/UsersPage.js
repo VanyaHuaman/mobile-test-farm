@@ -6,42 +6,42 @@ const BasePage = require('./BasePage');
  * Represents the Users screen that fetches data from API
  */
 class UsersPage extends BasePage {
-  constructor(driver) {
-    super(driver);
+  constructor(driver, platform) {
+    super(driver, platform);
     this.screenTestId = 'users-screen';
   }
 
-  // Selectors
+  // Selectors - Using accessibilityLabel for cross-platform consistency
   get screenSelector() {
-    return `~${this.screenTestId}`;
+    return { ios: `~${this.screenTestId}`, android: `~${this.screenTestId}` };
   }
 
   get backButton() {
-    return '~back-button';
+    return { ios: '~back-button', android: '~back-button' };
   }
 
   get refreshButton() {
-    return '~refresh-button';
+    return { ios: '~refresh-button', android: '~refresh-button' };
   }
 
   get loadingIndicator() {
-    return '~loading-indicator';
+    return { ios: '~loading-indicator', android: '~loading-indicator' };
   }
 
   get errorContainer() {
-    return '~error-container';
+    return { ios: '~error-container', android: '~error-container' };
   }
 
   get retryButton() {
-    return '~retry-button';
+    return { ios: '~retry-button', android: '~retry-button' };
   }
 
   get usersList() {
-    return '~users-list';
+    return { ios: '~users-list', android: '~users-list' };
   }
 
   get usersCount() {
-    return '~users-count';
+    return { ios: '~users-count', android: 'id=users-count' };
   }
 
   /**
@@ -49,7 +49,8 @@ class UsersPage extends BasePage {
    * @param {number} timeout - Timeout in milliseconds
    */
   async waitForScreen(timeout = 10000) {
-    const screen = await this.driver.$(this.screenSelector);
+    // Use accessibilityLabel for cross-platform consistency
+    const screen = await this.getElement(this.screenSelector);
     await screen.waitForDisplayed({ timeout });
   }
 
@@ -58,8 +59,12 @@ class UsersPage extends BasePage {
    * @returns {Promise<boolean>}
    */
   async verifyHeader() {
-    const screen = await this.driver.$(this.screenSelector);
-    return await screen.isDisplayed();
+    try {
+      const screen = await this.getElement(this.screenSelector);
+      return await screen.isDisplayed();
+    } catch (error) {
+      return false;
+    }
   }
 
   /**
@@ -68,7 +73,7 @@ class UsersPage extends BasePage {
    */
   async isLoading() {
     try {
-      const loading = await this.driver.$(this.loadingIndicator);
+      const loading = await this.getElement(this.loadingIndicator);
       return await loading.isDisplayed();
     } catch (error) {
       return false;
@@ -81,7 +86,7 @@ class UsersPage extends BasePage {
    */
   async hasError() {
     try {
-      const error = await this.driver.$(this.errorContainer);
+      const error = await this.getElement(this.errorContainer);
       return await error.isDisplayed();
     } catch (error) {
       return false;
@@ -93,7 +98,7 @@ class UsersPage extends BasePage {
    * @returns {Promise<string>}
    */
   async getErrorMessage() {
-    const error = await this.driver.$(this.errorContainer);
+    const error = await this.getElement(this.errorContainer);
     return await error.getText();
   }
 
@@ -103,8 +108,16 @@ class UsersPage extends BasePage {
    */
   async getUsersCount() {
     try {
-      const countElement = await this.driver.$(this.usersCount);
-      const text = await countElement.getText();
+      let text;
+      if (this.platform === 'android') {
+        // On Android, use text matching since Text elements don't create resource-ids
+        const countElement = await this.driver.$('android=new UiSelector().textContains(" users found")');
+        text = await countElement.getText();
+      } else {
+        // On iOS, use accessibilityLabel
+        const countElement = await this.getElement(this.usersCount);
+        text = await countElement.getText();
+      }
       // Extract number from "10 users found"
       const match = text.match(/(\d+)/);
       return match ? parseInt(match[1], 10) : 0;
@@ -121,7 +134,8 @@ class UsersPage extends BasePage {
    */
   async verifyUserCard(userId) {
     try {
-      const card = await this.driver.$(`~user-card-${userId}`);
+      const selector = { ios: `~user-card-${userId}`, android: `~user-card-${userId}` };
+      const card = await this.getElement(selector);
       return await card.isDisplayed();
     } catch (error) {
       return false;
@@ -134,7 +148,8 @@ class UsersPage extends BasePage {
    * @returns {Promise<string>}
    */
   async getUserName(userId) {
-    const nameElement = await this.driver.$(`~user-name-${userId}`);
+    const selector = { ios: `~user-name-${userId}`, android: `~user-name-${userId}` };
+    const nameElement = await this.getElement(selector);
     return await nameElement.getText();
   }
 
@@ -144,7 +159,8 @@ class UsersPage extends BasePage {
    * @returns {Promise<string>}
    */
   async getUserEmail(userId) {
-    const emailElement = await this.driver.$(`~user-email-${userId}`);
+    const selector = { ios: `~user-email-${userId}`, android: `~user-email-${userId}` };
+    const emailElement = await this.getElement(selector);
     return await emailElement.getText();
   }
 
@@ -174,8 +190,8 @@ class UsersPage extends BasePage {
    * @param {string} direction - 'up' or 'down'
    */
   async scrollList(direction = 'down') {
-    const list = await this.driver.$(this.usersList);
-    await this.scrollElement(list, direction);
+    const list = await this.getElement(this.usersList);
+    await list.scrollIntoView();
   }
 }
 

@@ -106,8 +106,9 @@ class FormPage extends BasePage {
 
   async setNotifications(enabled) {
     const toggle = await this.notificationsSwitch;
-    const currentValue = await toggle.getValue();
-    const isEnabled = currentValue === '1' || currentValue === 'true' || currentValue === true;
+    // Use 'checked' attribute which works on both platforms
+    const checked = await toggle.getAttribute('checked');
+    const isEnabled = checked === 'true';
 
     if (isEnabled !== enabled) {
       await toggle.click();
@@ -117,8 +118,9 @@ class FormPage extends BasePage {
 
   async setNewsletter(enabled) {
     const toggle = await this.newsletterSwitch;
-    const currentValue = await toggle.getValue();
-    const isEnabled = currentValue === '1' || currentValue === 'true' || currentValue === true;
+    // Use 'checked' attribute which works on both platforms
+    const checked = await toggle.getAttribute('checked');
+    const isEnabled = checked === 'true';
 
     if (isEnabled !== enabled) {
       await toggle.click();
@@ -128,6 +130,9 @@ class FormPage extends BasePage {
 
   async clickSubmit() {
     const button = await this.submitButton;
+    // Scroll to the button to ensure it's visible
+    await button.scrollIntoView();
+    await this.pause(300);
     await button.click();
     console.log('   Clicked submit button');
     // Wait for alert to appear
@@ -135,10 +140,16 @@ class FormPage extends BasePage {
   }
 
   async clickClear() {
+    console.log('   Attempting to find clear button...');
     const button = await this.clearButton;
+    console.log('   Clear button found, scrolling into view...');
+    // Scroll to the button to ensure it's visible
+    await button.scrollIntoView();
+    await this.pause(300);
+    console.log('   Clicking clear button...');
     await button.click();
     console.log('   Clicked clear button');
-    await this.pause(500);
+    await this.pause(1000);
   }
 
   async clickBack() {
@@ -150,34 +161,52 @@ class FormPage extends BasePage {
 
   async getName() {
     const input = await this.nameInput;
+    // Android TextInput uses 'text' attribute, iOS uses getValue()
+    if (this.platform === 'android') {
+      return await input.getAttribute('text');
+    }
     return await input.getValue();
   }
 
   async getEmail() {
     const input = await this.emailInput;
+    // Android TextInput uses 'text' attribute, iOS uses getValue()
+    if (this.platform === 'android') {
+      return await input.getAttribute('text');
+    }
     return await input.getValue();
   }
 
   async getAge() {
     const input = await this.ageInput;
+    // Android TextInput uses 'text' attribute, iOS uses getValue()
+    if (this.platform === 'android') {
+      return await input.getAttribute('text');
+    }
     return await input.getValue();
   }
 
   async getBio() {
     const input = await this.bioInput;
+    // Android TextInput uses 'text' attribute, iOS uses getValue()
+    if (this.platform === 'android') {
+      return await input.getAttribute('text');
+    }
     return await input.getValue();
   }
 
   async isNotificationsEnabled() {
     const toggle = await this.notificationsSwitch;
-    const value = await toggle.getValue();
-    return value === '1' || value === 'true' || value === true;
+    // Use 'checked' attribute which works on both platforms
+    const checked = await toggle.getAttribute('checked');
+    return checked === 'true';
   }
 
   async isNewsletterEnabled() {
     const toggle = await this.newsletterSwitch;
-    const value = await toggle.getValue();
-    return value === '1' || value === 'true' || value === true;
+    // Use 'checked' attribute which works on both platforms
+    const checked = await toggle.getAttribute('checked');
+    return checked === 'true';
   }
 
   async fillForm(formData) {
@@ -261,21 +290,28 @@ class FormPage extends BasePage {
     // Handle platform-specific alert dismissal
     if (this.platform === 'android') {
       try {
-        await this.driver.acceptAlert();
+        // On Android, React Native Alert creates a dialog with buttons that can be found by text
+        const okButton = await this.driver.$('android=new UiSelector().text("OK").className("android.widget.Button")');
+        if (await okButton.isExisting()) {
+          await okButton.click();
+          console.log('   Dismissed alert (Android)');
+        }
       } catch (e) {
-        // Alert might not be present
+        console.log('   No alert found (Android)');
       }
     } else if (this.platform === 'ios') {
       try {
         const okButton = await this.driver.$('~OK');
         if (await okButton.isExisting()) {
           await okButton.click();
+          console.log('   Dismissed alert (iOS)');
         }
       } catch (e) {
-        // Alert might not be present
+        console.log('   No alert found (iOS)');
       }
     }
-    await this.pause(500);
+    // Wait longer for UI to settle after dismissing alert
+    await this.pause(1000);
   }
 }
 

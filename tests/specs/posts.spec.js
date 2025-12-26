@@ -46,9 +46,9 @@ async function runPostsTest() {
       const platform = testBase.getPlatform();
       const loginPage = new LoginPage(testBase.driver, platform);
       const homePage = new HomePage(testBase.driver, platform);
-      const postsPage = new PostsPage(testBase.driver);
+      const postsPage = new PostsPage(testBase.driver, platform);
 
-      testBase.allure.step('Login to app', async () => {
+      await testBase.allure.step('Login to app', async () => {
         console.log('🔐 Logging in...');
         await testBase.driver.pause(2000);
 
@@ -65,16 +65,26 @@ async function runPostsTest() {
         console.log('✅ Home page loaded successfully');
       });
 
-      testBase.allure.step('Navigate to Posts screen', async () => {
-        // Click Posts button
-        const postsButton = await testBase.driver.$('~menu-item-posts');
+      await testBase.allure.step('Navigate to Posts screen', async () => {
+        console.log('🔍 Looking for Posts button...');
+
+        // Platform-specific selectors
+        let postsButton;
+        if (platform === 'android') {
+          // On Android, find by text content (more reliable than resource-id)
+          postsButton = await testBase.driver.$('android=new UiSelector().textContains("Posts (API)")');
+        } else {
+          // On iOS, use accessibility id (testID maps to accessibility identifier)
+          postsButton = await testBase.driver.$('~menu-item-posts');
+        }
+
         await postsButton.waitForDisplayed({ timeout: 10000 });
         await postsButton.click();
 
         console.log('✅ Clicked Posts button');
       });
 
-      testBase.allure.step('Verify Posts screen loaded', async () => {
+      await testBase.allure.step('Verify Posts screen loaded', async () => {
         // Wait for posts screen
         await postsPage.waitForScreen();
         console.log('✅ Posts screen loaded');
@@ -87,7 +97,7 @@ async function runPostsTest() {
         console.log('✅ Posts header verified');
       });
 
-      testBase.allure.step('Verify API data loaded', async () => {
+      await testBase.allure.step('Verify API data loaded', async () => {
         // Wait for posts list to load (with API data)
         await testBase.driver.pause(3000); // Give time for API call
 
@@ -116,7 +126,7 @@ async function runPostsTest() {
         console.log('✅ Posts loaded from API');
       });
 
-      testBase.allure.step('Verify posts list', async () => {
+      await testBase.allure.step('Verify posts list', async () => {
         // Get posts count
         const count = await postsPage.getPostsCount();
         console.log(`📊 Found ${count} posts`);
@@ -134,7 +144,7 @@ async function runPostsTest() {
         console.log('✅ Posts list verified');
       });
 
-      testBase.allure.step('Test refresh functionality', async () => {
+      await testBase.allure.step('Test refresh functionality', async () => {
         // Click refresh button
         await postsPage.clickRefresh();
         console.log('🔄 Clicked refresh button');
@@ -153,7 +163,7 @@ async function runPostsTest() {
         console.log('✅ Refresh functionality verified');
       });
 
-      testBase.allure.step('Navigate back to home', async () => {
+      await testBase.allure.step('Navigate back to home', async () => {
         await postsPage.clickBack();
         console.log('✅ Navigated back to home');
       });

@@ -43,6 +43,44 @@
       "responseMode": null
     },
     {
+      "uuid": "route-users",
+      "type": "http",
+      "documentation": "Get all users - Returns exactly 3 mock users to verify mocking works",
+      "method": "get",
+      "endpoint": "users",
+      "responses": [
+        {
+          "uuid": "response-users",
+          "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Mock User One\",\n    \"email\": \"mock1@mockoon.test\",\n    \"username\": \"mockuser1\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Mock User Two\",\n    \"email\": \"mock2@mockoon.test\",\n    \"username\": \"mockuser2\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Mock User Three\",\n    \"email\": \"mock3@mockoon.test\",\n    \"username\": \"mockuser3\"\n  }\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "X-Mock-Server",
+              "value": "Mockoon-Verified"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
       "uuid": "route-002",
       "type": "http",
       "documentation": "Get all posts - Simple mock returning array of posts",
@@ -81,6 +119,10 @@
     {
       "type": "route",
       "uuid": "route-001"
+    },
+    {
+      "type": "route",
+      "uuid": "route-users"
     },
     {
       "type": "route",

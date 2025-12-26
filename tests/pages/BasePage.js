@@ -23,6 +23,20 @@ class BasePage {
   }
 
   /**
+   * Helper method to find element by testID (works with both platforms)
+   * Converts a simple string ID to platform-specific accessibility ID selector
+   * @param {string} testId - Test ID string
+   * @returns {Promise<WebdriverIO.Element>}
+   */
+  async findElement(testId) {
+    const selectors = {
+      ios: `~${testId}`,
+      android: `~${testId}`,
+    };
+    return await this.getElement(selectors);
+  }
+
+  /**
    * Get multiple elements with platform-specific selector
    * @param {Object} selectors - { ios: 'selector', android: 'selector' }
    * @returns {Promise<WebdriverIO.ElementArray>}
@@ -34,10 +48,17 @@ class BasePage {
 
   /**
    * Wait for element to be displayed
-   * @param {Object} selectors - Platform-specific selectors
+   * @param {Object|string} selectors - Platform-specific selectors object OR simple test ID string
    * @param {number} timeout - Optional timeout (uses config default)
    */
   async waitForElement(selectors, timeout = config.timeouts.explicit) {
+    // If selectors is a string, convert it to object format
+    if (typeof selectors === 'string') {
+      selectors = {
+        ios: `~${selectors}`,
+        android: `~${selectors}`,
+      };
+    }
     const element = await this.getElement(selectors);
     await element.waitForDisplayed({ timeout });
     return element;

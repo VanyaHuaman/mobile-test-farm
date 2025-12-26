@@ -1,19 +1,5 @@
 {
   "devices": {
-    "android-emulator-1": {
-      "friendlyName": "Android Emulator (Pixel 64)",
-      "deviceId": "emulator-5554",
-      "platform": "android",
-      "type": "emulator",
-      "model": "sdk_gphone64_arm64",
-      "osVersion": "Android 14",
-      "active": true,
-      "capabilities": {
-        "platformName": "Android",
-        "appium:automationName": "UiAutomator2",
-        "appium:deviceName": "emulator-5554"
-      }
-    },
     "iphone-16-pro-simulator": {
       "friendlyName": "iPhone 16 Pro Simulator",
       "deviceId": "AE9BA913-29AC-4B5C-B718-8200F5106756",
@@ -28,10 +14,42 @@
         "appium:udid": "AE9BA913-29AC-4B5C-B718-8200F5106756"
       },
       "notes": "Test device for iOS automation"
+    },
+    "pixel-9": {
+      "friendlyName": "Pixel 9",
+      "deviceId": "emulator-5554",
+      "platform": "android",
+      "type": "emulator",
+      "model": "unknown",
+      "osVersion": "unknown",
+      "active": true,
+      "capabilities": {
+        "platformName": "Android",
+        "appium:automationName": "UiAutomator2",
+        "appium:deviceName": "emulator-5554"
+      },
+      "notes": "",
+      "mitmCertInstalled": true
+    },
+    "device-on": {
+      "friendlyName": "Device on",
+      "deviceId": "on",
+      "platform": "ios",
+      "type": "physical",
+      "model": "unknown",
+      "osVersion": "unknown",
+      "active": true,
+      "capabilities": {
+        "platformName": "iOS",
+        "appium:automationName": "XCUITest",
+        "appium:udid": "on"
+      },
+      "notes": "",
+      "mitmCertInstalled": false
     }
   },
   "metadata": {
-    "lastUpdated": "2025-12-23T23:07:15.166Z",
+    "lastUpdated": "2025-12-26T15:17:02.163Z",
     "version": "1.0.0"
   }
 }

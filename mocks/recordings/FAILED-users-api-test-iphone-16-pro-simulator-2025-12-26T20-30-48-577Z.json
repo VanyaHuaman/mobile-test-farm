@@ -1,0 +1,42 @@
+{
+  "status": "FAILED",
+  "mockId": "test-mockoon-server",
+  "timestamp": "2025-12-26T20:30:48.577Z",
+  "test": {
+    "name": "users-api-test",
+    "deviceId": "iphone-16-pro-simulator",
+    "error": "Command failed: adb -s AE9BA913-29AC-4B5C-B718-8200F5106756 shell settings get global http_proxy\nadb: device 'AE9BA913-29AC-4B5C-B718-8200F5106756' not found\n",
+    "duration": 8838
+  },
+  "totalTransactions": 2,
+  "transactions": [
+    {
+      "app": "mockoon-server",
+      "environmentName": "JSONPlaceholder API Mock - Simple Example",
+      "environmentUUID": "50a521bd-7f63-4873-9cc4-c9a759379a7b",
+      "level": "info",
+      "message": "Creating proxy to https://jsonplaceholder.typicode.com",
+      "timestamp": "2025-12-26T20:30:40.460Z"
+    },
+    {
+      "app": "mockoon-server",
+      "environmentName": "JSONPlaceholder API Mock - Simple Example",
+      "environmentUUID": "50a521bd-7f63-4873-9cc4-c9a759379a7b",
+      "level": "error",
+      "message": "Port 3001 is already in use",
+      "timestamp": "2025-12-26T20:30:40.465Z"
+    }
+  ],
+  "summary": {
+    "total": 2,
+    "proxiedCount": 0,
+    "mockedCount": 2,
+    "errorCount": 0,
+    "methods": {
+      "UNKNOWN": 2
+    },
+    "endpoints": {
+      "UNKNOWN": 2
+    }
+  }
+}

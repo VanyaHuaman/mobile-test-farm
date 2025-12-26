@@ -25,20 +25,28 @@ class HomePage extends BasePage {
         android: 'android=new UiSelector().text("Welcome to the test app!")',
       },
       formMenuItem: {
-        ios: '~menu-item-form',
-        android: '~menu-item-form',
+        ios: '~Navigate to Form Example',
+        android: '~Navigate to Form Example',
       },
       listMenuItem: {
-        ios: '~menu-item-list',
-        android: '~menu-item-list',
+        ios: '~Navigate to List Example',
+        android: '~Navigate to List Example',
       },
       profileMenuItem: {
-        ios: '~menu-item-profile',
-        android: '~menu-item-profile',
+        ios: '~Navigate to Profile',
+        android: '~Navigate to Profile',
+      },
+      usersMenuItem: {
+        ios: '~Navigate to Users (API)',
+        android: '~Navigate to Users (API)',
+      },
+      postsMenuItem: {
+        ios: '~Navigate to Posts (API)',
+        android: '~Navigate to Posts (API)',
       },
       logoutButton: {
-        ios: '~logout-button',
-        android: '~logout-button',
+        ios: '~Logout button',
+        android: '~Logout button',
       },
     };
   }
@@ -94,11 +102,55 @@ class HomePage extends BasePage {
   }
 
   /**
+   * Navigate to Users screen
+   */
+  async navigateToUsers() {
+    console.log('👥 Navigating to Users screen');
+    await this.click(this.selectors.usersMenuItem);
+  }
+
+  /**
+   * Navigate to Posts screen
+   */
+  async navigateToPosts() {
+    console.log('📰 Navigating to Posts screen');
+    await this.click(this.selectors.postsMenuItem);
+  }
+
+  /**
    * Click logout button
    */
   async logout() {
     console.log('🚪 Logging out');
     await this.click(this.selectors.logoutButton);
+  }
+
+  /**
+   * Click logout button (alias for logout)
+   */
+  async clickLogout() {
+    await this.logout();
+  }
+
+  /**
+   * Generic menu item click - routes to specific navigation methods
+   * @param {string} menuItem - Menu item name ('form', 'list', 'profile', 'users', 'posts')
+   */
+  async clickMenuItem(menuItem) {
+    const menuActions = {
+      form: () => this.navigateToForm(),
+      list: () => this.navigateToList(),
+      profile: () => this.navigateToProfile(),
+      users: () => this.navigateToUsers(),
+      posts: () => this.navigateToPosts(),
+    };
+
+    const action = menuActions[menuItem.toLowerCase()];
+    if (!action) {
+      throw new Error(`Unknown menu item: ${menuItem}`);
+    }
+
+    await action();
   }
 
   /**

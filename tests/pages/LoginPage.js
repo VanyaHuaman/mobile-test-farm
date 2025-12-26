@@ -12,21 +12,21 @@ class LoginPage extends BasePage {
   }
 
   /**
-   * Selectors for login page elements
+   * Selectors for login page elements - Using accessibilityLabel for cross-platform consistency
    */
   get selectors() {
     return {
       usernameInput: {
         ios: '~username-input',
-        android: '~Username input',
+        android: '~username-input',
       },
       passwordInput: {
         ios: '~password-input',
-        android: '~Password input',
+        android: '~password-input',
       },
       loginButton: {
         ios: '~login-button',
-        android: '~Login button',
+        android: '~login-button',
       },
       forgotPasswordLink: {
         ios: '~forgot-password-link',
