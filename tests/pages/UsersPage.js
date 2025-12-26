@@ -152,21 +152,21 @@ class UsersPage extends BasePage {
    * Click back button
    */
   async clickBack() {
-    await this.clickElement(this.backButton);
+    await this.click(this.backButton);
   }
 
   /**
    * Click refresh button
    */
   async clickRefresh() {
-    await this.clickElement(this.refreshButton);
+    await this.click(this.refreshButton);
   }
 
   /**
    * Click retry button (shown on error)
    */
   async clickRetry() {
-    await this.clickElement(this.retryButton);
+    await this.click(this.retryButton);
   }
 
   /**
