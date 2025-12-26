@@ -28,10 +28,12 @@ async function runPostsTest() {
       app: config.apps.android.debug,
       appPackage: config.appInfo.android.package,
       appActivity: config.appInfo.android.activity,
+      noReset: config.behavior.noReset,
     },
     ios: {
       app: config.apps.ios.simulator,
       bundleId: config.appInfo.ios.bundleId,
+      noReset: config.behavior.noReset,
     },
   };
 

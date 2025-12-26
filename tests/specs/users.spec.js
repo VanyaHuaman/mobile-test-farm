@@ -28,10 +28,12 @@ async function runUsersTest() {
       app: config.apps.android.debug,
       appPackage: config.appInfo.android.package,
       appActivity: config.appInfo.android.activity,
+      noReset: config.behavior.noReset,
     },
     ios: {
       app: config.apps.ios.simulator,
       bundleId: config.appInfo.ios.bundleId,
+      noReset: config.behavior.noReset,
     },
   };
 
@@ -47,20 +49,34 @@ async function runUsersTest() {
       const usersPage = new UsersPage(testBase.driver);
 
       testBase.allure.step('Login to app', async () => {
-        console.log('🔐 Logging in...');
+        console.log('🔐 Starting login process...');
+        console.log('📱 App should be on login screen');
         await testBase.driver.pause(2000);
 
         // Login with default credentials
-        await loginPage.loginWithDefaultCredentials();
-        console.log('✅ Login action completed');
+        console.log('🔑 Attempting to login with default credentials...');
+        try {
+          await loginPage.loginWithDefaultCredentials();
+          console.log('✅ Login action completed');
+        } catch (error) {
+          console.error('❌ Login failed:', error.message);
+          throw error;
+        }
 
         // Wait for navigation
+        console.log('⏳ Waiting for navigation to home screen...');
         await testBase.driver.pause(1000);
 
         // Verify home page loaded
-        await homePage.waitForPageLoad();
-        await homePage.verifyOnHomePage();
-        console.log('✅ Home page loaded successfully');
+        console.log('🏠 Verifying home page loaded...');
+        try {
+          await homePage.waitForPageLoad();
+          await homePage.verifyOnHomePage();
+          console.log('✅ Home page loaded successfully');
+        } catch (error) {
+          console.error('❌ Home page verification failed:', error.message);
+          throw error;
+        }
       });
 
       testBase.allure.step('Navigate to Users screen', async () => {
