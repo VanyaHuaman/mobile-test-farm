@@ -482,29 +482,6 @@ Automated daily test execution via GitHub Actions:
 
 See [Quick Wins Documentation](docs/quick-wins.md) for detailed setup and usage.
 
-## Test Application
-
-The project includes a test Expo app at `/Users/vanyahuaman/expo-arch-example-app`:
-
-**Features:**
-- Built with Expo Router (file-based routing)
-- New Architecture enabled (Fabric + TurboModules)
-- 5 test screens: Login, Home, Form, List, Profile
-- All elements tagged with testID for automation
-- Cross-platform (Android & iOS)
-
-**Build for Android:**
-```bash
-cd ~/expo-arch-example-app
-npx expo run:android
-```
-
-**Build for iOS (Phase 2):**
-```bash
-cd ~/expo-arch-example-app
-npx expo run:ios
-```
-
 ## Documentation
 
 ### Core Guides
@@ -612,14 +589,7 @@ npx expo run:ios
 - ✅ Support for multiple mock environments (errors, timeouts, edge cases)
 - ✅ Test variants for different API scenarios
 
-**Test Application:**
-- ✅ Expo Router + React Native New Architecture
-- ✅ Cross-platform app (Android & iOS)
-- ✅ Comprehensive testID coverage
-- ✅ Debug and release build support
-- ✅ Debug-specific network security config (Android)
-
-**Test Results:**
+**Verified Platforms:**
 - ✅ iOS: iPhone 16 Pro Simulator - PASSED (with MITM mocking)
 - ✅ Android: Pixel 64 Emulator - PASSED (with MITM mocking)
 - ✅ Parallel Execution: Both platforms simultaneously - PASSED
