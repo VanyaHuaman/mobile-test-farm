@@ -383,8 +383,8 @@ Located at: `.github/workflows/nightly-tests.yml`
    - Install XCUITest 10.12.2 (iOS)
    - Start Appium server
 
-5. **Build Test App**
-   - Checkout expo-arch-example-app
+5. **Build Your Mobile App**
+   - Checkout your mobile app repository
    - Install dependencies
    - Build Android APK
    - Build iOS app

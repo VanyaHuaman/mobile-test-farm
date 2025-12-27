@@ -1,10 +1,22 @@
 # Mobile Test Farm
 
+> **📦 Template Branch** - This is the clean starter template for new projects.
+> **✨ Want to see examples?** Check out the [`master` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/master) for a complete working example with a real Expo app.
+
 [![Mobile Test Farm CI](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml)
 [![Android Tests](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml)
 [![iOS Tests](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-ios.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-ios.yml)
 
 Automated mobile device testing infrastructure for running tests across multiple Android and iOS devices with user-friendly device management.
+
+**Start your project:**
+```bash
+git clone -b template https://github.com/VanyaHuaman/mobile-test-farm.git my-mobile-tests
+cd my-mobile-tests
+npm run setup
+```
+
+See **[GETTING_STARTED.md](GETTING_STARTED.md)** for a quick setup guide.
 
 ## Features
 
@@ -18,7 +30,6 @@ Automated mobile device testing infrastructure for running tests across multiple
 ✅ **Video Recording** - Automatic video recording on test failure for debugging
 ✅ **HTML Test Reports** - Beautiful Allure reports with charts, videos, and history
 ✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
-✅ **Modern Test App** - Expo app with New Architecture (Fabric + TurboModules)
 ✅ **Device Registry** - Centralized device configuration and management
 ✅ **Cross-Platform** - Same tests run on both Android and iOS
 ✅ **Appium 3** - Latest Appium with modern architecture
