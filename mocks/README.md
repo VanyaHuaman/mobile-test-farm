@@ -29,7 +29,7 @@ Mock environment files define your API mocks. Each file contains:
 - Proxy: https://jsonplaceholder.typicode.com
 - Use case: Learning, basic testing
 
-#### Advanced Mocks (Phase 3)
+#### Advanced Mocks
 
 **`users-faker-advanced.json`** - Faker.js data generation
 - `GET /users/random` - Random user with realistic Faker data

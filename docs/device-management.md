@@ -323,7 +323,7 @@ adb devices -l
 # Developer Options > USB Debugging
 ```
 
-**iOS (Coming in Phase 2):**
+**iOS:**
 ```bash
 # Check iOS device connectivity
 idevice_id -l
@@ -401,5 +401,4 @@ const emulators = manager
 ## See Also
 
 - [Writing Tests](./writing-tests.md)
-- [Phase 1 Completion Report](./phase1-completion.md)
 - [Setup Android](./setup-android.md)

@@ -405,8 +405,6 @@ Mockoon supports [Faker.js templating](https://mockoon.com/docs/latest/templatin
 }
 ```
 
-**Coming soon:** Advanced mock examples using Faker.js (Phase 3)
-
 ### 2. Response Rules
 
 Return different responses based on request parameters:
@@ -559,26 +557,6 @@ testBase.mockoonManager.saveTransactionLogs(mockId, 'manual-save.json');
 - Check `MOCKOON_PROXY_URL` is set
 - Verify `proxyMode: true` in mock file
 - Check `proxyHost` matches `MOCKOON_PROXY_URL`
-
----
-
-## Next Steps
-
-### Phase 2: Add Real API to Example App
-
-We'll update `expo-arch-example-app` to:
-1. Install TanStack Query for data fetching
-2. Add API calls to JSONPlaceholder test API
-3. Configure API_BASE_URL to use Mockoon
-4. Create example screens with real data
-
-### Phase 3: Advanced Mock Examples
-
-Create advanced mock files demonstrating:
-- Faker.js integration for realistic test data
-- Response rules for conditional mocking
-- CRUD operations with data buckets
-- Complex scenarios (pagination, auth, file uploads)
 
 ---
 

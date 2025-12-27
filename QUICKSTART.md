@@ -354,7 +354,6 @@ You now have a working Mobile Test Farm setup!
 
 4. **Explore Documentation:**
    - [Device Management Guide](docs/device-management.md)
-   - [Phase 1 Completion Report](docs/phase1-completion.md)
    - [Android Setup Guide](docs/setup-android.md)
 
 ---
