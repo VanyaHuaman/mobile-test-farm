@@ -416,29 +416,74 @@ MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/empty.json npm run tes
 
 ### Using MITM Proxy with Cloud Devices
 
-MITM proxy works with **local emulators and simulators only**. Cloud device farms (BrowserStack, Sauce Labs, AWS Device Farm, Firebase Test Lab) cannot route traffic through your local MITM proxy.
+Your **local MITM proxy** (running on localhost:8888) cannot be accessed by cloud devices. However, **mocking still works with cloud devices** using these approaches:
 
-**Alternative for Cloud Devices:**
+**Option 1: Cloud Provider Tunneling (Recommended)**
 
-1. **Deploy Mockoon to a Public Server:**
-   ```bash
-   # Example: Deploy to Heroku, AWS, or DigitalOcean
-   # Configure app to use public Mockoon URL
-   ```
+Many cloud providers support tunneling to access localhost:
 
-2. **Use Cloud Provider's Network Proxy Features:**
-   - Some cloud providers support custom proxy configuration
-   - Check provider documentation for proxy capabilities
+**BrowserStack Local:**
+```bash
+# Download BrowserStack Local binary
+# Start tunnel to expose your localhost
+./BrowserStackLocal --key YOUR_ACCESS_KEY
 
-3. **Direct Mock Server Approach:**
-   - Run Mockoon on a public server
-   - Configure app to point to public mock server URL
-   - No MITM proxy needed
+# Now cloud devices can access localhost:8888 and localhost:3001
+# Run tests normally with MOCKOON_ENABLED=true
+```
 
-**Recommended Approach for Cloud Testing:**
-- Use local devices with MITM proxy for mocking scenarios
-- Use cloud devices for real API testing and broader device coverage
-- Hybrid testing: Local (with mocks) + Cloud (with real APIs)
+**Sauce Connect:**
+```bash
+# Start Sauce Connect tunnel
+sc -u YOUR_USERNAME -k YOUR_ACCESS_KEY
+
+# Cloud devices can now access your local MITM proxy
+```
+
+**AWS Device Farm:**
+- Supports VPC endpoints for private network access
+- Can route to private mock servers
+
+**Option 2: Deploy Mock Server Publicly**
+
+Deploy Mockoon to a public server and update MITM proxy configuration:
+
+```bash
+# 1. Deploy Mockoon to cloud (Heroku, AWS, DigitalOcean, etc.)
+# Example public URL: https://your-mockoon.herokuapp.com
+
+# 2. Update MITM proxy to redirect to public Mockoon
+# Edit mocks/mitm-scripts/test-mitm-proxy.py:
+MOCKOON_HOST = "your-mockoon.herokuapp.com"
+MOCKOON_PORT = 443  # HTTPS
+
+# 3. Cloud devices route through cloud-accessible MITM proxy
+```
+
+**Option 3: Direct Mockoon (No MITM Proxy)**
+
+Configure app to connect directly to Mockoon:
+
+```bash
+# If using public Mockoon server
+# No MITM proxy needed - app points directly to mock server
+# Requires app code to support configurable API URL
+```
+
+**Option 4: Use Cloud Provider's Mock Features**
+
+Some providers offer built-in API mocking:
+- Firebase Test Lab: Network profile simulation
+- AWS Device Farm: Custom network configurations
+
+**Recommended Approaches:**
+
+| Scenario | Best Option | Why |
+|----------|-------------|-----|
+| Quick cloud testing | BrowserStack Local / Sauce Connect | Easy setup, works with existing MITM config |
+| Production cloud testing | Deploy Mockoon publicly | More reliable, no tunnel needed |
+| Hybrid testing | Local with MITM, Cloud with real API | Leverages strengths of both |
+| CI/CD automation | Deploy Mockoon publicly | No local dependencies |
 
 ### Debugging Failed Tests
 
