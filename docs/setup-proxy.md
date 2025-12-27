@@ -420,6 +420,26 @@ ngrok http 8080
 # Use ngrok URL as proxy in device
 ```
 
+## Using with Cloud Device Farms
+
+MITM proxy works with cloud providers that support tunneling to localhost:
+
+**✅ Supported (with tunneling):**
+- **BrowserStack** - Use BrowserStack Local binary to create tunnel
+- **Sauce Labs** - Use Sauce Connect to tunnel to localhost
+- **AWS Device Farm** - Use VPC endpoints for private network access
+- **LambdaTest** - Use LambdaTest tunnel for localhost access
+
+**❌ Not Supported (requires public deployment):**
+- **Firebase Test Lab** - No tunneling support, deploy Mockoon and mitmproxy publicly
+- **Perfecto** - Limited tunneling capabilities
+- **Kobiton** - No direct localhost tunneling
+
+For unsupported providers, you have these options:
+1. Deploy Mockoon to a public server (Heroku, AWS, DigitalOcean, etc.)
+2. Use ngrok to expose mitmproxy publicly (see Option 2 above)
+3. Use hybrid testing (local devices with mocks, cloud devices with real API)
+
 ## Security Notes
 
 - ⚠️ mitmproxy intercepts ALL traffic including sensitive data

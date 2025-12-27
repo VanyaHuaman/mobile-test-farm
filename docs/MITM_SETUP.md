@@ -231,6 +231,22 @@ A: Yes, but you need to:
 2. Point to your computer's IP (not localhost)
 3. Install certificate on device
 
+**Q: Can I use this with cloud device farms?**
+A: Yes, but only with providers that support tunneling:
+
+**✅ Supported (with tunneling):**
+- **BrowserStack** - Use BrowserStack Local binary to create tunnel
+- **Sauce Labs** - Use Sauce Connect to tunnel to localhost
+- **AWS Device Farm** - Use VPC endpoints for private network access
+- **LambdaTest** - Use LambdaTest tunnel for localhost access
+
+**❌ Not Supported (requires public deployment):**
+- **Firebase Test Lab** - No tunneling support, deploy Mockoon publicly
+- **Perfecto** - Limited tunneling capabilities
+- **Kobiton** - No direct localhost tunneling
+
+For unsupported providers, deploy Mockoon to a public server (Heroku, AWS, etc.) or use hybrid testing (local devices with mocks, cloud devices with real API).
+
 **Q: Does this slow down tests?**
 A: Minimal overhead. MITM proxy is very fast. Mockoon responses are faster than real API.
 
