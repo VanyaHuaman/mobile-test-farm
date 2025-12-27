@@ -1,10 +1,27 @@
 # Mobile Test Farm
 
+> **✨ Example Branch** - This branch contains a complete working example with a real Expo app.
+> **📦 Want a clean starter?** Check out the [`template` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/template) for a ready-to-use template without the example app.
+
 [![Mobile Test Farm CI](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml)
 [![Android Tests](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml)
 [![iOS Tests](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-ios.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-ios.yml)
 
 Automated mobile device testing infrastructure for running tests across multiple Android and iOS devices with user-friendly device management.
+
+**Explore the examples:**
+```bash
+git clone https://github.com/VanyaHuaman/mobile-test-farm.git
+cd mobile-test-farm
+npm run setup
+```
+
+**Start a new project:**
+```bash
+git clone -b template https://github.com/VanyaHuaman/mobile-test-farm.git my-mobile-tests
+cd my-mobile-tests
+npm run setup
+```
 
 ## Features
 
