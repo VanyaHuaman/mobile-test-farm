@@ -359,16 +359,86 @@ MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/empty.json npm run tes
 
 ### Platform-Specific Setup
 
-**Android:**
+**Android Emulators:**
 - Automatically configured via `adb` device proxy
 - Debug builds trust mitmproxy certificate
 - No app code changes needed
 
-**iOS:**
+**iOS Simulators:**
 - Uses macOS system proxy settings
 - Certificate installed in macOS keychain
 - Metro bundler bypass configured automatically
 - No app code changes needed
+
+### Using MITM Proxy with Physical Devices
+
+**Android Physical Devices:**
+
+1. **Configure WiFi Proxy:**
+   - Connect device to same WiFi network as your computer
+   - Open WiFi settings on device
+   - Long press on connected network → Modify Network
+   - Advanced Options → Manual Proxy
+   - Set hostname to your computer's local IP (e.g., `192.168.1.100`)
+   - Set port to `8888`
+
+2. **Install Certificate:**
+   ```bash
+   # Push certificate to device
+   adb push ~/.mitmproxy/mitmproxy-ca-cert.pem /sdcard/Download/
+
+   # On device: Settings → Security → Install from storage
+   # Select the certificate file
+   ```
+
+3. **For Debug Builds:**
+   - Debug-specific network security config already trusts user certificates
+   - No additional app changes needed
+
+**iOS Physical Devices:**
+
+1. **Configure WiFi Proxy:**
+   - Connect device to same WiFi network as your Mac
+   - Settings → WiFi → (i) on connected network
+   - Configure Proxy → Manual
+   - Server: Your Mac's local IP (e.g., `192.168.1.100`)
+   - Port: `8888`
+
+2. **Install Certificate:**
+   - Email the certificate to yourself or use AirDrop
+   - Certificate location: `~/.mitmproxy/mitmproxy-ca-cert.pem`
+   - On device: Open the certificate file
+   - Follow prompts to install profile
+
+3. **Enable Full Trust:**
+   - Settings → General → About → Certificate Trust Settings
+   - Enable full trust for mitmproxy certificate
+
+### Using MITM Proxy with Cloud Devices
+
+MITM proxy works with **local emulators and simulators only**. Cloud device farms (BrowserStack, Sauce Labs, AWS Device Farm, Firebase Test Lab) cannot route traffic through your local MITM proxy.
+
+**Alternative for Cloud Devices:**
+
+1. **Deploy Mockoon to a Public Server:**
+   ```bash
+   # Example: Deploy to Heroku, AWS, or DigitalOcean
+   # Configure app to use public Mockoon URL
+   ```
+
+2. **Use Cloud Provider's Network Proxy Features:**
+   - Some cloud providers support custom proxy configuration
+   - Check provider documentation for proxy capabilities
+
+3. **Direct Mock Server Approach:**
+   - Run Mockoon on a public server
+   - Configure app to point to public mock server URL
+   - No MITM proxy needed
+
+**Recommended Approach for Cloud Testing:**
+- Use local devices with MITM proxy for mocking scenarios
+- Use cloud devices for real API testing and broader device coverage
+- Hybrid testing: Local (with mocks) + Cloud (with real APIs)
 
 ### Debugging Failed Tests
 
