@@ -26,11 +26,11 @@ const config = {
   },
 
   // Application Paths
-  // TODO: Update these paths to point to your mobile app
+  // Points to the native Android Compose example app
   apps: {
     android: {
       debug: process.env.ANDROID_APP_DEBUG ||
-             path.join(os.homedir(), 'your-app/android/app/build/outputs/apk/debug/app-debug.apk'),
+             path.join(__dirname, '../examples/native-android-app/app/build/outputs/apk/debug/app-debug.apk'),
       release: process.env.ANDROID_APP_RELEASE || '',
     },
     ios: {
@@ -41,10 +41,10 @@ const config = {
   },
 
   // App Package/Bundle Information
-  // TODO: Update these to match your app's package/bundle identifier
+  // Native Android Compose app package info
   appInfo: {
     android: {
-      package: process.env.ANDROID_PACKAGE || 'com.yourcompany.yourapp',
+      package: process.env.ANDROID_PACKAGE || 'com.example.nativecomposeapp',
       activity: process.env.ANDROID_ACTIVITY || '.MainActivity',
     },
     ios: {
@@ -56,7 +56,7 @@ const config = {
   testUsers: {
     default: {
       username: process.env.TEST_USERNAME || 'demo',
-      password: process.env.TEST_PASSWORD || 'password',
+      password: process.env.TEST_PASSWORD || 'password123',
     },
   },
 

@@ -40,7 +40,13 @@
     "dashboard:dev": "nodemon server/index.js",
     "setup:mitm": "node bin/setup-mitm.js",
     "setup:mitm:android": "node bin/setup-mitm.js --android",
-    "setup:mitm:ios": "node bin/setup-mitm.js --ios"
+    "setup:mitm:ios": "node bin/setup-mitm.js --ios",
+    "build:native-android": "cd examples/native-android-app && ./gradlew assembleDebug",
+    "build:native-android:clean": "cd examples/native-android-app && ./gradlew clean assembleDebug",
+    "test:native-android:login": "node tests/specs/native-android/login.spec.js",
+    "test:native-android:users": "node tests/specs/native-android/users-list.spec.js",
+    "test:native-android:profile": "node tests/specs/native-android/profile.spec.js",
+    "test:native-android:all": "npm run test:native-android:login && npm run test:native-android:users && npm run test:native-android:profile"
   },
   "bin": {
     "devices": "./bin/devices.js"
