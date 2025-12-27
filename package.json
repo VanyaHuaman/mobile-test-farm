@@ -8,6 +8,7 @@
     "test": "tests"
   },
   "scripts": {
+    "setup": "node bin/setup.js",
     "test": "node tests/specs/login.spec.js",
     "appium": "appium",
     "test:login": "node tests/login-test.js",

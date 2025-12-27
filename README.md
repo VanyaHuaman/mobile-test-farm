@@ -32,7 +32,37 @@ Automated mobile device testing infrastructure for running tests across multiple
 
 ## Quick Start
 
-### Option 1: Web Dashboard (Recommended for Teams)
+### Option 1: Automated Setup (Recommended for First Time)
+
+Run the one-command setup script that automatically installs and configures everything:
+
+```bash
+cd mobile-test-farm
+npm run setup
+```
+
+This interactive script will:
+- ✅ Check your system requirements (Node.js, Java, Android SDK, Xcode)
+- ✅ Install missing dependencies (Homebrew, mitmproxy, Appium)
+- ✅ Configure environment variables automatically
+- ✅ Install Appium drivers (UiAutomator2, XCUITest)
+- ✅ Set up MITM proxy certificates for API mocking
+- ✅ Verify everything is working
+
+After setup completes:
+
+```bash
+# Start Appium server
+npx appium
+
+# Connect your devices and run your first test
+npm run test:login
+
+# Or use the Web Dashboard
+npm run dashboard
+```
+
+### Option 2: Web Dashboard (Recommended for Teams)
 
 ```bash
 # Start the dashboard server
@@ -50,11 +80,11 @@ The web dashboard provides:
 
 See [Web Dashboard Guide](docs/web-dashboard.md) for detailed instructions.
 
-### Option 2: Command Line
+### Option 3: Manual Installation
 
-### 1. Install Node.js 22.21.1 LTS
+If you prefer to install components manually:
 
-Appium 3.x requires Node.js 22.x for proper ES Module support:
+#### 1. Install Node.js 22.21.1 LTS
 
 ```bash
 # Using nvm (recommended)
@@ -66,52 +96,78 @@ node --version  # Should show v22.21.1
 npm --version   # Should show 10.9.4
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 
 ```bash
 cd mobile-test-farm
 npm install
 ```
 
-### 3. Start Appium Server
+#### 3. Install Appium and Drivers
 
 ```bash
+# Install Appium globally
+npm install -g appium
+
+# Install drivers
+appium driver install uiautomator2  # For Android
+appium driver install xcuitest      # For iOS (macOS only)
+```
+
+#### 4. Install Additional Tools
+
+```bash
+# macOS
+brew install mitmproxy
+
+# Linux
+pip3 install mitmproxy
+```
+
+#### 5. Set Up Environment Variables
+
+Add to your `~/.zshrc` or `~/.bashrc`:
+
+```bash
+export ANDROID_HOME=~/Library/Android/sdk
+export JAVA_HOME=/path/to/jdk
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+```
+
+#### 6. Start Appium and Run Tests
+
+```bash
+# Start Appium server
 npx appium
-```
 
-Leave this running in the background.
-
-### 4. Connect and Register Devices
-
-**For Android Emulator:**
-```bash
-# Start your Android emulator first
-# Then sync to discover connected devices
+# Connect devices
 npm run devices sync
-
-# Register the device with a friendly name
 npm run devices register
-```
 
-**For Physical Devices:**
-- Enable USB debugging on Android devices
-- Connect via USB
-- Run `npm run devices sync` to discover
-- Run `npm run devices register` to add with friendly name
-
-### 5. Run Your First Test
-
-```bash
-# Run on default device (android-emulator-1)
+# Run your first test
 npm run test:login
-
-# Run on specific device by name
-node tests/login-test.js "Lenovo 11-inch Tablet"
 ```
 
 ## Prerequisites
 
-### Required Software
+### Minimum Requirements (Automated Setup)
+
+If using **`npm run setup`** (recommended), you only need:
+
+- **Node.js 22.21.1 LTS** - [Install via nvm](https://github.com/nvm-sh/nvm)
+- **Android Studio** or **Android SDK** - For Android testing ([Download](https://developer.android.com/studio))
+- **Xcode** - For iOS testing on macOS ([App Store](https://apps.apple.com/us/app/xcode/id497799835))
+
+The setup script will automatically install:
+- ✅ Appium 3.1.2
+- ✅ Appium drivers (UiAutomator2, XCUITest)
+- ✅ mitmproxy
+- ✅ Homebrew (if missing on macOS)
+- ✅ Configure environment variables
+
+### Full Requirements (Manual Setup)
+
+If installing manually:
 
 **macOS:**
 - Node.js 22.21.1 LTS (Jod) - Required for Appium 3.x
