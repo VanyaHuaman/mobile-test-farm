@@ -60,13 +60,64 @@ This interactive script will:
 - ✅ Set up MITM proxy certificates for API mocking
 - ✅ Verify everything is working
 
-After setup completes:
+After setup completes, configure your app:
+
+#### Configure Your App
+
+Edit `config/test.config.js` to point to your mobile app:
+
+```javascript
+apps: {
+  android: {
+    debug: '/path/to/your/app-debug.apk',  // ← Update with your APK path
+  },
+  ios: {
+    simulator: '/path/to/YourApp.app',     // ← Update with your .app path
+  },
+},
+appInfo: {
+  android: {
+    package: 'com.yourcompany.yourapp',    // ← Your app's package name
+    activity: '.MainActivity',              // ← Usually this for React Native/Expo
+  },
+  ios: {
+    bundleId: 'com.yourcompany.yourapp',   // ← Your app's bundle identifier
+  },
+},
+```
+
+**Find your package/bundle ID:**
+
+```bash
+# Android - Find package name
+adb shell pm list packages | grep yourapp
+# Example output: package:com.mycompany.myapp
+
+# iOS - Find bundle ID
+/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" /path/to/YourApp.app/Info.plist
+# Example output: com.mycompany.myapp
+```
+
+Or set via environment variables:
+
+```bash
+export ANDROID_APP_DEBUG=/path/to/your/app-debug.apk
+export ANDROID_PACKAGE=com.yourcompany.yourapp
+export IOS_APP_SIMULATOR=/path/to/YourApp.app
+export IOS_BUNDLE_ID=com.yourcompany.yourapp
+```
+
+#### Run Your First Test
 
 ```bash
 # Start Appium server
 npx appium
 
-# Connect your devices and run your first test
+# In another terminal, sync and register your devices
+npm run devices sync
+npm run devices register
+
+# Run a test (update the test to match your app)
 npm run test:login
 
 # Or use the Web Dashboard

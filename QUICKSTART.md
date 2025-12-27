@@ -219,84 +219,131 @@ Total: 1 device(s) | Active: 1
 
 ---
 
-## Step 7: Build the Test App (2 minutes)
+## Step 7: Configure Your App (2 minutes)
 
-The test app is already created in `~/expo-arch-example-app`. Now we build it:
+Now connect the framework to YOUR mobile app:
 
-```bash
-cd ~/expo-arch-example-app
+### 1. Update App Paths
 
-# Build for Android
-npx expo run:android
+Edit `config/test.config.js`:
+
+```javascript
+apps: {
+  android: {
+    debug: '/path/to/your/app-debug.apk',  // ← Your APK path
+  },
+  ios: {
+    simulator: '/path/to/YourApp.app',     // ← Your .app path
+  },
+},
+appInfo: {
+  android: {
+    package: 'com.yourcompany.yourapp',    // ← Your package name
+    activity: '.MainActivity',              // ← Usually .MainActivity
+  },
+  ios: {
+    bundleId: 'com.yourcompany.yourapp',   // ← Your bundle ID
+  },
+},
 ```
 
-**What happens:**
-1. Gradle downloads dependencies (first time only)
-2. App is compiled
-3. APK is built and installed on device
-4. App launches automatically
+### 2. Find Your Package/Bundle ID
 
-**Expected result:**
-- APK location: `android/app/build/outputs/apk/debug/app-debug.apk` (43MB)
-- App should launch on your device/emulator
-- You should see a login screen
+**Android:**
+```bash
+# List all installed packages on your device
+adb shell pm list packages | grep yourapp
 
-**Test manually:**
-- Username: `demo`
-- Password: `password`
-- Tap "Login" → Should navigate to Home screen ✅
+# Example output: package:com.mycompany.myapp
+# Use: com.mycompany.myapp
+```
+
+**iOS:**
+```bash
+# Read bundle ID from your .app
+/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" /path/to/YourApp.app/Info.plist
+
+# Example output: com.mycompany.myapp
+# Use: com.mycompany.myapp
+```
+
+### 3. Verify App Launches
+
+Test that the framework can launch your app:
+
+```bash
+# Start Appium (if not already running)
+npx appium
+
+# In another terminal, try to launch your app manually
+# This tests that your config is correct
+```
+
+**Expected:** Your app should launch on the registered device.
+
+**If app doesn't launch:**
+- Check APK/app path is correct
+- Verify package name/bundle ID matches your app
+- See [Troubleshooting](#troubleshooting) below
 
 ---
 
-## Step 8: Run Your First Automated Test (1 minute)
+## Step 8: Write Your First Test (3 minutes)
 
-**In the mobile-test-farm directory:**
+Create a simple test that launches your app:
+
+**Create `tests/specs/app-launch.spec.js`:**
+
+```javascript
+const TestBase = require('../../lib/TestBase');
+
+describe('App Launch Test', () => {
+  const testBase = new TestBase();
+
+  it('should launch the app', async function() {
+    await testBase.runTest(
+      'android-emulator-1',  // Your registered device name
+      null,                   // Use default config
+      async (driver) => {
+        // App is now launched!
+        console.log('✅ App launched successfully');
+
+        // Wait a moment to see the app
+        await driver.pause(2000);
+
+        // Get app state (should be 4 = running in foreground)
+        const appState = await driver.queryAppState('com.yourcompany.yourapp');
+        console.log('App state:', appState);
+
+        if (appState === 4) {
+          console.log('✅ App is running in foreground');
+        }
+      },
+      'app-launch-test'
+    );
+  });
+});
+```
+
+**Run your test:**
 
 ```bash
-cd ~/mobile-test-farm
-
-# Run the login test
-npm run test:login
+node tests/specs/app-launch.spec.js
 ```
 
 **Expected output:**
 ```
-🚀 Mobile Test Farm - Login Test
+✅ App launched successfully
+App state: 4
+✅ App is running in foreground
 
-Using device: android-emulator (Android Emulator)
-Capabilities: {
-  platformName: 'Android',
-  'appium:automationName': 'UiAutomator2',
-  'appium:deviceName': 'emulator-5554',
-  'appium:app': '/Users/.../app-debug.apk',
-  'appium:appPackage': 'com.vanyahuaman.expoarchexampleapp',
-  'appium:appActivity': '.MainActivity',
-  'appium:noReset': false
-}
-
-Connecting to Appium server...
-✅ Session created successfully
-
-Starting test: Login Flow
-  ✓ App launched
-  ✓ Login screen displayed
-  ✓ Username field found
-  ✓ Password field found
-  ✓ Entering credentials...
-  ✓ Tapping login button...
-  ✓ Navigated to Home screen
-  ✓ Home title verified: "Welcome to Home"
-
-✅ Login test passed!
-
-Session ended
+Test passed!
 ```
 
-**What the test does:**
-1. Launches the app
-2. Finds username and password fields
-3. Enters credentials (demo/password)
-4. Taps the login button
+**What this test does:**
+1. Launches your app on the device
+2. Verifies the app is running in foreground
+3. That's it! You've confirmed the framework works with your app
 5. Verifies navigation to Home screen
 6. Confirms "Welcome to Home" text appears
 

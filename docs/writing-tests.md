@@ -2,6 +2,113 @@
 
 This guide will help you write automated tests for your mobile applications.
 
+## Before You Write Tests
+
+Before diving into writing tests, make sure you've completed these prerequisites:
+
+### 1. Configure Your App
+
+Your app must be configured in `config/test.config.js`:
+
+```javascript
+apps: {
+  android: {
+    debug: '/path/to/your/app-debug.apk',
+  },
+  ios: {
+    simulator: '/path/to/YourApp.app',
+  },
+},
+appInfo: {
+  android: {
+    package: 'com.yourcompany.yourapp',
+    activity: '.MainActivity',
+  },
+  ios: {
+    bundleId: 'com.yourcompany.yourapp',
+  },
+},
+```
+
+See the [README Quick Start](../README.md#configure-your-app) for details.
+
+### 2. Verify App Launches
+
+Test that the framework can launch your app:
+
+```bash
+# Start Appium
+npx appium
+
+# In another terminal, register your device
+npm run devices sync
+npm run devices register
+
+# Try launching your app manually on the device
+# You should see your app launch
+```
+
+If your app doesn't launch, check:
+- APK/app file exists at the specified path
+- Package name/bundle ID is correct
+- Device is properly registered
+- Appium is running
+
+### 3. Learn Element Inspection
+
+You need to know how to find UI elements in your app:
+
+```javascript
+// How do you know what to use here? ↓
+await driver.$('~login-button').click();
+```
+
+**See:** [Element Inspection Guide](ELEMENT_INSPECTION.md) to learn how to find element selectors.
+
+**Quick tools:**
+- **Appium Inspector** (recommended) - Visual element inspector
+- **UI Automator Viewer** (Android) - Built into Android SDK
+- **Accessibility Inspector** (iOS) - Built into Xcode
+
+### 4. Your First Test
+
+Start with a simple test that just launches your app:
+
+```javascript
+// tests/specs/app-launch.spec.js
+const TestBase = require('../../lib/TestBase');
+
+describe('App Launch Test', () => {
+  const testBase = new TestBase();
+
+  it('should launch the app', async function() {
+    await testBase.runTest(
+      'android-emulator-1',  // Your device name
+      null,
+      async (driver) => {
+        console.log('✅ App launched successfully');
+
+        // Verify app is running
+        const appState = await driver.queryAppState('com.yourcompany.yourapp');
+        if (appState === 4) {
+          console.log('✅ App is running in foreground');
+        }
+      },
+      'app-launch-test'
+    );
+  });
+});
+```
+
+Run it:
+```bash
+node tests/specs/app-launch.spec.js
+```
+
+Once this works, you're ready to write real tests!
+
+---
+
 ## Test Structure
 
 Tests are organized by platform in the `tests/` directory:
