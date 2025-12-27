@@ -30,22 +30,6 @@
       },
       "notes": "",
       "mitmCertInstalled": true
-    },
-    "device-on": {
-      "friendlyName": "Device on",
-      "deviceId": "on",
-      "platform": "ios",
-      "type": "physical",
-      "model": "unknown",
-      "osVersion": "unknown",
-      "active": true,
-      "capabilities": {
-        "platformName": "iOS",
-        "appium:automationName": "XCUITest",
-        "appium:udid": "on"
-      },
-      "notes": "",
-      "mitmCertInstalled": false
     }
   },
   "metadata": {
