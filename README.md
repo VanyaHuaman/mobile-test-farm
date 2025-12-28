@@ -572,7 +572,7 @@ npm run notify:test            # Test notification configuration
 
 ## Example App (Expo/React Native)
 
-This branch includes a complete Expo/React Native example app located at `../expo-arch-example-app/`.
+This branch includes a complete Expo/React Native example app located at `examples/expo-app/`.
 
 **Features:**
 - Login screen with validation
@@ -586,7 +586,7 @@ This branch includes a complete Expo/React Native example app located at `../exp
 
 ```bash
 # Android
-cd ../expo-arch-example-app
+cd examples/expo-app
 npx expo run:android
 
 # iOS
@@ -718,7 +718,7 @@ npm start
 ```bash
 # Check app path in config/test.config.js
 # Rebuild your app
-cd ../expo-arch-example-app
+cd examples/expo-app
 npx expo run:android  # or run:ios
 ```
 

@@ -84,12 +84,12 @@ npm run setup
 
 ## Step 3: Build the Example App (2 minutes)
 
-The Expo/React Native example app is located at `../expo-arch-example-app/`.
+The Expo/React Native example app is located at `examples/expo-app/`.
 
 **For Android:**
 
 ```bash
-cd ../expo-arch-example-app
+cd examples/expo-app
 npx expo run:android
 ```
 
@@ -98,7 +98,7 @@ Wait for the build to complete. The app will launch on your connected device/emu
 **For iOS (macOS only):**
 
 ```bash
-cd ../expo-arch-example-app
+cd examples/expo-app
 npx expo run:ios
 ```
 
@@ -444,7 +444,7 @@ npm start
 ### "App not installed"
 ```bash
 # Rebuild the Expo app
-cd ../expo-arch-example-app
+cd examples/expo-app
 npx expo run:android  # or run:ios
 ```
 
@@ -455,14 +455,14 @@ npx expo run:android  # or run:ios
 npm run devices list
 
 # Try running the app manually first
-cd ../expo-arch-example-app
+cd examples/expo-app
 npx expo run:android
 ```
 
 ### Build fails for Expo app
 ```bash
 # Clean and rebuild
-cd ../expo-arch-example-app
+cd examples/expo-app
 rm -rf android/build
 rm -rf node_modules
 npm install
@@ -498,7 +498,7 @@ npm run test:parallel:all      # Run on all devices
 npm run report:serve           # Generate and view report
 
 # Build Example App
-cd ../expo-arch-example-app
+cd examples/expo-app
 npx expo run:android           # Build Android
 npx expo run:ios               # Build iOS
 
@@ -511,9 +511,9 @@ emulator -list-avds            # List emulators
 ### File Locations
 
 - **Test Farm**: `~/mobile-test-farm/`
-- **Example App**: `~/expo-arch-example-app/`
-- **Android APK**: `~/expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk`
-- **iOS .app**: `~/expo-arch-example-app/ios/build/Build/Products/Debug-iphonesimulator/expoarchexample.app`
+- **Example App**: examples/expo-app/`
+- **Android APK**: examples/expo-app/android/app/build/outputs/apk/debug/app-debug.apk`
+- **iOS .app**: examples/expo-app/ios/build/Build/Products/Debug-iphonesimulator/expoarchexample.app`
 - **Device Config**: `~/mobile-test-farm/config/devices.json`
 - **Test Scripts**: `~/mobile-test-farm/tests/specs/`
 - **Page Objects**: `~/mobile-test-farm/tests/page-objects/`
