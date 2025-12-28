@@ -1,4 +1,4 @@
-const BasePage = require('../BasePage');
+const BasePage = require('../../pages/BasePage');
 
 /**
  * Login Page Object for Native Android Compose App
@@ -7,7 +7,7 @@ class NativeLoginPage extends BasePage {
   get selectors() {
     return {
       screen: {
-        android: '~login-screen',
+        android: '~login-screen',  // Accessibility ID (testTag with testTagsAsResourceId might improve behavior)
       },
       welcomeTitle: {
         android: '~welcome-title',
@@ -37,13 +37,31 @@ class NativeLoginPage extends BasePage {
 
   async enterUsername(username) {
     const element = await this.getElement(this.selectors.usernameInput);
-    await element.setValue(username);
+    // Click to focus the Compose TextField
+    await element.click();
+    await this.pause(300);
+    // Compose TextFields require character-by-character input
+    // Standard setValue() doesn't work with Jetpack Compose
+    for (const char of username) {
+      await this.driver.keys([char]);
+      await this.pause(50);
+    }
+    await this.pause(300);
     console.log(`✓ Entered username: ${username}`);
   }
 
   async enterPassword(password) {
     const element = await this.getElement(this.selectors.passwordInput);
-    await element.setValue(password);
+    // Click to focus the Compose TextField
+    await element.click();
+    await this.pause(300);
+    // Compose TextFields require character-by-character input
+    // Standard setValue() doesn't work with Jetpack Compose
+    for (const char of password) {
+      await this.driver.keys([char]);
+      await this.pause(50);
+    }
+    await this.pause(300);
     console.log(`✓ Entered password`);
   }
 
@@ -56,6 +74,14 @@ class NativeLoginPage extends BasePage {
     await this.waitForLoginScreen();
     await this.enterUsername(username);
     await this.enterPassword(password);
+    // Dismiss keyboard using Android back button (more reliable than hideKeyboard)
+    try {
+      await this.driver.back();
+      await this.pause(500);
+      console.log('✓ Keyboard dismissed using back button');
+    } catch (e) {
+      console.log('✓ Could not dismiss keyboard:', e.message);
+    }
     await this.clickLoginButton();
   }
 

@@ -1,4 +1,4 @@
-const BasePage = require('../BasePage');
+const BasePage = require('../../pages/BasePage');
 
 /**
  * Users List Page Object for Native Android Compose App

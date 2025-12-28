@@ -1,4 +1,4 @@
-const BasePage = require('../BasePage');
+const BasePage = require('../../pages/BasePage');
 
 /**
  * Home Page Object for Native Android Compose App
@@ -7,7 +7,7 @@ class NativeHomePage extends BasePage {
   get selectors() {
     return {
       screen: {
-        android: '~home-screen',
+        android: '~home-screen',  // Accessibility ID
       },
       appTitle: {
         android: '~app-title',

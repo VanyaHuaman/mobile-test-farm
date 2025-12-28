@@ -4,7 +4,7 @@ const NativeHomePage = require('../../page-objects/native-android/HomePage');
 const config = require('../../../config/test.config');
 
 // Get device from command line argument or use default
-const deviceNameOrId = process.argv[2] || 'android-emulator-1';
+const deviceNameOrId = process.argv[2] || 'pixel-9';
 
 // App configuration for native Android Compose app
 const APP_CONFIG = {
@@ -26,7 +26,8 @@ async function runLoginTests() {
     await testBase.runTest(
       deviceNameOrId,
       APP_CONFIG,
-      async (driver) => {
+      async () => {
+        const driver = testBase.driver;
         const loginPage = new NativeLoginPage(driver, 'android');
         const homePage = new NativeHomePage(driver, 'android');
 
@@ -49,7 +50,8 @@ async function runLoginTests() {
     await testBase.runTest(
       deviceNameOrId,
       APP_CONFIG,
-      async (driver) => {
+      async () => {
+        const driver = testBase.driver;
         const loginPage = new NativeLoginPage(driver, 'android');
 
         // Wait for login screen
@@ -71,7 +73,8 @@ async function runLoginTests() {
     await testBase.runTest(
       deviceNameOrId,
       APP_CONFIG,
-      async (driver) => {
+      async () => {
+        const driver = testBase.driver;
         const loginPage = new NativeLoginPage(driver, 'android');
 
         // Wait for login screen
@@ -79,6 +82,13 @@ async function runLoginTests() {
 
         // Attempt login with empty username
         await loginPage.enterPassword('password123');
+        // Dismiss keyboard before clicking button
+        try {
+          await driver.back();
+          await driver.pause(500);
+        } catch (e) {
+          console.log('✓ Could not dismiss keyboard');
+        }
         await loginPage.clickLoginButton();
 
         // Verify error message
@@ -94,7 +104,8 @@ async function runLoginTests() {
     await testBase.runTest(
       deviceNameOrId,
       APP_CONFIG,
-      async (driver) => {
+      async () => {
+        const driver = testBase.driver;
         const loginPage = new NativeLoginPage(driver, 'android');
 
         // Wait for login screen
@@ -102,6 +113,13 @@ async function runLoginTests() {
 
         // Attempt login with empty password
         await loginPage.enterUsername('demo');
+        // Dismiss keyboard before clicking button
+        try {
+          await driver.back();
+          await driver.pause(500);
+        } catch (e) {
+          console.log('✓ Could not dismiss keyboard');
+        }
         await loginPage.clickLoginButton();
 
         // Verify error message
