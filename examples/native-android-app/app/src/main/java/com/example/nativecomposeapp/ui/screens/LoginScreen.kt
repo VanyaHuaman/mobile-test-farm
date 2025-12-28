@@ -16,6 +16,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +29,8 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     fun validateAndLogin() {
         errorMessage = ""
@@ -41,8 +45,8 @@ fun LoginScreen(
             username == "demo" && password == "password123" -> {
                 isLoading = true
                 // Simulate network delay
-                kotlinx.coroutines.GlobalScope.launch {
-                    kotlinx.coroutines.delay(500)
+                coroutineScope.launch {
+                    delay(500)
                     onLoginSuccess()
                 }
             }

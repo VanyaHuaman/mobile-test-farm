@@ -53,7 +53,10 @@
       "Bash(sudo security add-trusted-cert:*)",
       "Bash(networksetup -setwebproxystate:*)",
       "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\" && cat {}')",
-      "Bash(MOCKOON_ENABLED=true npm run test:users:*)"
+      "Bash(MOCKOON_ENABLED=true npm run test:users:*)",
+      "Bash(git checkout:*)",
+      "Bash(grep:*)",
+      "Bash(git cherry-pick:*)"
     ],
     "deny": [],
     "ask": []
