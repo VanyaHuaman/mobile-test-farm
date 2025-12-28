@@ -6,7 +6,7 @@ This guide will help you prepare your iPhone SE for automated testing with Appiu
 
 - iPhone SE (or other iOS device)
 - USB Lightning cable
-- macOS computer OR Linux with docker-ios support
+- macOS computer (recommended for iOS testing)
 - Apple ID (free or paid developer account)
 
 ## Important Notes
@@ -171,15 +171,6 @@ xcodebuild -project WebDriverAgent.xcodeproj \
 3. Find your Apple ID or developer certificate
 4. Tap it and select **Trust**
 
-## Step 10: Test Connection from Container
-
-```bash
-# From iOS Appium container
-podman exec -it appium-ios idevice_id -l
-
-# Should show your device UDID
-```
-
 ## Troubleshooting
 
 ### Device not detected
@@ -222,30 +213,6 @@ iOS 16+ requires Developer Mode. See Step 1.
    rm -rf ~/Library/Developer/Xcode/DerivedData
    ```
 4. Try automatic signing in Xcode
-
-## Docker/Podman Considerations for iOS
-
-iOS device access in containers is challenging:
-
-### Recommended Approach:
-
-1. **Run usbmuxd on host**:
-   ```bash
-   sudo systemctl start usbmuxd
-   ```
-
-2. **Use host networking for iOS container**:
-   Already configured in `compose.yml` as `network_mode: host`
-
-3. **Pass USB devices to container**:
-   Already configured with `/dev/bus/usb` volume mount
-
-### Alternative: Host-based iOS Testing
-
-If container approach doesn't work:
-1. Run Appium for iOS directly on host
-2. Keep Android testing containerized
-3. This is a common hybrid approach
 
 ## Best Practices
 
