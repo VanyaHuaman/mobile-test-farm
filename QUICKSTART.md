@@ -94,24 +94,38 @@ npm run devices list
 
 ---
 
-## Step 4: Start Appium Server (30 seconds)
+## Step 4: Start Services (30 seconds)
 
 **In a new terminal window:**
 
 ```bash
 cd ~/mobile-test-farm
-npx appium
+npm start
 ```
+
+This starts both Appium and the Web Dashboard with automatic health checks.
 
 **Expected output:**
 ```
-[Appium] Welcome to Appium v2.19.0
-[Appium] Appium REST http interface listener started on http://0.0.0.0:4723
-[Appium] Available drivers:
-[Appium]   - uiautomator2@4.2.9 (automationName 'UiAutomator2')
+🚀 Mobile Test Farm - Starting Services
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Appium is ready
+✅ Dashboard is ready
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ All services are ready!
+
+📱 Dashboard: http://localhost:3000
+🔌 Appium:    http://localhost:4723
+
+Press Ctrl+C to stop all services
 ```
 
-**Keep this terminal running!** Appium needs to run in the background for tests to work.
+**Keep this terminal running!** Both services need to run in the background for tests to work.
+
+**Alternative:** If you prefer to start Appium manually:
+```bash
+npx appium
+```
 
 ---
 
@@ -272,8 +286,8 @@ adb shell pm list packages | grep yourapp
 Test that the framework can launch your app:
 
 ```bash
-# Start Appium (if not already running)
-npx appium
+# Start services (if not already running)
+npm start
 
 # In another terminal, try to launch your app manually
 # This tests that your config is correct
@@ -424,8 +438,8 @@ npm run devices sync
 # Check if Appium is running
 curl http://localhost:4723/status
 
-# If not, start Appium
-npx appium
+# If not, start services
+npm start
 ```
 
 ### "Device unauthorized"
@@ -463,9 +477,9 @@ npm run devices register      # Add new device
 npm run test:login            # Run login test
 node tests/login-test.js "Device Name"  # Test specific device
 
-# Appium
-npx appium                    # Start server
-curl http://localhost:4723/status  # Check status
+# Services
+npm start                     # Start Appium + Dashboard
+curl http://localhost:4723/status  # Check Appium status
 
 # Android
 adb devices                   # List connected devices
