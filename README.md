@@ -107,21 +107,61 @@ export IOS_APP_SIMULATOR=/path/to/YourApp.app
 export IOS_BUNDLE_ID=com.yourcompany.yourapp
 ```
 
-#### Run Your First Test
+#### Start Services and Run Tests
+
+**Option A: One-Command Startup (Recommended)**
 
 ```bash
-# Start Appium server
-npx appium
+# Start Appium + Dashboard with one command
+npm start
+```
 
-# In another terminal, sync and register your devices
+This starts:
+- ✅ Appium server (http://localhost:4723)
+- ✅ Web Dashboard (http://localhost:3000)
+- ✅ Health checks to verify everything is ready
+
+**Expected output:**
+```
+🚀 Mobile Test Farm - Starting Services
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Appium is ready
+✅ Dashboard is ready
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ All services are ready!
+
+📱 Dashboard: http://localhost:3000
+🔌 Appium:    http://localhost:4723
+
+Press Ctrl+C to stop all services
+```
+
+**Then in another terminal:**
+
+```bash
+# Sync and register your devices
 npm run devices sync
 npm run devices register
 
 # Run a test (update the test to match your app)
 npm run test:login
 
-# Or use the Web Dashboard
+# Or use the Web Dashboard at http://localhost:3000
+```
+
+**Option B: Manual Startup**
+
+If you prefer to start services separately:
+
+```bash
+# Terminal 1: Start Appium
+npx appium
+
+# Terminal 2: Start Dashboard (optional)
 npm run dashboard
+
+# Terminal 3: Run tests
+npm run test:login
 ```
 
 ### Option 2: Web Dashboard (Recommended for Teams)
@@ -196,13 +236,13 @@ export JAVA_HOME=/path/to/jdk
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 ```
 
-#### 6. Start Appium and Run Tests
+#### 6. Start Services and Run Tests
 
 ```bash
-# Start Appium server
-npx appium
+# Start Appium + Dashboard
+npm start
 
-# Connect devices
+# In another terminal, connect devices
 npm run devices sync
 npm run devices register
 
@@ -649,8 +689,12 @@ npm run test:parallel:hybrid     # Run on local + cloud devices in parallel
 npm run test:parallel:cloud      # Run on cloud devices only in parallel
 npm run test:parallel:help       # Show parallel execution help
 
-# Appium Server
-npm run appium                   # Start Appium server
+# Services
+npm start                        # Start Appium + Dashboard (recommended)
+npm run appium                   # Start Appium server only
+npm run dashboard                # Start Dashboard only
+npm run services:check           # Check if services are running
+npm run services:wait            # Wait for services to be ready
 
 # Notifications
 npm run notify:test              # Test notification configuration
