@@ -21,25 +21,31 @@ Mobile Device → mitmproxy (proxy) → Mockoon (mock) or Real API
 
 ## Prerequisites
 
-- mitmproxy and Mockoon containers running
+- mitmproxy installed locally
+- Mockoon CLI installed locally
 - Mobile device on same network as server
 - Device can reach server IP address
 
 ## Step 1: Start the Services
 
+Start mitmproxy and Mockoon locally:
+
 ```bash
-cd ~/mobile-test-farm
-./scripts/start.sh
+# Start Mockoon with your mock environment
+npx mockoon-cli start --data mocks/environments/jsonplaceholder-simple.json --port 3000
+
+# In another terminal, start mitmproxy
+mitmdump --set block_global=false --set connection_strategy=lazy -s mocks/mitm-scripts/route_to_mockoon.py --listen-port 8080
 ```
 
 Verify services are running:
 ```bash
-podman ps | grep -E "mitmproxy|mockoon"
-```
+# Check mitmproxy
+curl http://localhost:8080
 
-You should see:
-- `mitmproxy` on ports 8080 (proxy) and 8081 (web UI)
-- `mockoon` on port 3000
+# Check Mockoon
+curl http://localhost:3000
+```
 
 ## Step 2: Get Server IP Address
 
@@ -59,11 +65,11 @@ Example: `192.168.1.100`
 
 ```bash
 # Start mitmproxy briefly to generate certificates
-podman exec -it mitmproxy mitmdump
+mitmdump
 
 # Press Ctrl+C after a few seconds
 
-# Certificates are now in ./mocks/mitmproxy/
+# Certificates are now in ~/.mitmproxy/
 ```
 
 ### Android Certificate Installation
@@ -81,15 +87,15 @@ podman exec -it mitmproxy mitmdump
 
 **Method 2: Manual Transfer**
 
-1. Copy certificate from server:
+1. Copy certificate from mitmproxy directory:
    ```bash
    # The .cer file is for Android
-   ls -la mocks/mitmproxy/mitmproxy-ca-cert.cer
+   ls -la ~/.mitmproxy/mitmproxy-ca-cert.cer
    ```
 
 2. Transfer to device:
    ```bash
-   adb push mocks/mitmproxy/mitmproxy-ca-cert.cer /sdcard/Download/
+   adb push ~/.mitmproxy/mitmproxy-ca-cert.cer /sdcard/Download/
    ```
 
 3. On device:
@@ -224,8 +230,8 @@ X-Mock-Mode: real    # Use real API
 
 To use:
 ```bash
-# Update compose.yml to use this script instead
---scripts /scripts/conditional_mock.py
+# Run mitmproxy with conditional script
+mitmdump -s mocks/mitm-scripts/conditional_mock.py --listen-port 8080
 ```
 
 ### 3. **fallback_mock.py**
@@ -233,8 +239,8 @@ To use:
 Real API first, fallback to mock on error:
 
 ```bash
-# Update compose.yml
---scripts /scripts/fallback_mock.py
+# Run mitmproxy with fallback script
+mitmdump -s mocks/mitm-scripts/fallback_mock.py --listen-port 8080
 ```
 
 ### 4. **selective_record.py**
@@ -242,35 +248,25 @@ Real API first, fallback to mock on error:
 Record API traffic for later conversion to mocks:
 
 ```bash
-# Update compose.yml
---scripts /scripts/selective_record.py
+# Run mitmproxy with recording script
+mitmdump -s mocks/mitm-scripts/selective_record.py --listen-port 8080
 
-# Recordings saved to: mocks/mitmproxy/recordings.jsonl
+# Recordings saved to: mocks/recordings/
 ```
 
 ## Switching Between Scripts
 
-Edit `compose.yml`:
+Simply change the `-s` parameter when starting mitmproxy:
 
-```yaml
-services:
-  mitmproxy:
-    command: >
-      mitmweb
-      --web-host 0.0.0.0
-      --set block_global=false
-      --scripts /scripts/YOUR_SCRIPT.py
-```
-
-Then restart:
 ```bash
-podman restart mitmproxy
+# Use different routing script
+mitmdump -s mocks/mitm-scripts/YOUR_SCRIPT.py --listen-port 8080
 ```
 
 **Or use multiple scripts:**
-```yaml
---scripts /scripts/route_to_mockoon.py
---scripts /scripts/fallback_mock.py
+```bash
+# Run with multiple scripts
+mitmdump -s mocks/mitm-scripts/route_to_mockoon.py -s mocks/mitm-scripts/fallback_mock.py --listen-port 8080
 ```
 
 ## Testing Modes
@@ -329,7 +325,7 @@ Use `fallback_mock.py` script
 1. Device proxy is configured correctly
 2. Server IP is reachable from device (`ping <server-ip>`)
 3. Port 8080 is not blocked by firewall
-4. mitmproxy container is running
+4. mitmproxy is running locally
 
 **Test connectivity:**
 ```bash
@@ -362,9 +358,7 @@ adb shell settings get global http_proxy
 
 **Debug:**
 ```bash
-# Check mitmproxy logs
-podman logs mitmproxy -f
-
+# Check mitmproxy console output (if running in terminal)
 # Should see: [MOCK] or [REAL] for each request
 ```
 
@@ -460,24 +454,20 @@ For unsupported providers, you have these options:
 ## Quick Reference
 
 ```bash
-# Start services
-./scripts/start.sh
+# Start Mockoon
+npx mockoon-cli start --data mocks/environments/jsonplaceholder-simple.json --port 3000
 
-# Check services
-podman ps | grep -E "mitmproxy|mockoon"
+# Start mitmproxy (in another terminal)
+mitmdump -s mocks/mitm-scripts/route_to_mockoon.py --listen-port 8080
 
-# View mitmproxy logs
-podman logs mitmproxy -f
+# Or use mitmweb for web UI
+mitmweb -s mocks/mitm-scripts/route_to_mockoon.py --listen-port 8080 --web-port 8081
 
-# View Mockoon logs
-podman logs mockoon -f
+# Test Mockoon
+curl http://localhost:3000/api/v1/products
 
-# Restart mitmproxy (after config change)
-podman restart mitmproxy
-
-# Access web UIs
-# mitmproxy: http://localhost:8081
-# Mockoon test: curl http://localhost:3000/api/v1/products
+# Test mitmproxy
+curl -x localhost:8080 http://api.example.com
 
 # Remove proxy from Android
 adb shell settings put global http_proxy :0

@@ -57,13 +57,6 @@ List of devices attached
 1234567890ABCDEF    device usb:1-1 product:coral model:Pixel_4_XL device:coral
 ```
 
-### From Container:
-
-```bash
-# Check devices from appium-android container
-podman exec -it appium-android adb devices
-```
-
 ## Step 5: Get Device UDID
 
 ```bash
