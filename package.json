@@ -9,8 +9,12 @@
   },
   "scripts": {
     "setup": "node bin/setup.js",
+    "start": "concurrently --kill-others-on-fail --names \"APPIUM,DASHBOARD,HEALTH\" -c \"cyan,green,yellow\" \"npm run appium\" \"npm run dashboard\" \"npm run services:wait\"",
+    "dev": "npm start",
     "test": "node tests/specs/login.spec.js",
     "appium": "appium",
+    "services:check": "node bin/check-services.js check",
+    "services:wait": "node bin/check-services.js wait",
     "test:login": "node tests/login-test.js",
     "test:login:pom": "node tests/specs/login.spec.js",
     "test:login:release": "node tests/login-test-release.js",
@@ -64,6 +68,7 @@
     "allure-commandline": "^2.36.0",
     "appium-uiautomator2-driver": "^6.7.5",
     "appium-xcuitest-driver": "^10.12.2",
+    "concurrently": "^9.2.1",
     "webdriverio": "^9.21.0"
   },
   "dependencies": {
