@@ -1,7 +1,8 @@
 # Mobile Test Farm
 
-> **📦 Template Branch** - This is the clean starter template for new projects.
-> **✨ Want to see examples?** Check out the [`master` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/master) for a complete working example with a real Expo app.
+> **📦 Clean Template** - This is the clean starter template for new projects.
+> **✨ Want Expo/React Native example?** Check out the [`expo-example` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/expo-example) for a complete Expo app with tests.
+> **🤖 Want native Android Compose example?** Check out the [`native-android-example` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/native-android-example) for a Jetpack Compose app with tests.
 
 [![Mobile Test Farm CI](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml)
 [![Android Tests](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml)
@@ -11,9 +12,20 @@ Automated mobile device testing infrastructure for running tests across multiple
 
 **Start your project:**
 ```bash
-git clone -b template https://github.com/VanyaHuaman/mobile-test-farm.git my-mobile-tests
+git clone https://github.com/VanyaHuaman/mobile-test-farm.git my-mobile-tests
 cd my-mobile-tests
 npm run setup
+```
+
+**Or explore examples:**
+```bash
+# Expo/React Native example
+git clone -b expo-example https://github.com/VanyaHuaman/mobile-test-farm.git
+cd mobile-test-farm && npm run setup
+
+# Native Android Compose example
+git clone -b native-android-example https://github.com/VanyaHuaman/mobile-test-farm.git
+cd mobile-test-farm && npm run setup
 ```
 
 See **[GETTING_STARTED.md](GETTING_STARTED.md)** for a quick setup guide.
