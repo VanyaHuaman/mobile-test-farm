@@ -182,12 +182,11 @@ Mockoon also supports Handlebars:
 
 5. **Export:**
    - File → Export Environment
-   - Save to: `~/mobile-test-farm/mocks/mockoon/my-app-api.json`
+   - Save to: `~/mobile-test-farm/mocks/environments/my-app-api.json`
 
-6. **Update compose.yml:**
-   ```yaml
-   mockoon:
-     command: ["--data", "/data/my-app-api.json", "--port", "3000"]
+6. **Run with Mockoon CLI:**
+   ```bash
+   npx mockoon-cli start --data mocks/environments/my-app-api.json --port 3000
    ```
 
 ### Method 2: Edit JSON Directly
@@ -210,24 +209,17 @@ Edit `mocks/mockoon/mobile-api-mocks.json`:
 }
 ```
 
-Restart Mockoon:
+Restart Mockoon CLI:
 ```bash
-podman restart mockoon
+# Stop with Ctrl+C and restart
+npx mockoon-cli start --data mocks/environments/mobile-api-mocks.json --port 3000
 ```
 
 ### Method 3: Record from Real API
 
 ```bash
-# 1. Update compose.yml to use recording script
-services:
-  mitmproxy:
-    command: >
-      mitmweb
-      --web-host 0.0.0.0
-      --scripts /scripts/selective_record.py
-
-# 2. Restart mitmproxy
-podman restart mitmproxy
+# 1. Start mitmproxy with recording script
+mitmdump -s mocks/mitm-scripts/selective_record.py --listen-port 8080
 
 # 3. Configure device to use proxy and use your app
 # Generates traffic
@@ -270,13 +262,9 @@ requests.get(
 
 Automatically fallback to mock on errors:
 
-```yaml
-# compose.yml
-mitmproxy:
-  command: >
-    mitmweb
-    --web-host 0.0.0.0
-    --scripts /scripts/fallback_mock.py
+```bash
+# Start mitmproxy with fallback script
+mitmdump -s mocks/mitm-scripts/fallback_mock.py --listen-port 8080
 ```
 
 Now if real API returns 500, mock is used instead.
@@ -462,8 +450,10 @@ curl http://localhost:3000/api/login -X POST \
 ### Check Mockoon is Running
 
 ```bash
-podman ps | grep mockoon
-podman logs mockoon
+# Check if Mockoon is responding
+curl http://localhost:3000
+
+# Check the terminal where you started Mockoon CLI for logs
 ```
 
 ### Test Direct Access
@@ -479,9 +469,7 @@ curl http://<server-ip>:3000/api/products
 ### Check mitmproxy Routing
 
 ```bash
-# Watch logs
-podman logs mitmproxy -f
-
+# Check mitmproxy console output
 # Should show:
 # [MOCK] GET /api/products → Mockoon
 ```

@@ -694,9 +694,10 @@ UI Update (Browser)
    curl http://localhost:4723/status
    ```
 
-2. Verify test app is built:
+2. Verify your test app is built:
    ```bash
-   ls ~/expo-arch-example-app/android/app/build/outputs/apk/debug/
+   # Check that your APK exists at the path configured in test.config.js
+   ls /path/to/your/app.apk
    ```
 
 3. Check device registration:

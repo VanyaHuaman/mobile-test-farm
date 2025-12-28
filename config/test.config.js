@@ -26,27 +26,29 @@ const config = {
   },
 
   // Application Paths
+  // TODO: Update these paths to point to your mobile app
   apps: {
     android: {
       debug: process.env.ANDROID_APP_DEBUG ||
-             path.join(os.homedir(), 'expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk'),
+             path.join(os.homedir(), 'your-app/android/app/build/outputs/apk/debug/app-debug.apk'),
       release: process.env.ANDROID_APP_RELEASE || '',
     },
     ios: {
       simulator: process.env.IOS_APP_SIMULATOR ||
-                 path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData/expoarchexampleapp-hkwwfuedzurdeibfyglrulesvlly/Build/Products/Debug-iphonesimulator/expoarchexampleapp.app'),
+                 path.join(os.homedir(), 'Library/Developer/Xcode/DerivedData/YourApp-xxx/Build/Products/Debug-iphonesimulator/YourApp.app'),
       device: process.env.IOS_APP_DEVICE || '',
     },
   },
 
   // App Package/Bundle Information
+  // TODO: Update these to match your app's package/bundle identifier
   appInfo: {
     android: {
-      package: process.env.ANDROID_PACKAGE || 'com.vanyahuaman.expoarchexampleapp',
+      package: process.env.ANDROID_PACKAGE || 'com.yourcompany.yourapp',
       activity: process.env.ANDROID_ACTIVITY || '.MainActivity',
     },
     ios: {
-      bundleId: process.env.IOS_BUNDLE_ID || 'com.vanyahuaman.expoarchexampleapp',
+      bundleId: process.env.IOS_BUNDLE_ID || 'com.yourcompany.yourapp',
     },
   },
 
