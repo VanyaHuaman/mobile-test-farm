@@ -9,7 +9,7 @@
   },
   "scripts": {
     "setup": "node bin/setup.js",
-    "start": "concurrently --kill-others --names \"APPIUM,DASHBOARD,HEALTH\" -c \"cyan,green,yellow\" \"npm run appium\" \"npm run dashboard\" \"npm run services:wait\"",
+    "start": "concurrently --kill-others-on-fail --names \"APPIUM,DASHBOARD,HEALTH\" -c \"cyan,green,yellow\" \"npm run appium\" \"npm run dashboard\" \"npm run services:wait\"",
     "dev": "npm start",
     "test": "node tests/specs/login.spec.js",
     "appium": "appium",
