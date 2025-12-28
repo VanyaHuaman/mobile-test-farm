@@ -1,7 +1,8 @@
 # Mobile Test Farm
 
-> **✨ Example Branch** - This branch contains a complete working example with a real Expo app.
-> **📦 Want a clean starter?** Check out the [`template` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/template) for a ready-to-use template without the example app.
+> **✨ Expo/React Native Example** - This branch contains a complete working example with an Expo/React Native app.
+> **🤖 Want native Android with Jetpack Compose?** Check out the [`native-android-example` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/native-android-example) for a native Android Compose app with test examples.
+> **📦 Want a clean starter template?** Check out the [`template` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/template) for a ready-to-use template without example apps.
 
 [![Mobile Test Farm CI](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/mobile-tests.yml)
 [![Android Tests](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml/badge.svg)](https://github.com/VanyaHuaman/mobile-test-farm/actions/workflows/test-android.yml)
@@ -9,14 +10,15 @@
 
 Automated mobile device testing infrastructure for running tests across multiple Android and iOS devices with user-friendly device management.
 
-**Explore the examples:**
+**Explore the Expo/React Native example:**
 ```bash
 git clone https://github.com/VanyaHuaman/mobile-test-farm.git
 cd mobile-test-farm
 npm run setup
+npm start
 ```
 
-**Start a new project:**
+**Start a new project from template:**
 ```bash
 git clone -b template https://github.com/VanyaHuaman/mobile-test-farm.git my-mobile-tests
 cd my-mobile-tests
@@ -35,7 +37,6 @@ npm run setup
 ✅ **Video Recording** - Automatic video recording on test failure for debugging
 ✅ **HTML Test Reports** - Beautiful Allure reports with charts, videos, and history
 ✅ **CI/CD Ready** - GitHub Actions workflows for automated testing
-✅ **Modern Test App** - Expo app with New Architecture (Fabric + TurboModules)
 ✅ **Device Registry** - Centralized device configuration and management
 ✅ **Cross-Platform** - Same tests run on both Android and iOS
 ✅ **Appium 3** - Latest Appium with modern architecture
@@ -49,7 +50,7 @@ npm run setup
 
 ## Quick Start
 
-### Option 1: Automated Setup (Recommended for First Time)
+### Option 1: Automated Setup (Recommended)
 
 Run the one-command setup script that automatically installs and configures everything:
 
@@ -64,30 +65,27 @@ This interactive script will:
 - ✅ Configure environment variables automatically
 - ✅ Install Appium drivers (UiAutomator2, XCUITest)
 - ✅ Set up MITM proxy certificates for API mocking
-- ✅ Verify everything is working
+- ✅ Build the example Expo app (optional)
 
-After setup completes, configure your app:
-
-#### Configure Your App
-
-Edit `config/test.config.js` to point to your mobile app:
+Then connect your app (or use the included Expo example):
 
 ```javascript
+// config/test.config.js
 apps: {
   android: {
-    debug: '/path/to/your/app-debug.apk',  // ← Update with your APK path
+    debug: '/path/to/your/app-debug.apk',  // ← Your APK path
   },
   ios: {
-    simulator: '/path/to/YourApp.app',     // ← Update with your .app path
+    simulator: '/path/to/YourApp.app',     // ← Your .app path
   },
 },
 appInfo: {
   android: {
-    package: 'com.yourcompany.yourapp',    // ← Your app's package name
-    activity: '.MainActivity',              // ← Usually this for React Native/Expo
+    package: 'com.yourcompany.yourapp',    // ← Your package name
+    activity: '.MainActivity',              // ← Usually .MainActivity
   },
   ios: {
-    bundleId: 'com.yourcompany.yourapp',   // ← Your app's bundle identifier
+    bundleId: 'com.yourcompany.yourapp',   // ← Your bundle ID
   },
 },
 ```
@@ -149,7 +147,7 @@ Press Ctrl+C to stop all services
 npm run devices sync
 npm run devices register
 
-# Run a test (update the test to match your app)
+# Run a test
 npm run test:login
 
 # Or use the Web Dashboard at http://localhost:3000
@@ -173,7 +171,7 @@ npm run test:login
 ### Option 2: Web Dashboard (Recommended for Teams)
 
 ```bash
-# Start the dashboard server
+# Start the dashboard server (or use npm start)
 npm run dashboard
 ```
 
@@ -229,26 +227,25 @@ appium driver install xcuitest      # For iOS (macOS only)
 brew install mitmproxy
 
 # Linux
-pip3 install mitmproxy
+pip install mitmproxy
 ```
 
-#### 5. Set Up Environment Variables
-
-Add to your `~/.zshrc` or `~/.bashrc`:
+#### 5. Set Environment Variables
 
 ```bash
+# Add to ~/.zshrc or ~/.bashrc
 export ANDROID_HOME=~/Library/Android/sdk
 export JAVA_HOME=/path/to/jdk
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 ```
 
-#### 6. Start Appium and Run Tests
+#### 6. Start Services and Run Tests
 
 ```bash
-# Start Appium server
-npx appium
+# Start Appium + Dashboard
+npm start
 
-# Connect devices
+# In another terminal, connect devices
 npm run devices sync
 npm run devices register
 
@@ -268,65 +265,67 @@ If using **`npm run setup`** (recommended), you only need:
 
 The setup script will automatically install:
 - ✅ Appium 3.1.2
-- ✅ Appium drivers (UiAutomator2, XCUITest)
-- ✅ mitmproxy
-- ✅ Homebrew (if missing on macOS)
-- ✅ Configure environment variables
+- ✅ UiAutomator2 driver 6.7.5 (Android)
+- ✅ XCUITest driver 10.12.2 (iOS)
+- ✅ WebDriverIO 9.21.0
+- ✅ mitmproxy (for API mocking)
+- ✅ All npm dependencies
 
-### Full Requirements (Manual Setup)
+### Full Requirements (Manual Installation)
 
-If installing manually:
+If installing manually, you need:
 
-**macOS:**
-- Node.js 22.21.1 LTS (Jod) - Required for Appium 3.x
-- npm 10.9.4 (comes with Node.js)
-- Appium 3.1.2 (installed via `npm install -g appium`)
-- Android SDK with platform-tools (for ADB)
-- Java Development Kit (JDK) 11+
-- Xcode (for iOS support)
-- mitmproxy (for API mocking): `brew install mitmproxy`
-- Mockoon CLI (for mock server): Installed via project dependencies
+#### Required for All Platforms
+- Node.js 22.21.1+ LTS
+- npm 10.9.4+
+- Git
 
-**Environment Variables:**
-```bash
-export ANDROID_HOME=~/Library/Android/sdk
-export JAVA_HOME=/path/to/jdk
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-```
+#### Required for Android Testing
+- Android SDK (API 34+)
+- Java JDK 11+
+- Android Studio (recommended) or command-line tools
+- USB debugging enabled on physical devices
 
-### Device Requirements
+#### Required for iOS Testing (macOS only)
+- macOS 12+
+- Xcode 14+
+- Xcode Command Line Tools
+- iOS Simulator or physical device with dev certificate
 
-**Android:**
-- USB debugging enabled (Settings > Developer Options > USB Debugging)
-- Connected via USB or running emulator
+#### Optional (Recommended)
+- mitmproxy - For transparent API mocking
+- Allure - For HTML test reports (auto-installed)
+- Docker - For containerized testing (future)
 
-**iOS:**
-- Developer Mode enabled
-- Xcode installed
-- Physical device or iOS Simulator
-
-## Project Structure
-
-```
-mobile-test-farm/
-├── bin/                    # CLI tools
-│   └── devices.js         # Device management CLI
-├── config/                # Configuration
-│   └── devices.json       # Device registry
-├── lib/                   # Core libraries
-│   └── device-manager.js  # Device management API
-├── tests/                 # Test scripts
-│   └── login-test.js      # Example login test
-├── docs/                  # Documentation
-│   ├── device-management.md    # Device management guide
-│   ├── setup-android.md        # Android setup
-│   ├── setup-ios.md            # iOS setup
-│   └── writing-tests.md        # Test development guide
-├── results/               # Test results and screenshots
-└── package.json          # Dependencies and scripts
-```
+See detailed setup guides:
+- [Android Setup Guide](docs/setup-android.md)
+- [iOS Setup Guide](docs/setup-ios.md)
 
 ## Device Management
+
+### Register a Device
+
+```bash
+# Discover connected devices
+npm run devices sync
+
+# Register interactively
+npm run devices register
+```
+
+**Example registration:**
+```
+📝 Register New Device
+
+Select device: emulator-5554 (sdk_gphone64_arm64)
+Enter friendly name: Android Emulator
+Enter OS version: Android 14
+Enter notes: Test device for automation
+
+✅ Device registered successfully!
+   ID: android-emulator
+   Device ID: emulator-5554
+```
 
 ### List Registered Devices
 
@@ -334,336 +333,163 @@ mobile-test-farm/
 npm run devices list
 ```
 
-Output:
+**Example output:**
 ```
 📱 Registered Devices:
 
 ────────────────────────────────────────────────────────────────────
-✅ 🖥️  Android Emulator (Pixel 64)
-   ID: android-emulator-1
+✅ 🖥️  Android Emulator
+   ID: android-emulator
    Device ID: emulator-5554
    Platform: android | Type: emulator
    Model: sdk_gphone64_arm64 | OS: Android 14
-────────────────────────────────────────────────────────────────────
-✅ 📱 Lenovo 11-inch Tablet
-   ID: lenovo-11-inch-tablet
-   Device ID: ZY223K7LXM
-   Platform: android | Type: physical
-   Model: Lenovo_TB-X606F | OS: Android 10
-   Notes: QA Testing Device
+   Notes: Test device for automation
 ────────────────────────────────────────────────────────────────────
 
-Total: 2 device(s) | Active: 2
+Total: 1 device(s) | Active: 1
 ```
 
-### Sync Connected Devices
+### Use Device in Tests
 
-```bash
-npm run devices sync
+```javascript
+// Use by friendly name (case-insensitive)
+node tests/login-test.js "Android Emulator"
+
+// Or by device ID
+node tests/login-test.js android-emulator
 ```
 
-Discovers all connected Android devices and shows their registration status.
-
-### Register New Device
-
-```bash
-npm run devices register
-```
-
-Interactive prompts guide you through:
-1. Select device from discovered list
-2. Enter friendly name (e.g., "Lenovo 11-inch Tablet")
-3. Enter OS version
-4. Add optional notes
-
-### Get Device Details
-
-```bash
-npm run devices get "Lenovo 11-inch Tablet"
-# or
-npm run devices get android-emulator-1
-```
-
-### Remove Device
-
-```bash
-npm run devices remove lenovo-11-inch-tablet
-```
+See [Device Management Guide](docs/device-management.md) for advanced usage.
 
 ## Running Tests
 
-### Basic Test Execution
+### Quick Test Commands
 
 ```bash
-# Default device (Page Object Model)
-npm test
+# Login test
+npm run test:login
 
-# Specific device by ID
-npm run test:login:pom android-emulator-1
+# Form validation
+npm run test:form
 
-# Specific device by friendly name
-npm run test:login:pom "Lenovo 11-inch Tablet"
+# List scrolling
+npm run test:list
+
+# Navigation flows
+npm run test:navigation
+
+# Profile screen
+npm run test:profile
+
+# API tests with mocking
+npm run test:users
+npm run test:posts
+
+# Run all UI tests
+npm run test:suite:all
+
+# Run all API tests
+npm run test:api:all
 ```
 
-### Parallel Test Execution
-
-Run tests across multiple devices simultaneously for faster execution:
+### Run Test on Specific Device
 
 ```bash
-# Run on specific devices in parallel
-npm run test:parallel tests/specs/login.spec.js device1 device2
+# By friendly name
+node tests/specs/login.spec.js "Android Emulator"
 
-# Run on all local devices
+# By device ID
+node tests/specs/login.spec.js android-emulator
+```
+
+### Parallel Testing
+
+Run tests across multiple devices simultaneously:
+
+```bash
+# Parallel on all local devices
 npm run test:parallel:all
 
-# Run on local + cloud devices (hybrid mode)
+# Parallel on local + cloud (hybrid)
 npm run test:parallel:hybrid
 
-# Run on cloud devices only
+# Parallel on cloud devices only
 npm run test:parallel:cloud
 
-# Run on specific cloud provider
-npm run test:parallel tests/specs/login.spec.js --cloud --provider=browserstack
-
-# Control concurrency (max 5 tests at once)
-npm run test:parallel tests/specs/form.spec.js --all-local --max=5
-
-# Verbose output
-npm run test:parallel tests/specs/login.spec.js --all-local --verbose
+# Custom parallel execution
+node run-parallel.js tests/specs/login.spec.js pixel-9 iphone-16-pro
 ```
 
-**Benefits:**
-- **10x+ faster execution** - Tests run simultaneously across devices
-- **Hybrid mode** - Mix local devices with cloud devices (BrowserStack, Sauce Labs, AWS, Firebase)
-- **Concurrency control** - Limit parallel executions to manage resources
-- **Event-driven monitoring** - Real-time progress tracking
-- **Graceful shutdown** - Ctrl+C stops all running tests cleanly
-- **Cost optimization** - Use local devices first, cloud for broader coverage
+See [Parallel Testing Guide](docs/parallel-testing.md) for details.
 
-**Examples:**
-```bash
-# Run on 2 local devices + 3 cloud devices in parallel
-node run-parallel.js tests/specs/login.spec.js \
-  android-emulator-1 \
-  iphone-16-pro-simulator \
-  browserstack-iPhone-15-Pro \
-  saucelabs-Pixel-8 \
-  aws-Galaxy-S23
+## Test Reporting
 
-# Run on all BrowserStack devices
-npm run test:parallel tests/specs/form.spec.js --cloud --provider=browserstack
-```
-
-See [Parallel Testing Guide](docs/parallel-testing.md) and [Cloud Integration Guide](docs/CLOUD_INTEGRATION.md) for detailed information.
-
-## API Mocking with MITM Proxy
-
-The test farm includes a transparent API mocking system that works on both Android and iOS **without any app code changes**. Apps believe they're calling the real API, but traffic is transparently intercepted and redirected to Mockoon mock server.
-
-### How It Works
-
-```
-Mobile App → HTTPS API Call → MITM Proxy (port 8888) →
-Mockoon (port 3001) → Mock Response → App
-```
-
-**Key Benefits:**
-- ✅ Zero app code changes required
-- ✅ Works on both Android and iOS
-- ✅ Transparent certificate handling
-- ✅ Automatic traffic recording on failure
-- ✅ Test different API scenarios (errors, timeouts, edge cases)
-
-### Quick Example
+### Generate Allure Report
 
 ```bash
-# Enable mocking for a test run
-MOCKOON_ENABLED=true npm run test:users -- pixel-9
+# Generate report
+npm run report:generate
 
-# The test will use mock data instead of real API
-# App is completely unaware of the mocking
+# Open report
+npm run report:open
+
+# Or generate and serve
+npm run report:serve
 ```
 
-### Create Custom Mocks
+Reports include:
+- ✅ Pass/fail rates with charts
+- ✅ Test execution timeline
+- ✅ Screenshots on failure
+- ✅ Video recordings (if configured)
+- ✅ Device information
+- ✅ Test history and trends
 
-Edit `mocks/environments/jsonplaceholder-simple.json`:
+See [HTML Reporting Guide](docs/html-reporting.md) for configuration.
 
-```json
-{
-  "routes": [
-    {
-      "method": "get",
-      "endpoint": "users",
-      "responses": [{
-        "body": "[{\"id\": 1, \"name\": \"Test User\"}]",
-        "statusCode": 200
-      }]
-    }
-  ]
-}
-```
+## API Mocking & Traffic Interception
 
-### Test Different Scenarios
-
-**Test 500 Error:**
-```bash
-MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/error-500.json npm run test:users
-```
-
-**Test Network Timeout:**
-```bash
-MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/timeout.json npm run test:users
-```
-
-**Test Empty Response:**
-```bash
-MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/empty.json npm run test:users
-```
-
-### Platform-Specific Setup
-
-**Android Emulators:**
-- Automatically configured via `adb` device proxy
-- Debug builds trust mitmproxy certificate
-- No app code changes needed
-
-**iOS Simulators:**
-- Uses macOS system proxy settings
-- Certificate installed in macOS keychain
-- Metro bundler bypass configured automatically
-- No app code changes needed
-
-### Using MITM Proxy with Physical Devices
-
-**Android Physical Devices:**
-
-1. **Configure WiFi Proxy:**
-   - Connect device to same WiFi network as your computer
-   - Open WiFi settings on device
-   - Long press on connected network → Modify Network
-   - Advanced Options → Manual Proxy
-   - Set hostname to your computer's local IP (e.g., `192.168.1.100`)
-   - Set port to `8888`
-
-2. **Install Certificate:**
-   ```bash
-   # Push certificate to device
-   adb push ~/.mitmproxy/mitmproxy-ca-cert.pem /sdcard/Download/
-
-   # On device: Settings → Security → Install from storage
-   # Select the certificate file
-   ```
-
-3. **For Debug Builds:**
-   - Debug-specific network security config already trusts user certificates
-   - No additional app changes needed
-
-**iOS Physical Devices:**
-
-1. **Configure WiFi Proxy:**
-   - Connect device to same WiFi network as your Mac
-   - Settings → WiFi → (i) on connected network
-   - Configure Proxy → Manual
-   - Server: Your Mac's local IP (e.g., `192.168.1.100`)
-   - Port: `8888`
-
-2. **Install Certificate:**
-   - Email the certificate to yourself or use AirDrop
-   - Certificate location: `~/.mitmproxy/mitmproxy-ca-cert.pem`
-   - On device: Open the certificate file
-   - Follow prompts to install profile
-
-3. **Enable Full Trust:**
-   - Settings → General → About → Certificate Trust Settings
-   - Enable full trust for mitmproxy certificate
-
-### Using MITM Proxy with Cloud Devices
-
-Your **local MITM proxy** (running on localhost:8888) cannot be accessed by cloud devices. However, **mocking still works with cloud devices** using these approaches:
-
-**Option 1: Cloud Provider Tunneling (Recommended)**
-
-Many cloud providers support tunneling to access localhost:
-
-**BrowserStack Local:**
-```bash
-# Download BrowserStack Local binary
-# Start tunnel to expose your localhost
-./BrowserStackLocal --key YOUR_ACCESS_KEY
-
-# Now cloud devices can access localhost:8888 and localhost:3001
-# Run tests normally with MOCKOON_ENABLED=true
-```
-
-**Sauce Connect:**
-```bash
-# Start Sauce Connect tunnel
-sc -u YOUR_USERNAME -k YOUR_ACCESS_KEY
-
-# Cloud devices can now access your local MITM proxy
-```
-
-**AWS Device Farm:**
-- Supports VPC endpoints for private network access
-- Can route to private mock servers
-
-**Option 2: Deploy Mock Server Publicly**
-
-Deploy Mockoon to a public server and update MITM proxy configuration:
+### Setup MITM Proxy
 
 ```bash
-# 1. Deploy Mockoon to cloud (Heroku, AWS, DigitalOcean, etc.)
-# Example public URL: https://your-mockoon.herokuapp.com
+# Automated setup (recommended)
+npm run setup:mitm
 
-# 2. Update MITM proxy to redirect to public Mockoon
-# Edit mocks/mitm-scripts/test-mitm-proxy.py:
-MOCKOON_HOST = "your-mockoon.herokuapp.com"
-MOCKOON_PORT = 443  # HTTPS
-
-# 3. Cloud devices route through cloud-accessible MITM proxy
+# Or platform-specific
+npm run setup:mitm:android
+npm run setup:mitm:ios
 ```
 
-**Option 3: Direct Mockoon (No MITM Proxy)**
-
-Configure app to connect directly to Mockoon:
+### Run Tests with Mocking
 
 ```bash
-# If using public Mockoon server
-# No MITM proxy needed - app points directly to mock server
-# Requires app code to support configurable API URL
+# Run with mock API responses
+MOCKOON_ENABLED=true npm run test:users
+
+# Use specific mock file
+MOCKOON_ENABLED=true MOCKOON_MOCK_FILE=mocks/environments/error-scenarios.json npm run test:users
+
+# Test with API recording (records on failure)
+npm run test:users  # Failed test automatically records API traffic
 ```
 
-**Option 4: Use Cloud Provider's Mock Features**
+### Mock Files
 
-Some providers offer built-in API mocking:
-- Firebase Test Lab: Network profile simulation
-- AWS Device Farm: Custom network configurations
+Mock configurations are in `mocks/environments/`:
+- `jsonplaceholder-simple.json` - Basic mocked responses
+- `error-scenarios.json` - 500 errors, timeouts, malformed responses
+- `empty-data.json` - Empty arrays, null responses
 
-**Recommended Approaches:**
+### Traffic Recording
 
-| Scenario | Best Option | Why |
-|----------|-------------|-----|
-| Quick cloud testing | BrowserStack Local / Sauce Connect | Easy setup, works with existing MITM config |
-| Production cloud testing | Deploy Mockoon publicly | More reliable, no tunnel needed |
-| Hybrid testing | Local with MITM, Cloud with real API | Leverages strengths of both |
-| CI/CD automation | Deploy Mockoon publicly | No local dependencies |
-
-### Debugging Failed Tests
-
-When a test fails with mocking enabled, transaction logs are automatically saved to `mocks/recordings/`:
+When tests fail, API traffic is automatically recorded to `mocks/recordings/`:
 
 ```bash
-# View failed test transactions
-cat mocks/recordings/FAILED-users-api-test-pixel-9-2025-12-26.json
+# View recorded traffic from failed test
+cat mocks/recordings/FAILED-users-api-test-pixel-9-2025-12-28.json
 ```
 
-The log shows:
-- All API calls intercepted
-- Request/response details
-- Mock server activity
-- Proxy routing information
-
-See [API Mocking Guide](docs/MOCKING.md) and [MITM Setup Guide](docs/MITM_SETUP.md) for detailed configuration.
+See [API Mocking Guide](docs/MOCKING.md) and [MITM Setup Guide](docs/MITM_SETUP.md) for details.
 
 ## Available Commands
 
@@ -671,244 +497,253 @@ See [API Mocking Guide](docs/MOCKING.md) and [MITM Setup Guide](docs/MITM_SETUP.
 ```bash
 npm run devices list           # List all registered devices
 npm run devices sync           # Discover connected devices
-npm run devices register       # Register new device
-npm run devices get <name>     # Get device details
-npm run devices remove <id>    # Remove device
+npm run devices register       # Register a new device interactively
 ```
 
 ### Testing
 ```bash
-# Individual Test Suites
-npm test                         # Run default test suite (login)
-npm run test:login:pom           # Run login test with Page Object Model
-npm run test:form                # Run form interaction tests
-npm run test:list                # Run list filtering and interaction tests
-npm run test:profile             # Run profile and settings tests
-npm run test:navigation          # Run complete navigation flow tests
-
-# Run All Suites Sequentially
-npm run test:suite:all           # Run all test suites on default device
-
-# Parallel Test Execution
-npm run test:parallel:all        # Run on all local devices in parallel
-npm run test:parallel:hybrid     # Run on local + cloud devices in parallel
-npm run test:parallel:cloud      # Run on cloud devices only in parallel
-npm run test:parallel:help       # Show parallel execution help
-
-# Appium Server
-npm run appium                   # Start Appium server
-
-# Notifications
-npm run notify:test              # Test notification configuration
-
-# Web Dashboard
-npm run dashboard                # Start web dashboard server (http://localhost:3000)
-npm run dashboard:dev            # Start dashboard with auto-reload (requires nodemon)
+npm run test:login             # Login flow test
+npm run test:form              # Form validation test
+npm run test:list              # List scrolling test
+npm run test:navigation        # Navigation test
+npm run test:profile           # Profile screen test
+npm run test:users             # Users API test
+npm run test:posts             # Posts API test
+npm run test:suite:all         # Run all UI tests
+npm run test:api:all           # Run all API tests
 ```
 
-## Test Reliability & Notifications
-
-### Multi-Platform Notifications
-
-Get instant test results on your preferred communication platform:
-
-- **Slack** - Team channels and direct messages
-- **Microsoft Teams** - Team channels
-- **Discord** - Server channels
-- **Email** - Via webhook services (SendGrid, Mailgun, etc.)
-- **Custom Webhook** - Any REST API endpoint
-
-**Setup:**
-1. Copy `.env.example` to `.env`
-2. Add webhook URLs for your preferred platform(s)
-3. Test configuration: `npm run notify:test`
-
-**Example (.env):**
+### Parallel Testing
 ```bash
-NOTIFICATIONS_ENABLED=true
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
-TEAMS_WEBHOOK_URL=https://outlook.office.com/webhook/YOUR/WEBHOOK/URL
+npm run test:parallel          # Run tests in parallel
+npm run test:parallel:all      # Parallel on all local devices
+npm run test:parallel:hybrid   # Parallel on local + cloud
+npm run test:parallel:cloud    # Parallel on cloud only
+npm run test:parallel:help     # Show parallel execution help
 ```
 
-### Test Retry Logic
-
-Automatically retry failed tests to handle flaky tests and transient issues:
-
-- Configurable retry attempts (default: 2)
-- Configurable delay between retries (default: 3000ms)
-- Detailed logging of retry attempts
-- Track which attempt succeeded
-
-**Configuration (.env):**
+### Reporting
 ```bash
-TEST_RETRY_ENABLED=true
-TEST_MAX_RETRIES=2
-TEST_RETRY_DELAY=3000
+npm run report:generate        # Generate Allure HTML report
+npm run report:open            # Open generated report
+npm run report:serve           # Generate and serve report
+npm run report:clean           # Clean report directories
 ```
 
-### Nightly Test Runs
+### Services
+```bash
+npm start                      # Start Appium + Dashboard (recommended)
+npm run dev                    # Alias for npm start
+npm run appium                 # Start Appium server only
+npm run dashboard              # Start Dashboard only
+npm run services:check         # Check if services are running
+npm run services:wait          # Wait for services to be ready
+```
 
-Automated daily test execution via GitHub Actions:
+### API Mocking
+```bash
+npm run setup:mitm             # Setup MITM proxy certificates
+npm run setup:mitm:android     # Setup for Android only
+npm run setup:mitm:ios         # Setup for iOS only
+```
 
-- Runs at 2 AM UTC every day
-- Manual trigger option with suite selection
-- Full CI/CD pipeline (Android + iOS)
-- Artifact upload (reports, screenshots, videos)
-- Notification on failure
-
-See [Notifications & Automation Guide](docs/quick-wins.md) for detailed setup and usage.
+### Notifications
+```bash
+npm run notify:test            # Test notification configuration
+```
 
 ## Documentation
 
-### Core Guides
-- **[Web Dashboard Guide](docs/web-dashboard.md)** - User-friendly web UI for test management
-- **[API Mocking Guide](docs/MOCKING.md)** - Transparent API mocking with MITM proxy + Mockoon
-- **[MITM Proxy Setup](docs/MITM_SETUP.md)** - Detailed MITM proxy configuration for Android & iOS
-- **[Cloud Integration Guide](docs/CLOUD_INTEGRATION.md)** - BrowserStack, Sauce Labs, AWS, Firebase integration
-- **[Parallel Testing Guide](docs/parallel-testing.md)** - Run tests across multiple devices simultaneously
-- **[Device Management Guide](docs/device-management.md)** - Complete device management documentation
+- 📖 [Quick Start Guide](QUICKSTART.md) - Get up and running in 10 minutes
+- 🔧 [Device Management](docs/device-management.md) - Register and manage devices
+- 🧪 [Test Suites](docs/test-suites.md) - Writing and organizing tests
+- 🎭 [API Mocking](docs/MOCKING.md) - Mock API responses with MITM + Mockoon
+- 📊 [HTML Reporting](docs/html-reporting.md) - Generate beautiful test reports
+- 🎥 [Video Recording](docs/video-recording.md) - Record test failures
+- ⚡ [Parallel Testing](docs/parallel-testing.md) - Run tests across multiple devices
+- ☁️ [Cloud Integration](docs/CLOUD_INTEGRATION.md) - Use BrowserStack, Sauce Labs, etc.
+- 🔍 [Element Inspection](docs/ELEMENT_INSPECTION.md) - Find and inspect UI elements
+- 🚀 [CI/CD Integration](docs/ci-cd-integration.md) - GitHub Actions workflows
+- 🌐 [Web Dashboard](docs/web-dashboard.md) - Use the web UI
+- 🔧 [Android Setup](docs/setup-android.md) - Detailed Android configuration
+- 🍎 [iOS Setup](docs/setup-ios.md) - Detailed iOS configuration
+- 🎯 [Test Variants](docs/TEST-VARIANTS.md) - Multiple test configurations
+- 🔐 [MITM Setup](docs/MITM_SETUP.md) - Transparent proxy configuration
 
-### Testing & Reporting
-- **[Test Suites Guide](docs/test-suites.md)** - Comprehensive test suite documentation
-- **[Test Variants Guide](docs/TEST-VARIANTS.md)** - Run tests with different mock scenarios
-- **[Writing Tests Guide](docs/writing-tests.md)** - How to write automated tests
-- **[Video Recording Guide](docs/video-recording.md)** - Automatic video recording for debugging
-- **[HTML Reporting Guide](docs/html-reporting.md)** - Beautiful test reports with Allure
+## Example App (Expo/React Native)
 
-### Setup & Configuration
-- **[Android Setup Guide](docs/setup-android.md)** - Android development environment setup
-- **[iOS Setup Guide](docs/setup-ios.md)** - iOS development environment setup
-- **[CI/CD Integration Guide](docs/ci-cd-integration.md)** - Automated testing with GitHub Actions
-- **[Notifications & Automation](docs/quick-wins.md)** - Multi-platform notifications, test retry, scheduled runs
+This branch includes a complete Expo/React Native example app located at `../expo-arch-example-app/`.
 
-## Current Status
+**Features:**
+- Login screen with validation
+- Home screen with navigation
+- Form with various input types
+- Scrollable list with API data
+- Profile screen
+- Built with React Native + Expo
 
-### Completed Features ✅
+**Build the example app:**
 
-**Infrastructure:**
-- ✅ Appium 3.1.2 with modern architecture (Node.js 22.21.1)
-- ✅ UiAutomator2 driver 6.7.5 for Android
-- ✅ XCUITest driver 10.12.2 for iOS
-- ✅ WebDriverIO 9.21.0 test framework
+```bash
+# Android
+cd ../expo-arch-example-app
+npx expo run:android
 
-**Device Management:**
-- ✅ Universal device registry with friendly names
-- ✅ Android device discovery (emulators and physical)
-- ✅ iOS device discovery (simulators and physical)
-- ✅ Cross-platform device configuration
-- ✅ CLI tools for device management
+# iOS
+npx expo run:ios
+```
 
-**Test Architecture:**
-- ✅ Page Object Model implementation
-- ✅ Comprehensive test suites (Login, Form, List, Profile, Navigation)
-- ✅ Automatic screenshot and video on test failure
-- ✅ Cross-platform element location
-- ✅ Configuration-driven tests (.env support)
-- ✅ Centralized test data management
+**Run tests against the example app:**
 
-**Parallel Execution:**
-- ✅ Parallel test runner across multiple devices
-- ✅ Hybrid local + cloud device execution
-- ✅ Concurrency control and resource management
-- ✅ Event-driven test monitoring
-- ✅ Test result aggregation and summary reports
-- ✅ 10x+ faster test execution with multiple devices
+```bash
+cd mobile-test-farm
+npm run test:login
+npm run test:form
+npm run test:list
+```
 
-**Cloud Device Farms:**
-- ✅ BrowserStack integration (3000+ devices)
-- ✅ Sauce Labs integration (2000+ devices, multi-region)
-- ✅ AWS Device Farm integration (300+ devices, pay-per-use)
-- ✅ Firebase Test Lab integration (50+ devices, best free tier)
-- ✅ Unified device API (same code for local and cloud)
-- ✅ Hybrid testing mode (local + cloud simultaneously)
-- ✅ Dashboard cloud device visibility
-- ✅ Automatic hub routing (local Appium vs cloud providers)
+## Architecture
 
-**CI/CD:**
-- ✅ GitHub Actions workflows (Android, iOS, Full Suite)
-- ✅ Automated testing on push and PR
-- ✅ Test artifact collection (screenshots, logs)
-- ✅ Status badges and PR integration
+```
+mobile-test-farm/
+├── bin/                       # Utility scripts
+│   ├── devices.js            # Device management CLI
+│   ├── check-services.js     # Service health checks
+│   └── setup.js              # Automated setup script
+├── config/
+│   ├── test.config.js        # Test configuration
+│   ├── devices.json          # Device registry
+│   └── capabilities/         # Appium capabilities
+├── tests/
+│   ├── specs/                # Test specifications
+│   ├── page-objects/         # Page Object Model
+│   └── helpers/              # Test utilities
+├── lib/
+│   ├── device-manager.js     # Device management
+│   ├── TestBase.js           # Base test class
+│   └── DriverFactory.js      # WebDriver factory
+├── server/
+│   └── index.js              # Web Dashboard server
+├── mocks/
+│   ├── environments/         # Mock configurations
+│   └── recordings/           # Traffic recordings
+├── allure-results/           # Test results
+├── allure-report/            # Generated HTML reports
+└── docs/                     # Documentation
+```
 
-**Reporting:**
-- ✅ Allure HTML report integration
-- ✅ Rich test metadata (steps, screenshots, logs, videos)
-- ✅ Historical trend tracking
-- ✅ Report generation and viewing scripts
-- ✅ Automatic video recording on test failure
-- ✅ Video attachment to Allure reports
+## Best Practices
 
-**Notifications & Automation:**
-- ✅ Multi-platform notifications (Slack, Teams, Discord, Email, Webhooks)
-- ✅ Flexible notification configuration via environment variables
-- ✅ Test retry logic with configurable attempts and delays
-- ✅ Scheduled test runs via GitHub Actions (daily + manual trigger)
-- ✅ Test summary reports with aggregated results
+### 1. Use Device Registry
 
-**Web Dashboard:**
-- ✅ Express.js server with REST API
-- ✅ Socket.IO for real-time updates
-- ✅ Modern responsive web UI
-- ✅ Device management interface
-- ✅ One-click test execution
-- ✅ Live test output streaming
-- ✅ Results browser
-- ✅ Report and artifact viewing
+Always register devices with friendly names:
 
-**API Mocking & Testing:**
-- ✅ Transparent MITM proxy (mitmproxy) for traffic interception
-- ✅ Mockoon integration for mock API responses
-- ✅ Zero app code changes required for mocking
-- ✅ Platform-specific proxy configuration (Android via adb, iOS via macOS)
-- ✅ Automatic certificate trust in debug builds
-- ✅ Transaction logging on test failure
-- ✅ Support for multiple mock environments (errors, timeouts, edge cases)
-- ✅ Test variants for different API scenarios
+```bash
+npm run devices register
+```
 
-**Verified Platforms:**
-- ✅ iOS: iPhone 16 Pro Simulator - PASSED (with MITM mocking)
-- ✅ Android: Pixel 64 Emulator - PASSED (with MITM mocking)
-- ✅ Parallel Execution: Both platforms simultaneously - PASSED
-- ✅ Mock Verification: Confirmed traffic flows through Mockoon transparently
+Then reference by name in tests:
+
+```javascript
+await testBase.runTest("Android Emulator", config, async (driver) => {
+  // Test code
+});
+```
+
+### 2. Use Page Object Model
+
+Keep tests maintainable with page objects:
+
+```javascript
+const LoginPage = require('../page-objects/LoginPage');
+
+const loginPage = new LoginPage(driver);
+await loginPage.login('user@example.com', 'password');
+await loginPage.verifyHomeScreen();
+```
+
+### 3. Enable Auto Screenshots
+
+Screenshots are automatically captured on failure. View them in Allure reports.
+
+### 4. Use API Mocking for Reliability
+
+Mock flaky APIs to ensure test reliability:
+
+```bash
+MOCKOON_ENABLED=true npm run test:users
+```
+
+### 5. Run Tests in Parallel
+
+Save time by running on multiple devices:
+
+```bash
+npm run test:parallel:all
+```
+
+### 6. Use the Web Dashboard
+
+For non-technical team members, use the web UI:
+
+```bash
+npm start
+# Open http://localhost:3000
+```
 
 ## Troubleshooting
 
-### Device Not Detected
-
-**Android:**
+### "No devices found"
 ```bash
-# Check if ADB can see the device
-adb devices -l
+# Check ADB connection
+adb devices
 
-# Restart ADB server if needed
-adb kill-server
-adb start-server
+# Restart ADB if needed
+adb kill-server && adb start-server
+
+# Re-discover devices
+npm run devices sync
 ```
 
-### Appium Connection Issues
-
+### "Appium connection refused"
 ```bash
-# Check if Appium is running
-curl http://localhost:4723/status
+# Check if services are running
+npm run services:check
 
-# Restart Appium if needed
-pkill -f appium
-npx appium
+# If not, start services
+npm start
 ```
 
-### Permission Issues
+### "App not installed"
+```bash
+# Check app path in config/test.config.js
+# Rebuild your app
+cd ../expo-arch-example-app
+npx expo run:android  # or run:ios
+```
 
-If you see "unauthorized" in `adb devices`:
-1. Check device for authorization prompt
-2. Select "Always allow from this computer"
-3. Click OK
+### "Element not found"
+```bash
+# Use Appium Inspector to find correct selectors
+# See docs/ELEMENT_INSPECTION.md for details
+```
+
+### Tests failing intermittently
+```bash
+# Use API mocking to eliminate network flakiness
+MOCKOON_ENABLED=true npm run test:users
+```
 
 ## Contributing
 
-Contributions welcome! Please:
+Contributions are welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
-3. Submit a pull request
+3. Make your changes
+4. Add tests if applicable
+5. Update documentation
+6. Submit a pull request
 
 ## License
 
@@ -916,14 +751,10 @@ ISC
 
 ## Support
 
-For issues and questions:
-- Check the [documentation](docs/)
-- Review the [API Mocking Guide](docs/MOCKING.md) for mocking setup
-- Review the [MITM Setup Guide](docs/MITM_SETUP.md) for proxy configuration
-- Open an issue on GitHub
+- 📖 Check the [documentation](docs/)
+- 🐛 [Report issues](https://github.com/VanyaHuaman/mobile-test-farm/issues)
+- 💬 [Start a discussion](https://github.com/VanyaHuaman/mobile-test-farm/discussions)
 
 ---
 
-**Version:** 5.0.0
-**Features:** Android & iOS Support • Parallel Testing • CI/CD Integration • HTML Reporting • Video Recording • Notifications & Automation • Web Dashboard • Cloud Device Farms • Transparent API Mocking
-**Last Updated:** December 2025
+**Happy Testing!** 🚀

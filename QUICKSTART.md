@@ -1,14 +1,15 @@
 # Mobile Test Farm - Quick Start Guide
 
-Get up and running with the Mobile Test Farm in under 10 minutes.
+Get up and running with the Mobile Test Farm in under 10 minutes using the Expo/React Native example app.
 
 ## Overview
 
 This guide will help you:
 1. Set up your development environment
 2. Install and configure the Mobile Test Farm
-3. Register your first device
-4. Run your first automated test
+3. Build the example Expo app
+4. Register your first device
+5. Run your first automated test
 
 **Time Required:** ~10 minutes
 
@@ -20,7 +21,7 @@ This guide will help you:
 
 **macOS** (recommended):
 ```bash
-# Check Node.js (18+ required)
+# Check Node.js (22.21.1 required)
 node --version
 
 # Check Java (11+ required)
@@ -32,10 +33,12 @@ echo $ANDROID_HOME
 
 ### Install Missing Prerequisites
 
-**Node.js:**
+**Node.js 22.21.1:**
 ```bash
-# Install via Homebrew
-brew install node
+# Install via nvm (recommended)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+nvm install 22.21.1
+nvm use 22.21.1
 ```
 
 **Java JDK:**
@@ -61,42 +64,56 @@ export JAVA_HOME=/usr/local/opt/openjdk@11
 ## Step 2: Install Mobile Test Farm (1 minute)
 
 ```bash
-# Navigate to project directory
-cd ~/mobile-test-farm
+# Clone the repository
+git clone https://github.com/VanyaHuaman/mobile-test-farm.git
+cd mobile-test-farm
 
-# Install dependencies
-npm install
+# Run automated setup
+npm run setup
 ```
 
 **What gets installed:**
-- Appium 2.19.0 (automation server)
-- UiAutomator2 driver 4.2.9 (Android automation)
+- Appium 3.1.2 (automation server)
+- UiAutomator2 driver 6.7.5 (Android automation)
+- XCUITest driver 10.12.2 (iOS automation)
 - WebDriverIO 9.21.0 (test framework)
-- Device management tools
+- mitmproxy (for API mocking)
+- All dependencies and certificates
 
 ---
 
-## Step 3: Verify Installation (1 minute)
+## Step 3: Build the Example App (2 minutes)
+
+The Expo/React Native example app is located at `../expo-arch-example-app/`.
+
+**For Android:**
 
 ```bash
-# Check Appium installation
-npx appium --version
-# Expected: 2.19.0 or higher
-
-# Check UiAutomator2 driver
-npx appium driver list --installed
-# Expected: ✔ uiautomator2@4.2.9 installed
-
-# Verify device tools
-npm run devices list
-# Expected: Shows device registry (may be empty)
+cd ../expo-arch-example-app
+npx expo run:android
 ```
+
+Wait for the build to complete. The app will launch on your connected device/emulator.
+
+**For iOS (macOS only):**
+
+```bash
+cd ../expo-arch-example-app
+npx expo run:ios
+```
+
+**What this app includes:**
+- Login screen with validation
+- Home screen with bottom navigation
+- Form with various input types
+- Scrollable list with API data (JSONPlaceholder)
+- Profile screen with settings
 
 ---
 
 ## Step 4: Start Services (30 seconds)
 
-**In a new terminal window:**
+In the mobile-test-farm directory:
 
 ```bash
 cd ~/mobile-test-farm
@@ -139,7 +156,7 @@ npx appium
    emulator -list-avds
 
    # Start an emulator (replace with your AVD name)
-   emulator -avd Pixel_4_API_30 &
+   emulator -avd Pixel_9_API_34 &
    ```
 
 2. **Verify connection:**
@@ -163,6 +180,18 @@ npx appium
    ```
 
 4. **Accept authorization prompt** on device if it appears
+
+### Option C: iOS Simulator (macOS only)
+
+1. **List available simulators:**
+   ```bash
+   xcrun simctl list devices
+   ```
+
+2. **Launch a simulator:**
+   ```bash
+   open -a Simulator
+   ```
 
 ---
 
@@ -233,189 +262,153 @@ Total: 1 device(s) | Active: 1
 
 ---
 
-## Step 7: Configure Your App (2 minutes)
+## Step 7: Run Your First Test (1 minute)
 
-Now connect the framework to YOUR mobile app:
-
-### 1. Update App Paths
-
-Edit `config/test.config.js`:
-
-```javascript
-apps: {
-  android: {
-    debug: '/path/to/your/app-debug.apk',  // ← Your APK path
-  },
-  ios: {
-    simulator: '/path/to/YourApp.app',     // ← Your .app path
-  },
-},
-appInfo: {
-  android: {
-    package: 'com.yourcompany.yourapp',    // ← Your package name
-    activity: '.MainActivity',              // ← Usually .MainActivity
-  },
-  ios: {
-    bundleId: 'com.yourcompany.yourapp',   // ← Your bundle ID
-  },
-},
-```
-
-### 2. Find Your Package/Bundle ID
-
-**Android:**
-```bash
-# List all installed packages on your device
-adb shell pm list packages | grep yourapp
-
-# Example output: package:com.mycompany.myapp
-# Use: com.mycompany.myapp
-```
-
-**iOS:**
-```bash
-# Read bundle ID from your .app
-/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" /path/to/YourApp.app/Info.plist
-
-# Example output: com.mycompany.myapp
-# Use: com.mycompany.myapp
-```
-
-### 3. Verify App Launches
-
-Test that the framework can launch your app:
+**In another terminal** (keep npm start running):
 
 ```bash
-# Start services (if not already running)
-npm start
+cd ~/mobile-test-farm
 
-# In another terminal, try to launch your app manually
-# This tests that your config is correct
+# Run the login test
+npm run test:login
 ```
 
-**Expected:** Your app should launch on the registered device.
-
-**If app doesn't launch:**
-- Check APK/app path is correct
-- Verify package name/bundle ID matches your app
-- See [Troubleshooting](#troubleshooting) below
-
----
-
-## Step 8: Write Your First Test (3 minutes)
-
-Create a simple test that launches your app:
-
-**Create `tests/specs/app-launch.spec.js`:**
-
-```javascript
-const TestBase = require('../../lib/TestBase');
-
-describe('App Launch Test', () => {
-  const testBase = new TestBase();
-
-  it('should launch the app', async function() {
-    await testBase.runTest(
-      'android-emulator-1',  // Your registered device name
-      null,                   // Use default config
-      async (driver) => {
-        // App is now launched!
-        console.log('✅ App launched successfully');
-
-        // Wait a moment to see the app
-        await driver.pause(2000);
-
-        // Get app state (should be 4 = running in foreground)
-        const appState = await driver.queryAppState('com.yourcompany.yourapp');
-        console.log('App state:', appState);
-
-        if (appState === 4) {
-          console.log('✅ App is running in foreground');
-        }
-      },
-      'app-launch-test'
-    );
-  });
-});
-```
-
-**Run your test:**
-
-```bash
-node tests/specs/app-launch.spec.js
-```
+**What this test does:**
+1. Launches the Expo example app on your device
+2. Enters username and password
+3. Clicks the login button
+4. Verifies navigation to Home screen
+5. Confirms "Welcome to Home" text appears
+6. Takes screenshots
+7. Generates a test report
 
 **Expected output:**
 ```
-✅ App launched successfully
-App state: 4
-✅ App is running in foreground
+Running test on: Android Emulator (emulator-5554)
+✓ App launched successfully
+✓ Entered username: demo
+✓ Entered password: ********
+✓ Login button clicked
+✓ Navigated to Home screen
+✓ Home screen verified
 
 Test passed!
 ```
 
-**What this test does:**
-1. Launches your app on the device
-2. Verifies the app is running in foreground
-3. That's it! You've confirmed the framework works with your app
-5. Verifies navigation to Home screen
-6. Confirms "Welcome to Home" text appears
+---
+
+## Step 8: Try More Tests (30 seconds)
+
+```bash
+# Form validation test
+npm run test:form
+
+# List scrolling test
+npm run test:list
+
+# Navigation test
+npm run test:navigation
+
+# Profile screen test
+npm run test:profile
+
+# API mocking test
+npm run test:users
+```
 
 ---
 
-## Step 9: Run Test on Specific Device (30 seconds)
+## Step 9: View Test Report (30 seconds)
 
-If you have multiple devices registered:
+Generate a beautiful HTML report with charts and screenshots:
 
 ```bash
-# By device ID
-node tests/login-test.js android-emulator
-
-# By friendly name (case-insensitive)
-node tests/login-test.js "Android Emulator"
+npm run report:serve
 ```
+
+Your browser will open with an interactive Allure report showing:
+- ✅ Pass/fail statistics
+- ✅ Test execution timeline
+- ✅ Screenshots
+- ✅ Device information
+- ✅ Test history
 
 ---
 
 ## Success! 🎉
 
-You now have a working Mobile Test Farm setup!
+You now have a working Mobile Test Farm setup with the Expo example app!
 
 ### What You've Accomplished:
 
 ✅ Installed Appium and dependencies
-✅ Started Appium server
+✅ Built the Expo/React Native example app
+✅ Started Appium + Dashboard with one command
 ✅ Connected and registered a device
-✅ Built the test app
-✅ Ran your first automated test
+✅ Ran automated tests on your device
+✅ Generated beautiful HTML reports
 
 ### Next Steps:
 
-1. **Add More Devices:**
+1. **Try the Web Dashboard:**
+   ```bash
+   # Already running if you used npm start
+   # Open http://localhost:3000
+   ```
+   - Visual device management
+   - One-click test execution
+   - Real-time test output
+
+2. **Test with API Mocking:**
+   ```bash
+   # Run tests with mocked API responses
+   MOCKOON_ENABLED=true npm run test:users
+   ```
+
+3. **Add More Devices:**
    ```bash
    npm run devices register
    ```
 
-2. **Write More Tests:**
-   - See [Writing Tests Guide](docs/writing-tests.md)
-   - Example tests in `tests/` directory
-
-3. **Test on Multiple Devices:**
-   ```javascript
-   // Example: tests/multi-device-test.js
-   const DeviceManager = require('./lib/device-manager');
-   const manager = new DeviceManager();
-
-   const devices = manager.listActiveDevices();
-   for (const device of devices) {
-     console.log(`Testing on ${device.friendlyName}...`);
-     // Run test
-   }
+4. **Run Tests in Parallel:**
+   ```bash
+   # Run on all registered devices simultaneously
+   npm run test:parallel:all
    ```
 
-4. **Explore Documentation:**
+5. **Connect Your Own App:**
+
+   Edit `config/test.config.js`:
+   ```javascript
+   apps: {
+     android: {
+       debug: '/path/to/your/app-debug.apk',
+     },
+   },
+   appInfo: {
+     android: {
+       package: 'com.yourcompany.yourapp',
+       activity: '.MainActivity',
+     },
+   },
+   ```
+
+6. **Write Your Own Tests:**
+   - See [Test Suites Guide](docs/test-suites.md)
+   - Example tests in `tests/specs/` directory
+   - Page objects in `tests/page-objects/`
+
+7. **Try Native Android:**
+   ```bash
+   # Check out the native Android Compose example
+   git checkout native-android-example
+   ```
+
+8. **Explore Documentation:**
    - [Device Management Guide](docs/device-management.md)
-   - [Android Setup Guide](docs/setup-android.md)
+   - [API Mocking Guide](docs/MOCKING.md)
+   - [Parallel Testing Guide](docs/parallel-testing.md)
+   - [Web Dashboard Guide](docs/web-dashboard.md)
 
 ---
 
@@ -435,8 +428,8 @@ npm run devices sync
 
 ### "Appium connection refused"
 ```bash
-# Check if Appium is running
-curl http://localhost:4723/status
+# Check if services are running
+npm run services:check
 
 # If not, start services
 npm start
@@ -448,16 +441,31 @@ npm start
 3. Click OK
 4. Run `adb devices` again
 
+### "App not installed"
+```bash
+# Rebuild the Expo app
+cd ../expo-arch-example-app
+npx expo run:android  # or run:ios
+```
+
 ### Test fails with "Element not found"
 ```bash
-# App might not be installed
-cd ~/expo-arch-example-app
-npx expo run:android
+# Make sure the app is running
+# Check that you're using the correct device
+npm run devices list
 
-# Or rebuild
-cd ~/expo-arch-example-app/android
-./gradlew clean
-cd ..
+# Try running the app manually first
+cd ../expo-arch-example-app
+npx expo run:android
+```
+
+### Build fails for Expo app
+```bash
+# Clean and rebuild
+cd ../expo-arch-example-app
+rm -rf android/build
+rm -rf node_modules
+npm install
 npx expo run:android
 ```
 
@@ -468,32 +476,48 @@ npx expo run:android
 ### Essential Commands
 
 ```bash
+# Services
+npm start                      # Start Appium + Dashboard
+npm run services:check         # Check if services are running
+
 # Device Management
-npm run devices list          # List all devices
-npm run devices sync          # Discover devices
-npm run devices register      # Add new device
+npm run devices list           # List all devices
+npm run devices sync           # Discover devices
+npm run devices register       # Add new device
 
 # Testing
-npm run test:login            # Run login test
-node tests/login-test.js "Device Name"  # Test specific device
+npm run test:login             # Run login test
+npm run test:form              # Run form test
+npm run test:list              # Run list test
+npm run test:users             # Run API test
 
-# Services
-npm start                     # Start Appium + Dashboard
-curl http://localhost:4723/status  # Check Appium status
+# Parallel Testing
+npm run test:parallel:all      # Run on all devices
+
+# Reporting
+npm run report:serve           # Generate and view report
+
+# Build Example App
+cd ../expo-arch-example-app
+npx expo run:android           # Build Android
+npx expo run:ios               # Build iOS
 
 # Android
-adb devices                   # List connected devices
-adb logcat                    # View device logs
-emulator -list-avds           # List emulators
+adb devices                    # List connected devices
+adb logcat                     # View device logs
+emulator -list-avds            # List emulators
 ```
 
 ### File Locations
 
 - **Test Farm**: `~/mobile-test-farm/`
-- **Test App**: `~/expo-arch-example-app/`
-- **APK**: `~/expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk`
+- **Example App**: `~/expo-arch-example-app/`
+- **Android APK**: `~/expo-arch-example-app/android/app/build/outputs/apk/debug/app-debug.apk`
+- **iOS .app**: `~/expo-arch-example-app/ios/build/Build/Products/Debug-iphonesimulator/expoarchexample.app`
 - **Device Config**: `~/mobile-test-farm/config/devices.json`
-- **Test Scripts**: `~/mobile-test-farm/tests/`
+- **Test Scripts**: `~/mobile-test-farm/tests/specs/`
+- **Page Objects**: `~/mobile-test-farm/tests/page-objects/`
+- **Test Config**: `~/mobile-test-farm/config/test.config.js`
 
 ---
 
@@ -503,6 +527,9 @@ Need help?
 - 📖 Check [README.md](README.md) for detailed documentation
 - 🔧 See [Troubleshooting](#troubleshooting) section above
 - 📝 Review [docs/](docs/) for guides
-- 🐛 Report issues on GitHub
+- 🐛 [Report issues](https://github.com/VanyaHuaman/mobile-test-farm/issues)
+- 💬 [Start a discussion](https://github.com/VanyaHuaman/mobile-test-farm/discussions)
+
+---
 
 **Happy Testing!** 🚀
