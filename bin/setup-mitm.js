@@ -78,6 +78,50 @@ class MitmSetup {
   }
 
   /**
+   * Create mitmproxy config file
+   */
+  createMitmproxyConfig() {
+    console.log('\n⚙️  Creating mitmproxy configuration...\n');
+
+    const configPath = path.join(MITM_CERT_DIR, 'config.yaml');
+    const configContent = `# mitmproxy configuration for Mobile Test Farm
+# This config maps Android emulator's 10.0.2.2 (host) to localhost
+# Port 8889 is used to avoid conflicts with Charles Proxy (8888)
+
+map_remote:
+  - "|http://10.0.2.2|http://localhost"
+  - "|https://10.0.2.2|https://localhost"
+listen_port: 8889
+`;
+
+    try {
+      // Check if config already exists
+      if (fs.existsSync(configPath)) {
+        console.log(`✅ Config already exists at: ${configPath}`);
+        console.log('   Skipping config creation (use --force to overwrite)\n');
+        return true;
+      }
+
+      // Create config directory if it doesn't exist
+      if (!fs.existsSync(MITM_CERT_DIR)) {
+        fs.mkdirSync(MITM_CERT_DIR, { recursive: true });
+      }
+
+      // Write config file
+      fs.writeFileSync(configPath, configContent, 'utf8');
+      console.log(`✅ Created config at: ${configPath}`);
+      console.log('\nConfiguration:');
+      console.log('   • Port: 8889 (avoids Charles Proxy conflict on 8888)');
+      console.log('   • Maps Android emulator 10.0.2.2 → localhost');
+      console.log('   • Enables HTTPS requests from React Native apps\n');
+      return true;
+    } catch (error) {
+      console.error(`❌ Failed to create config: ${error.message}`);
+      return false;
+    }
+  }
+
+  /**
    * Install certificate on Android emulator
    */
   async installAndroidCertificate(deviceId) {
@@ -247,7 +291,13 @@ class MitmSetup {
       process.exit(1);
     }
 
-    // Step 3: Install on devices
+    // Step 3: Create mitmproxy config
+    const configCreated = this.createMitmproxyConfig();
+    if (!configCreated) {
+      console.log('\n⚠️  Config creation failed (continuing anyway)\n');
+    }
+
+    // Step 4: Install on devices
     if (options.platform === 'android' || !options.platform) {
       await this.setupAndroid();
     }
