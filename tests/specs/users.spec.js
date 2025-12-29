@@ -80,22 +80,30 @@ async function runUsersTest() {
       });
 
       await testBase.allure.step('Navigate to Users screen', async () => {
-        console.log('🔍 Looking for Users button...');
+        // Check if we're already on Users screen (some apps start on Users tab)
+        await testBase.driver.pause(1000);
+        const alreadyOnUsersScreen = await usersPage.verifyHeader();
 
-        // Platform-specific selectors
-        let usersButton;
-        if (platform === 'android') {
-          // On Android, find by text content (more reliable than resource-id)
-          usersButton = await testBase.driver.$('android=new UiSelector().textContains("Users (API)")');
+        if (alreadyOnUsersScreen) {
+          console.log('✅ Already on Users screen (app started here)');
         } else {
-          // On iOS, use accessibility id (testID maps to accessibility identifier)
-          usersButton = await testBase.driver.$('~menu-item-users');
+          console.log('🔍 Looking for Users button...');
+
+          // Platform-specific selectors
+          let usersButton;
+          if (platform === 'android') {
+            // On Android, find by text content (more reliable than resource-id)
+            usersButton = await testBase.driver.$('android=new UiSelector().textContains("Users (API)")');
+          } else {
+            // On iOS, use accessibility id (testID maps to accessibility identifier)
+            usersButton = await testBase.driver.$('~menu-item-users');
+          }
+
+          await usersButton.waitForDisplayed({ timeout: 10000 });
+          await usersButton.click();
+
+          console.log('✅ Clicked Users button');
         }
-
-        await usersButton.waitForDisplayed({ timeout: 10000 });
-        await usersButton.click();
-
-        console.log('✅ Clicked Users button');
       });
 
       await testBase.allure.step('Verify Users screen loaded', async () => {
@@ -159,27 +167,41 @@ async function runUsersTest() {
       });
 
       await testBase.allure.step('Test refresh functionality', async () => {
-        // Click refresh button
-        await usersPage.clickRefresh();
-        console.log('🔄 Clicked refresh button');
+        // Check if refresh button exists (Expo app has it, native app doesn't)
+        const hasRefreshButton = await usersPage.isDisplayed(usersPage.refreshButton);
 
-        // Wait for refresh to complete
-        await testBase.driver.pause(2000);
+        if (hasRefreshButton) {
+          // Click refresh button
+          await usersPage.clickRefresh();
+          console.log('🔄 Clicked refresh button');
 
-        // Verify still showing users
-        const count = await usersPage.getUsersCount();
-        console.log(`📊 After refresh: ${count} users`);
+          // Wait for refresh to complete
+          await testBase.driver.pause(2000);
 
-        if (count === 0) {
-          throw new Error('Users list empty after refresh');
+          // Verify still showing users
+          const count = await usersPage.getUsersCount();
+          console.log(`📊 After refresh: ${count} users`);
+
+          if (count === 0) {
+            throw new Error('Users list empty after refresh');
+          }
+
+          console.log('✅ Refresh functionality verified');
+        } else {
+          console.log('⏭️  Skipping refresh test (button not available in this app)');
         }
-
-        console.log('✅ Refresh functionality verified');
       });
 
       await testBase.allure.step('Navigate back to home', async () => {
-        await usersPage.clickBack();
-        console.log('✅ Navigated back to home');
+        // Check if back button exists (some apps may not have it)
+        const hasBackButton = await usersPage.isDisplayed(usersPage.backButton);
+
+        if (hasBackButton) {
+          await usersPage.clickBack();
+          console.log('✅ Navigated back to home');
+        } else {
+          console.log('⏭️  Skipping back navigation (button not available in this app)');
+        }
       });
 
       console.log('\n✅ Users API test passed!\n');

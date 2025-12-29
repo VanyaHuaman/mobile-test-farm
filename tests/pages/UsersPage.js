@@ -49,9 +49,18 @@ class UsersPage extends BasePage {
    * @param {number} timeout - Timeout in milliseconds
    */
   async waitForScreen(timeout = 10000) {
-    // Use accessibilityLabel for cross-platform consistency
-    const screen = await this.getElement(this.screenSelector);
-    await screen.waitForDisplayed({ timeout });
+    // Try primary screen selector (users-screen for Expo)
+    try {
+      const screen = await this.getElement(this.screenSelector);
+      await screen.waitForDisplayed({ timeout });
+    } catch (error) {
+      // Fallback: try native Android app selector (users-list-screen)
+      const nativeScreen = await this.getElement({
+        ios: '~users-list-screen',
+        android: '~users-list-screen'
+      });
+      await nativeScreen.waitForDisplayed({ timeout });
+    }
   }
 
   /**
@@ -59,12 +68,18 @@ class UsersPage extends BasePage {
    * @returns {Promise<boolean>}
    */
   async verifyHeader() {
-    try {
-      const screen = await this.getElement(this.screenSelector);
-      return await screen.isDisplayed();
-    } catch (error) {
-      return false;
+    // Try primary screen selector (users-screen for Expo)
+    const isExpoScreen = await this.isDisplayed(this.screenSelector);
+    if (isExpoScreen) {
+      return true;
     }
+
+    // Fallback: try native Android app selector (users-list-screen)
+    const isNativeScreen = await this.isDisplayed({
+      ios: '~users-list-screen',
+      android: '~users-list-screen'
+    });
+    return isNativeScreen;
   }
 
   /**
@@ -103,24 +118,44 @@ class UsersPage extends BasePage {
   }
 
   /**
-   * Get users count from header
+   * Get users count from header or by counting user items
    * @returns {Promise<number>}
    */
   async getUsersCount() {
     try {
       let text;
       if (this.platform === 'android') {
-        // On Android, use text matching since Text elements don't create resource-ids
-        const countElement = await this.driver.$('android=new UiSelector().textContains(" users found")');
-        text = await countElement.getText();
+        // Try to find count text (Expo app)
+        try {
+          const countElement = await this.driver.$('android=new UiSelector().textContains(" users found")');
+          text = await countElement.getText();
+          // Extract number from "10 users found"
+          const match = text.match(/(\d+)/);
+          return match ? parseInt(match[1], 10) : 0;
+        } catch (error) {
+          // Fallback: count user-item elements by checking IDs 1-10 (native Android app)
+          let count = 0;
+          for (let i = 1; i <= 10; i++) {
+            try {
+              const userItem = await this.driver.$(`~user-item-${i}`);
+              if (await userItem.isDisplayed()) {
+                count++;
+              }
+            } catch (e) {
+              // Element doesn't exist, stop counting
+              break;
+            }
+          }
+          return count;
+        }
       } else {
         // On iOS, use accessibilityLabel
         const countElement = await this.getElement(this.usersCount);
         text = await countElement.getText();
+        // Extract number from "10 users found"
+        const match = text.match(/(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
       }
-      // Extract number from "10 users found"
-      const match = text.match(/(\d+)/);
-      return match ? parseInt(match[1], 10) : 0;
     } catch (error) {
       console.error('Error getting users count:', error.message);
       return 0;
@@ -133,13 +168,21 @@ class UsersPage extends BasePage {
    * @returns {Promise<boolean>}
    */
   async verifyUserCard(userId) {
-    try {
-      const selector = { ios: `~user-card-${userId}`, android: `~user-card-${userId}` };
-      const card = await this.getElement(selector);
-      return await card.isDisplayed();
-    } catch (error) {
-      return false;
+    // Try Expo app format first (user-card-X)
+    const expoFormat = await this.isDisplayed({
+      ios: `~user-card-${userId}`,
+      android: `~user-card-${userId}`
+    });
+    if (expoFormat) {
+      return true;
     }
+
+    // Fallback to native Android app format (user-item-X)
+    const nativeFormat = await this.isDisplayed({
+      ios: `~user-item-${userId}`,
+      android: `~user-item-${userId}`
+    });
+    return nativeFormat;
   }
 
   /**

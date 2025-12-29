@@ -80,7 +80,28 @@ class BasePage {
    */
   async setText(selectors, text) {
     const element = await this.getElement(selectors);
-    await element.setValue(text);
+
+    if (this.platform === 'android') {
+      // For Android Compose TextFields, use ADB input text command
+      // This is more reliable than Appium's text input for Compose
+      await element.click();
+      await element.clearValue();
+
+      // Use ADB to input text directly
+      const { exec } = require('child_process');
+      const util = require('util');
+      const execPromise = util.promisify(exec);
+
+      // Escape special characters for ADB input
+      const escapedText = text.replace(/\s/g, '%s'); // Replace spaces with %s
+      await execPromise(`adb shell input text "${escapedText}"`);
+    } else {
+      // For iOS, use standard Appium approach
+      await element.click();
+      await element.clearValue();
+      await element.click();
+      await element.addValue(text);
+    }
   }
 
   /**

@@ -18,7 +18,8 @@ class HomePage extends BasePage {
     return {
       headerTitle: {
         ios: '-ios predicate string:label == "Home Dashboard"',
-        android: 'android=new UiSelector().textContains("Home Dashboard")',
+        // Native Android app uses "Native Android App", Expo app uses "Home Dashboard"
+        android: 'android=new UiSelector().textMatches("(Home Dashboard|Native Android App)")',
       },
       headerSubtitle: {
         ios: '-ios predicate string:label == "Welcome to the test app!"',
