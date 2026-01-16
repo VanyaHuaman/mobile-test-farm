@@ -1,5 +1,4 @@
 # Mobile Test Farm
-
 > **🤖 Native Android Compose Example** - This branch contains a complete native Android app built with Jetpack Compose.
 > **✨ Want Expo/React Native?** Check out the [`master` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/master) for an Expo/React Native example.
 > **📦 Want a clean template?** Check out the [`template` branch](https://github.com/VanyaHuaman/mobile-test-farm/tree/template) for a ready-to-use template.
